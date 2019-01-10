@@ -1,5 +1,15 @@
 #lang racket
 
+(provide run-all-mutants/with-modules
+         run-all-mutants/of-module
+         run-with-mutated-module
+         report-progress
+         make-mutated-module-runner
+         make-precision-config-module
+         print-mutation
+         mutate-module
+         [struct-out run-status])
+
 (require custom-load
          syntax/modread
          (only-in syntax/modresolve [resolve-module-path module-path->path])
@@ -137,7 +147,7 @@
 (define report-progress (make-parameter #f))
 
 ;; run-status -> void
-(define (report-run-status rs)
+(define (display-run-status rs)
   (printf "
 Run: mutated ~a in module ~a
 with precision ~a, index ~a
@@ -199,19 +209,23 @@ Blamed: ~a
                                             module-to-mutate
                                             #:suppress-output? suppress-output?
                                             #:timeout/s timeout/s
-                                            #:memory/gb memory/gb)
-  (string?
-   string?
-   #:suppress-output? boolean?
-   #:timeout/s number?
-   #:memory/gb number?
-   . -> .
-   (listof run-status?))
+                                            #:memory/gb memory/gb
+                                            #:make-result
+                                            [make-result identity])
+  (let ([A (new-∀/c 'A)])
+    ([string?
+      string?
+      #:suppress-output? boolean?
+      #:timeout/s number?
+      #:memory/gb number?]
+     [#:make-result (run-status? . -> . A)]
+     . ->* .
+     (listof A)))
 
   (let loop ([index-so-far 0]
              [results-so-far empty])
     (define results/this-index
-      (for*/list ([ctc-precision precision-configs])
+      (for/list ([ctc-precision precision-configs])
         (when (report-progress)
           (displayln "."))
         (run-with-mutated-module main-module
@@ -226,10 +240,10 @@ Blamed: ~a
           [else
            (when (report-progress)
              (displayln "-------------------------")
-             (for-each report-run-status results/this-index)
+             (for-each display-run-status results/this-index)
              (displayln "-------------------------"))
            (loop (add1 index-so-far)
-                 (cons results/this-index
+                 (cons (map make-result results/this-index)
                        results-so-far))])))
 
 (define/contract (run-all-mutants/with-modules main-module
@@ -239,19 +253,25 @@ Blamed: ~a
                                                #:timeout/s
                                                [timeout/s (* 3 60)]
                                                #:memory/gb
-                                               [memory/gb 3])
-  ((string? (listof string?))
-   (#:suppress-output? boolean?
-    #:timeout/s number?
-    #:memory/gb number?)
-   . ->* . (listof run-status?))
+                                               [memory/gb 3]
+                                               #:make-result
+                                               [make-result identity])
+  (let ([A (new-∀/c 'A)])
+    ([string? (listof string?)]
+     [#:suppress-output? boolean?
+      #:timeout/s number?
+      #:memory/gb number?
+      #:make-result (run-status? . -> . A)]
+     . ->* .
+     (listof A)))
 
   (flatten
    (map (λ (x)
           (run-all-mutants/of-module main-module x
                                      #:suppress-output? suppress-output?
                                      #:timeout/s timeout/s
-                                     #:memory/gb memory/gb))
+                                     #:memory/gb memory/gb
+                                     #:make-result make-result))
         mutatable-modules)))
 
 
