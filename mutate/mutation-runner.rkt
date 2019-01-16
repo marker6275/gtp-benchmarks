@@ -212,15 +212,14 @@ Blamed: ~a
                                             #:memory/gb memory/gb
                                             #:make-result
                                             [make-result identity])
-  (let ([A (new-∀/c 'A)])
-    ([string?
-      string?
-      #:suppress-output? boolean?
-      #:timeout/s number?
-      #:memory/gb number?]
-     [#:make-result (run-status? . -> . A)]
-     . ->* .
-     (listof A)))
+  ([string?
+    string?
+    #:suppress-output? boolean?
+    #:timeout/s number?
+    #:memory/gb number?]
+   [#:make-result (run-status? . -> . any/c)]
+   . ->* .
+   (listof any/c))
 
   (let loop ([index-so-far 0]
              [results-so-far empty])
@@ -256,14 +255,13 @@ Blamed: ~a
                                                [memory/gb 3]
                                                #:make-result
                                                [make-result identity])
-  (let ([A (new-∀/c 'A)])
-    ([string? (listof string?)]
-     [#:suppress-output? boolean?
-      #:timeout/s number?
-      #:memory/gb number?
-      #:make-result (run-status? . -> . A)]
-     . ->* .
-     (listof A)))
+  ([string? (listof string?)]
+   [#:suppress-output? boolean?
+    #:timeout/s number?
+    #:memory/gb number?
+    #:make-result (run-status? . -> . any/c)]
+   . ->* .
+   (listof any/c))
 
   (flatten
    (map (λ (x)
