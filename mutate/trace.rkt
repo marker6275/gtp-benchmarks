@@ -315,5 +315,71 @@
               '()))
 
 
+(struct run-status (outcome blamed trace) #:transparent)
+(define ??? #f)
+(define (blame->run-status b)
+  (printf "Got blame: ~a\n" b)
+  (run-status 'blamed
+              (blame-positive (exn:fail:contract:blame-object b))
+              ???))
+
+(define (oom->run-status e)
+  (printf "Got oom: ~a\n" e)
+  (run-status 'oom
+              ???
+              ???))
+
+(define (exn->run-status e)
+  (printf "Got exn: ~a\n" e)
+  (run-status 'crashed
+              ???
+              ???))
+
+(define (run-with-tracing main-module
+                          other-modules-to-instrument
+                          mutated-module
+                          mutated-module-stx
+                          #:suppress-output? [suppress-output? #t]
+                          #:timeout/s [timeout/s (* 3 60)]
+                          #:memory/gb [memory/gb 3])
+  (define run (make-instrumented-module-runner main-module
+                                               other-modules-to-instrument
+                                               mutated-module
+                                               mutated-module-stx))
+  (define run/handled
+    (λ _
+      (with-handlers ([exn:fail:contract:blame? blame->run-status]
+                      [exn:fail:out-of-memory? oom->run-status]
+                      [exn? exn->run-status])
+        (run-status 'completed #f (run)))))
+  (run-with-limits run/handled
+                   #:timeout/s timeout/s
+                   #:timeout-result (run-status 'timeout #f ???)
+                   #:memory/gb memory/gb
+                   #:oom-result (run-status 'oom #f ???)
+                   #:suppress-output? suppress-output?))
+
+(module+test-begin
+ (test-equal? (run-with-tracing "d.rkt"
+                                '("e.rkt")
+                                "e.rkt"
+                                (read-module "e.rkt"))
+              (run-status
+               'completed
+               #f
+               (hash
+                (simplify-path (string->path "./d.rkt"))
+                (label-bounds 3 13)
+                (simplify-path (string->path "./e.rkt"))
+                (label-bounds 0 2)
+                'baz
+                (label-bounds 1 1)
+                'bar
+                (label-bounds 6 12)
+                'foo
+                (label-bounds 4 11)
+                '+
+                (label-bounds 10 10)))))
+
 (module+ test
   (display-test-results))
