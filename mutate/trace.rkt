@@ -141,6 +141,7 @@
                            ns)
 
   (define (run)
+    (current-trace-reset!)
     (parameterize ([current-load/use-compiled
                     ;; Prevent loading from bytecode to ensure
                     ;; instrumented versions are loaded
