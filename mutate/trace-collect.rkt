@@ -68,7 +68,9 @@
                         index
                         trace))
       (when report-progress
-        (displayln this-mutant-outcome))
+        (displayln '--------------------)
+        (displayln this-mutant-outcome)
+        (displayln '--------------------))
       this-mutant-outcome])))
 
 (struct distance (value) #:transparent)
@@ -91,7 +93,8 @@ blamed-label85: unbound identifier;
   [{_ _ _}
    (no-blame)])
 (define (trace-distance-between mutated-label blamed-label trace)
-  (cond [(not (symbol? blamed-label))
+  (cond [(or (false? blamed-label)
+             (exn? blamed-label))
          (no-blame)]
         [(and (hash-has-key? trace mutated-label)
               (hash-has-key? trace blamed-label))
