@@ -42,7 +42,34 @@
      (strip-context
       #`(module name (submod flow-trace/collapsing compressed)
           (#%module-begin
-           body ...)))]))
+           #,@(disable-ctc-helpers (syntax-e #'(body ...))))))]))
+
+(define/contract (disable-ctc-helpers top-level-def-stxs)
+  ((listof syntax?) . -> . (listof syntax?))
+  (map disable-def-if-helper top-level-def-stxs))
+
+(define (disable-def-if-helper top-level-def)
+  (syntax-parse top-level-def
+    #:datum-literals (define)
+    [(define x:id _ ...)
+     #'(define x #f)]
+    [(define (x:id _ ...) _ ...)
+     #'(define x #f)]
+    [(define ((x:id _ ...) _ ...) _ ...)
+     #'(define x #f)]
+    [_ top-level-def]))
+
+(module+test-begin
+ (ignore
+  (define-test (test-stx=? a b)
+    (test-equal? (syntax->datum a)
+                 (syntax->datum b))))
+ (test-stx=? (disable-def-if-helper #'(define foobar #t))
+             #'(define foobar #f))
+ (test-stx=? (disable-def-if-helper #'(define (foobar x) x))
+             #'(define foobar #f))
+ (test-stx=? (disable-def-if-helper #'(define ((foobar x) y) x))
+             #'(define foobar #f)))
 
 ;; lltodo: this^ obtaining of the trace within the main module *doesn't work*
 ;; I can't do it within the flow-trace lang.
@@ -54,10 +81,7 @@
 (module+test-begin
  (ignore
   (define dummy-mod-path (string->path "/tmp/test.rkt"))
-  (define dummy-mod-stx #'(module mod-name racket (#%module-begin a b c)))
-  (define-test (test-stx=? a b)
-    (equal? (syntax->datum a)
-            (syntax->datum b))))
+  (define dummy-mod-stx #'(module mod-name racket (#%module-begin a b c))))
  (test-stx=? (instrument-module dummy-mod-path
                                 dummy-mod-stx)
              #'(module mod-name (submod flow-trace/collapsing compressed)
@@ -108,6 +132,8 @@
 
   (define modules-to-instrument/strings
     (map (compose path->string simplify-path) other-modules-to-instrument))
+  ;; Modules must be loaded in order such that loading one module doesn't
+  ;; cause another one to be loaded before it gets instrumented
   (define modules-to-instrument/ordered
     (order-by-dependencies modules-to-instrument/strings))
 
