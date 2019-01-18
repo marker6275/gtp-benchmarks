@@ -358,14 +358,15 @@
                                                mutated-module-stx))
   (define run/handled
     (λ _
-      (with-handlers ([exn? (λ _ #f)])
+      (with-handlers ([exn? (λ (e) e)])
         (run))))
-  (run-with-limits run/handled
-                   #:timeout/s timeout/s
-                   #:timeout-result #f
-                   #:memory/gb memory/gb
-                   #:oom-result #f
-                   #:suppress-output? suppress-output?)
+  (displayln
+   (run-with-limits run/handled
+                    #:timeout/s timeout/s
+                    #:timeout-result #f
+                    #:memory/gb memory/gb
+                    #:oom-result #f
+                    #:suppress-output? suppress-output?))
   ;; Sharing of global trace store means we can just look at it after
   ;; running the program
   (current-trace))
