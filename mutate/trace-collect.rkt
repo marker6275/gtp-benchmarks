@@ -111,7 +111,7 @@ blamed-label85: unbound identifier;
               ("../benchmarks/forth/untyped/command.rkt"
                "../benchmarks/forth/untyped/eval.rkt"
                "../benchmarks/forth/untyped/stack.rkt")))
-    #;("snake" ("../benchmarks/snake/untyped/main.rkt"
+    ("snake" ("../benchmarks/snake/untyped/main.rkt"
               ("../benchmarks/snake/untyped/collide.rkt"
                "../benchmarks/snake/untyped/const.rkt"
                "../benchmarks/snake/untyped/cut-tail.rkt"
@@ -119,7 +119,7 @@ blamed-label85: unbound identifier;
                "../benchmarks/snake/untyped/handlers.rkt"
                "../benchmarks/snake/untyped/motion-help.rkt"
                "../benchmarks/snake/untyped/motion.rkt")))
-    ("dungeon" ("../benchmarks/dungeon/untyped/main.rkt"
+    #;("dungeon" ("../benchmarks/dungeon/untyped/main.rkt"
                 ("../benchmarks/dungeon/base/un-types.rkt"
                  "../benchmarks/dungeon/untyped/cell.rkt"
                  "../benchmarks/dungeon/untyped/grid.rkt"
@@ -130,3 +130,36 @@ blamed-label85: unbound identifier;
    (for/list ([bench (in-list benchmarks-to-mutate)])
      (match-define (list name (list main-module mutatable-modules)) bench)
      (mutant-outcomes/for-modules name main-module mutatable-modules))))
+
+(module+ main
+  (define data
+    (flatten
+     (for/list ([bench (in-list benchmarks-to-mutate)])
+       (match-define (list name (list main-module mutatable-modules)) bench)
+       (mutant-outcomes/for-modules name main-module mutatable-modules
+                                    #:report-progress #t))))
+  (with-output-to-file "snake.rktd" #:exists 'replace
+    (λ _
+      (printf "benchmark, precision, mutated-id, mutant-index, outcome, blamed, distance")
+      (for ([outcome (in-list data)])
+        (match-define (mutant-outcome bench
+                                      precision
+                                      outcome
+                                      blamed
+                                      mutated
+                                      maybe-distance
+                                      index
+                                      _)
+          outcome)
+        (define distance/repr (match maybe-distance
+                                [(distance n) n]
+                                [(no-blame) 'N/A]
+                                [(label-missing _) 'M/L]))
+        (printf "~a, ~a, ~a, ~a, ~a, ~a, ~a~n"
+                bench
+                precision
+                mutated
+                index
+                outcome
+                blamed
+                distance/repr)))))
