@@ -106,7 +106,7 @@
 
 ;; -----------------------------------------------------------------------------
 
-(define N 1)
+(define/contract N exact-nonnegative-integer? 1)
 
 (define/contract wall-cache
   (configurable-ctc
@@ -120,10 +120,10 @@
    [types hash?])
   (make-hash))
 
-(define animate-generation? #f) ; to see intermediate steps
-(define ITERS 10)
-(define dungeon-height 18) ; to be easy to display in 80x24, with other stuff
-(define dungeon-width  60)
+(define/contract animate-generation? boolean? #f) ; to see intermediate steps
+(define/contract ITERS exact-nonnegative-integer? 10)
+(define/contract dungeon-height exact-nonnegative-integer? 18) ; to be easy to display in 80x24, with other stuff
+(define/contract dungeon-width  exact-nonnegative-integer? 60)
 
 ;; -----------------------------------------------------------------------------
 
@@ -657,9 +657,10 @@
         [(_ _ _ _) (raise-user-error 'voidcase)])))))
 
 
-(define LOOPS 100)
+(define/contract LOOPS exact-nonnegative-integer? 1)
 
-(define (main)
+(define/contract (main)
+  any/c
   (for ((_i (in-range LOOPS)))
     (show-grid (smooth-walls (generate-dungeon (range N))))
     (reset!)))

@@ -13,9 +13,9 @@
 
 (define/contract LOOPS
   (configurable-ctc
-   [max 10]
+   [max 1]
    [types natural?])
-  10)
+  1)
 
 (define/contract (main lines)
   (configurable-ctc

@@ -158,7 +158,7 @@
     (super-new)))
 (register-cell-type! wall% #\X)
 
-(define double-bar? #t)
+(define/contract double-bar? boolean? #t)
 (define-syntax-rule (define-wall name single-bar double-bar)
   (begin (define/contract name
            (configurable-ctc
