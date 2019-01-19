@@ -57,7 +57,7 @@
                               mutated-module
                               mutated-stx
                               mutatable-modules))
-      (define distance (trace-distance-between mutated-module blamed trace))
+      (define distance (trace-distance-between mutated-id blamed trace))
       (define this-mutant-outcome
         (mutant-outcome bench
                         precision
@@ -96,8 +96,8 @@ blamed-label85: unbound identifier;
          (no-blame)]
         [(and (hash-has-key? trace mutated-label)
               (hash-has-key? trace blamed-label))
-         (- (label-bounds-upper (hash-ref trace blamed-label))
-            (label-bounds-lower (hash-ref trace mutated-label)))]
+         (distance (- (label-bounds-upper (hash-ref trace blamed-label))
+                      (label-bounds-lower (hash-ref trace mutated-label))))]
         [(hash-has-key? trace mutated-label)
          (label-missing blamed-label)]
         [else
