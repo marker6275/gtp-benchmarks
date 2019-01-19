@@ -192,6 +192,9 @@ Blamed: ~a
         (with-handlers
           ([exn:fail:contract:blame? (compose
                                       (curry make-status* 'blamed)
+                                      (match-lambda [`(function ,id) id]
+                                                    [`(definition ,id) id]
+                                                    [other other])
                                       blame-positive
                                       exn:fail:contract:blame-object)]
            [exn:fail:out-of-memory? (curry make-status* 'oom)]
@@ -325,42 +328,39 @@ Blamed: ~a
  (list
    (run-status 'completed #f "a.rkt" 'a 'none 0)
    (run-status 'completed #f "a.rkt" 'a 'types 0)
-   (run-status 'blamed '(definition a) "a.rkt" 'a 'max 0)
+   (run-status 'blamed 'a "a.rkt" 'a 'max 0)
    (run-status 'completed #f "a.rkt" 'b 'none 1)
-   (run-status 'blamed '(definition b) "a.rkt" 'b 'types 1)
-   (run-status 'blamed '(definition b) "a.rkt" 'b 'max 1)
+   (run-status 'blamed 'b "a.rkt" 'b 'types 1)
+   (run-status 'blamed 'b "a.rkt" 'b 'max 1)
    (run-status 'oom #f "a.rkt" 'foo 'none 2)
    (run-status 'oom #f "a.rkt" 'foo 'types 2)
    (run-status 'oom #f "a.rkt" 'foo 'max 2)
    (run-status 'completed #f "a.rkt" 'foo 'none 3)
    (run-status 'completed #f "a.rkt" 'foo 'types 3)
-   (run-status 'blamed '(function foo) "a.rkt" 'foo 'max 3)
+   (run-status 'blamed 'foo "a.rkt" 'foo 'max 3)
    (run-status 'completed #f "a.rkt" 'foo 'none 4)
    (run-status 'completed #f "a.rkt" 'foo 'types 4)
-   (run-status 'blamed '(function foo) "a.rkt" 'foo 'max 4)
+   (run-status 'blamed 'foo "a.rkt" 'foo 'max 4)
    (run-status 'completed #f "a.rkt" 'foo
                (or 'none 'types 'max)
                (or 5 6 7 8 9 10 11 12))
    ...
    (run-status 'completed #f "b.rkt" 'c 'none 0)
-   (run-status 'blamed '(definition c) "b.rkt" 'c 'types 0)
-   (run-status 'blamed '(definition c) "b.rkt" 'c 'max 0)
+   (run-status 'blamed 'c "b.rkt" 'c 'types 0)
+   (run-status 'blamed 'c "b.rkt" 'c 'max 0)
    (run-status 'crashed (? exn:fail:contract?) "b.rkt" 'd 'none 1)
-   (run-status 'blamed '(definition d) "b.rkt" 'd 'types 1)
-   (run-status 'blamed '(definition d) "b.rkt" 'd 'max 1)
+   (run-status 'blamed 'd "b.rkt" 'd 'types 1)
+   (run-status 'blamed 'd "b.rkt" 'd 'max 1)
    (run-status 'completed #f "b.rkt" 'd 'none 2)
    (run-status 'completed #f "b.rkt" 'd 'types 2)
-   (run-status 'blamed '(definition d) "b.rkt" 'd 'max 2)))))
+   (run-status 'blamed 'd "b.rkt" 'd 'max 2)))))
 
-;; lltmp
 (module+ main
-  ;; example divergent mutant
-  ;; Just consumes memory until it is killed
   (parameterize ([report-progress #t])
-    (run-all-mutants/with-modules "../benchmarks/forth/untyped/main.rkt"
-                                  '("../benchmarks/forth/untyped/eval.rkt"
-                                    "../benchmarks/forth/untyped/command.rkt"
-                                    "../benchmarks/forth/untyped/stack.rkt")
+    (run-all-mutants/with-modules "../benchmarks/dungeon/untyped/main.rkt"
+                                  '("../benchmarks/dungeon/untyped/cell.rkt"
+                                    "../benchmarks/dungeon/untyped/grid.rkt"
+                                    "../benchmarks/dungeon/untyped/utils.rkt")
                                   #:suppress-output? #t
                                   #:timeout/s (* 3 60)
                                   #:memory/gb 3)))
