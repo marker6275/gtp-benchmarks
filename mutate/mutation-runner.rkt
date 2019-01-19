@@ -214,17 +214,20 @@ Blamed: ~a
                                             #:timeout/s timeout/s
                                             #:memory/gb memory/gb
                                             #:make-result
-                                            [make-result identity])
+                                            [make-result identity]
+                                            #:start-index
+                                            [start-index 0])
   ([string?
     string?
     #:suppress-output? boolean?
     #:timeout/s number?
     #:memory/gb number?]
-   [#:make-result (run-status? . -> . any/c)]
+   [#:make-result (run-status? . -> . any/c)
+    #:start-index natural?]
    . ->* .
    (listof any/c))
 
-  (let loop ([index-so-far 0]
+  (let loop ([index-so-far start-index]
              [results-so-far empty])
     (define results/this-index
       (for/list ([ctc-precision precision-configs])
