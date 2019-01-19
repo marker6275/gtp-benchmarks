@@ -63,8 +63,8 @@
                         precision
                         outcome
                         blamed
-                        distance
                         mutated-id
+                        distance
                         index
                         trace))
       (when report-progress
