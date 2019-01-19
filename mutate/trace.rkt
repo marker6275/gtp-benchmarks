@@ -360,13 +360,16 @@
     (λ _
       (with-handlers ([exn? (λ (e) e)])
         (run))))
-  (displayln
-   (run-with-limits run/handled
-                    #:timeout/s timeout/s
-                    #:timeout-result #f
-                    #:memory/gb memory/gb
-                    #:oom-result #f
-                    #:suppress-output? suppress-output?))
+  (define run-result
+    (run-with-limits run/handled
+                     #:timeout/s timeout/s
+                     #:timeout-result #f
+                     #:memory/gb memory/gb
+                     #:oom-result #f
+                     #:suppress-output? suppress-output?))
+  (when run-result
+    (displayln (format "Warning: unexpected tracing run result ~a" run-result)
+               (current-error-port)))
   ;; Sharing of global trace store means we can just look at it after
   ;; running the program
   (current-trace))
