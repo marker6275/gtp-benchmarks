@@ -68,9 +68,7 @@
                         index
                         trace))
       (when report-progress
-        (displayln '--------------------)
-        (displayln this-mutant-outcome)
-        (displayln '--------------------))
+        (display-mutant-outcome/csv this-mutant-outcome))
       this-mutant-outcome])))
 
 (struct distance (value) #:transparent)
@@ -131,35 +129,35 @@ blamed-label85: unbound identifier;
      (match-define (list name (list main-module mutatable-modules)) bench)
      (mutant-outcomes/for-modules name main-module mutatable-modules))))
 
+(define/match (display-mutant-outcome/csv outcome)
+  [{(mutant-outcome bench
+                    precision
+                    outcome
+                    blamed
+                    mutated
+                    maybe-distance
+                    index
+                    _)}
+   (define distance/repr (match maybe-distance
+                           [(distance n) n]
+                           [(no-blame) 'N/A]
+                           [(label-missing _) 'M/L]))
+   (printf "~a, ~a, ~a, ~a, ~a, ~a, ~a~n"
+           bench
+           precision
+           mutated
+           index
+           outcome
+           blamed
+           distance/repr)])
+
 (module+ main
   (define data
     (flatten
      (for/list ([bench (in-list benchmarks-to-mutate)])
        (match-define (list name (list main-module mutatable-modules)) bench)
-       (mutant-outcomes/for-modules name main-module mutatable-modules
-                                    #:report-progress #t))))
-  (with-output-to-file "snake.rktd" #:exists 'replace
-    (λ _
-      (printf "benchmark, precision, mutated-id, mutant-index, outcome, blamed, distance")
-      (for ([outcome (in-list data)])
-        (match-define (mutant-outcome bench
-                                      precision
-                                      outcome
-                                      blamed
-                                      mutated
-                                      maybe-distance
-                                      index
-                                      _)
-          outcome)
-        (define distance/repr (match maybe-distance
-                                [(distance n) n]
-                                [(no-blame) 'N/A]
-                                [(label-missing _) 'M/L]))
-        (printf "~a, ~a, ~a, ~a, ~a, ~a, ~a~n"
-                bench
-                precision
-                mutated
-                index
-                outcome
-                blamed
-                distance/repr)))))
+       (with-output-to-file (format "~a.rktd" name) #:exists 'replace
+         (λ _
+           (printf "benchmark, precision, mutated-id, mutant-index, outcome, blamed, distance")
+           (mutant-outcomes/for-modules name main-module mutatable-modules
+                                        #:report-progress #t)))))))
