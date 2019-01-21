@@ -42,6 +42,16 @@
                     mutated-module-path
                     mutated-module-stx))
 
+(define (last-label trace)
+  (for/fold ([max-label #f]
+             [max-index -1]
+             #:result max-label)
+            ([(label bounds) (in-hash trace)])
+    (define label-index (label-bounds-upper bounds))
+    (if (> label-index max-index)
+        (values label label-index)
+        (values max-label max-index))))
+
 (define (mutant-outcomes/for-modules bench main-module mutatable-modules
                                      #:report-progress [report-progress #f])
   (run-all-mutants/with-modules
@@ -57,12 +67,16 @@
                               mutated-module
                               mutated-stx
                               mutatable-modules))
-      (define distance (trace-distance-between mutated-id blamed trace))
+      (define blamed-id (if (exn? blamed)
+                            ;; if mutant crashed, take last label before crash
+                            (last-label trace)
+                            blamed))
+      (define distance (trace-distance-between mutated-id blamed-id trace))
       (define this-mutant-outcome
         (mutant-outcome bench
                         precision
                         outcome
-                        blamed
+                        blamed-id
                         mutated-id
                         distance
                         index
@@ -91,8 +105,7 @@ blamed-label85: unbound identifier;
   [{_ _ _}
    (no-blame)])
 (define (trace-distance-between mutated-label blamed-label trace)
-  (cond [(or (false? blamed-label)
-             (exn? blamed-label))
+  (cond [(false? blamed-label)
          (no-blame)]
         [(and (hash-has-key? trace mutated-label)
               (hash-has-key? trace blamed-label))
