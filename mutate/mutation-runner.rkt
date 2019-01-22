@@ -222,7 +222,7 @@ Blamed: ~a
     #:suppress-output? boolean?
     #:timeout/s number?
     #:memory/gb number?]
-   [#:make-result (run-status? . -> . any/c)
+   [#:make-result ((listof run-status?) . -> . any/c)
     #:start-index natural?]
    . ->* .
    (listof any/c))
@@ -248,7 +248,7 @@ Blamed: ~a
              (for-each display-run-status results/this-index)
              (displayln "-------------------------"))
            (loop (add1 index-so-far)
-                 (cons (map make-result results/this-index)
+                 (cons (make-result results/this-index)
                        results-so-far))])))
 
 (define/contract (run-all-mutants/with-modules main-module
@@ -265,7 +265,7 @@ Blamed: ~a
    [#:suppress-output? boolean?
     #:timeout/s number?
     #:memory/gb number?
-    #:make-result (run-status? . -> . any/c)]
+    #:make-result ((listof run-status?) . -> . any/c)]
    . ->* .
    (listof any/c))
 

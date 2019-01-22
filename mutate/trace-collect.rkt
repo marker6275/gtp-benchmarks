@@ -59,31 +59,38 @@
    mutatable-modules
    #:make-result
    (match-lambda
-     [(run-status outcome blamed
-                  mutated-module mutated-id
-                  precision index)
+     [(and run-statuses
+           (list (run-status outcomes blames
+                             mutated-module* mutated-id*
+                             precisions index*)
+                 ...))
+      (define index (first index*))
+      (define mutated-module (first mutated-module*))
+      (define mutated-id (first mutated-id*))
       (define-values (mutated-stx _) (mutate-module mutated-module index))
       (define trace (trace-of main-module
                               mutated-module
                               mutated-stx
                               mutatable-modules))
-      (define blamed-id (if (exn? blamed)
-                            ;; if mutant crashed, take last label before crash
-                            (last-label trace)
-                            blamed))
-      (define distance (trace-distance-between mutated-id blamed-id trace))
-      (define this-mutant-outcome
-        (mutant-outcome bench
-                        precision
-                        outcome
-                        blamed-id
-                        mutated-id
-                        distance
-                        index
-                        trace))
-      (when report-progress
-        (display-mutant-outcome/csv this-mutant-outcome))
-      this-mutant-outcome])))
+      (map (match-lambda
+             [(run-status outcome blame _ _ precision _)
+              (define blamed-id (if (exn? blame) (last-label trace) blame))
+              (define distance (trace-distance-between mutated-id
+                                                       blamed-id
+                                                       trace))
+              (define this-mutant-outcome
+                (mutant-outcome bench
+                                precision
+                                outcome
+                                blamed-id
+                                mutated-id
+                                distance
+                                index
+                                trace))
+              (when report-progress
+                (display-mutant-outcome/csv this-mutant-outcome))
+              this-mutant-outcome])
+           run-statuses)])))
 
 (struct distance (value) #:transparent)
 (struct no-blame () #:transparent)
@@ -169,8 +176,8 @@ blamed-label85: unbound identifier;
     (flatten
      (for/list ([bench (in-list benchmarks-to-mutate)])
        (match-define (list name (list main-module mutatable-modules)) bench)
-       (with-output-to-file (format "~a.rktd" name) #:exists 'replace
-         (λ _
-           (printf "benchmark, precision, mutated-id, mutant-index, outcome, blamed, distance")
-           (mutant-outcomes/for-modules name main-module mutatable-modules
-                                        #:report-progress #t)))))))
+       ;; with-output-to-file (format "~a.rktd" name) #:exists 'replace
+       ;; λ _
+       (printf "benchmark, precision, mutated-id, mutant-index, outcome, blamed, distance")
+       (mutant-outcomes/for-modules name main-module mutatable-modules
+                                    #:report-progress #t)))))
