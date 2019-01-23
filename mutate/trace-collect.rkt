@@ -183,6 +183,7 @@ blamed-label85: unbound identifier;
        (match-define (list name (list main-module mutatable-modules)) bench)
        ;; with-output-to-file (format "~a.rktd" name) #:exists 'replace
        ;; λ _
-       (printf "benchmark, precision, mutated-id, mutant-index, outcome, blamed, distance")
+       (printf "benchmark, precision, mutated-id, mutant-index, \
+outcome, blamed, distance~n")
        (mutant-outcomes/for-modules name main-module mutatable-modules
                                     #:report-progress #t)))))
