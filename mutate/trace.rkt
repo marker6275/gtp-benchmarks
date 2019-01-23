@@ -46,6 +46,9 @@
 
 (module+test-begin
  (ignore
+  (define-test (test-stx=? a b)
+    (test-equal? (syntax->datum a)
+                 (syntax->datum b)))
   (define dummy-mod-path (string->path "/tmp/test.rkt"))
   (define dummy-mod-stx #'(module mod-name racket (#%module-begin a b c))))
  (test-stx=? (instrument-module dummy-mod-path
