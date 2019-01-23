@@ -132,11 +132,106 @@
                  "../benchmarks/dungeon/untyped/grid.rkt"
                  "../benchmarks/dungeon/untyped/utils.rkt")))))
 
-#;(define data
-  (flatten
-   (for/list ([bench (in-list benchmarks-to-mutate)])
-     (match-define (list name (list main-module mutatable-modules)) bench)
-     (mutant-outcomes/for-modules name main-module mutatable-modules))))
+
+(module+ snake-traces
+  ;; Demonstration that traces are different when collected repeatedly
+  (define bench "snake")
+  (define main-module "../benchmarks/snake/untyped/main.rkt")
+  (define mutatable-modules '("../benchmarks/snake/untyped/collide.rkt"
+                              "../benchmarks/snake/untyped/const.rkt"
+                              "../benchmarks/snake/untyped/cut-tail.rkt"
+                              "../benchmarks/snake/untyped/data.rkt"
+                              "../benchmarks/snake/untyped/handlers.rkt"
+                              "../benchmarks/snake/untyped/motion-help.rkt"
+                              "../benchmarks/snake/untyped/motion.rkt"))
+  (define mutated-module "../benchmarks/snake/untyped/cut-tail.rkt")
+  (define index 1)
+
+  (define-values (mutated-module-stx _)
+    (mutate-module mutated-module index))
+
+  (define mutant-run/none (run-with-mutated-module main-module
+                                                   mutated-module
+                                                   index
+                                                   'none))
+  (define trace/none (trace-of main-module
+                               mutated-module
+                               mutated-module-stx
+                               mutatable-modules
+                               #:suppress-output? #f))
+  (define mutant-run/types (run-with-mutated-module main-module
+                                                   mutated-module
+                                                   index
+                                                   'types))
+  (define trace/types (trace-of main-module
+                                mutated-module
+                                mutated-module-stx
+                                mutatable-modules))
+  (define mutant-run/max (run-with-mutated-module main-module
+                                                   mutated-module
+                                                   index
+                                                   'max))
+  (define trace/max (trace-of main-module
+                              mutated-module
+                              mutated-module-stx
+                              mutatable-modules))
+  (unless (and (equal? trace/none trace/types)
+               (equal? trace/none trace/max))
+    (error "Collected traces don't match!")))
+
+(module+ forth-traces
+  (define bench "forth")
+  (define main-module "../benchmarks/forth/untyped/main.rkt")
+  (define mutatable-modules '("../benchmarks/forth/untyped/command.rkt"
+                              "../benchmarks/forth/untyped/eval.rkt"
+                              "../benchmarks/forth/untyped/stack.rkt"))
+  (define mutated-module "../benchmarks/forth/untyped/command.rkt")
+  (define index 7)
+
+  (define-values (mutated-module-stx _)
+    (mutate-module mutated-module index))
+
+  (define mutant-run/none (run-with-mutated-module main-module
+                                                   mutated-module
+                                                   index
+                                                   'none))
+  (define trace/none (trace-of main-module
+                               mutated-module
+                               mutated-module-stx
+                               mutatable-modules
+                               #:suppress-output? #f))
+  (define mutant-run/types (run-with-mutated-module main-module
+                                                   mutated-module
+                                                   index
+                                                   'types))
+  (define mutant-run/max (run-with-mutated-module main-module
+                                                   mutated-module
+                                                   index
+                                                   'max)))
+
+;; lltodo: wiw: debugging dungeon tracing crashing
+(module+ dungeon-traces
+  (define bench "dungeon")
+  (define main-module "../benchmarks/dungeon/untyped/main.rkt")
+  (define mutatable-modules '("../benchmarks/dungeon/base/un-types.rkt"
+                              "../benchmarks/dungeon/untyped/cell.rkt"
+                              "../benchmarks/dungeon/untyped/grid.rkt"
+                              "../benchmarks/dungeon/untyped/utils.rkt"))
+  (define mutated-module "../benchmarks/dungeon/base/un-types.rkt")
+  (define index 1)
+
+  (define-values (mutated-module-stx _)
+    (mutate-module mutated-module index))
+
+  (define mutant-run/none (run-with-mutated-module main-module
+                                                   mutated-module
+                                                   index
+                                                   'none))
+  (define trace/none (trace-of main-module
+                               mutated-module
+                               mutated-module-stx
+                               mutatable-modules
+                               #:suppress-output? #f)))
 
 (define/match (display-mutant-outcome/csv outcome)
   [{(mutant-outcome bench
