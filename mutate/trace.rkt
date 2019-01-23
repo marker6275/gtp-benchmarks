@@ -41,42 +41,8 @@
     [(module name lang (#%module-begin body ...))
      (strip-context
       #`(module name (submod flow-trace/collapsing compressed)
-          (#%module-begin
-           #,@(disable-ctc-helpers (syntax-e #'(body ...))))))]))
+          (#%module-begin body ...)))]))
 
-(define/contract (disable-ctc-helpers top-level-def-stxs)
-  ((listof syntax?) . -> . (listof syntax?))
-  (map disable-def-if-helper top-level-def-stxs))
-
-(define (disable-def-if-helper top-level-def)
-  (syntax-parse top-level-def
-    #:datum-literals (define)
-    [(define x:id _ ...)
-     #'(define x #f)]
-    [(define (x:id _ ...) _ ...)
-     #'(define x #f)]
-    [(define ((x:id _ ...) _ ...) _ ...)
-     #'(define x #f)]
-    [_ top-level-def]))
-
-(module+test-begin
- (ignore
-  (define-test (test-stx=? a b)
-    (test-equal? (syntax->datum a)
-                 (syntax->datum b))))
- (test-stx=? (disable-def-if-helper #'(define foobar #t))
-             #'(define foobar #f))
- (test-stx=? (disable-def-if-helper #'(define (foobar x) x))
-             #'(define foobar #f))
- (test-stx=? (disable-def-if-helper #'(define ((foobar x) y) x))
-             #'(define foobar #f)))
-
-;; lltodo: this^ obtaining of the trace within the main module *doesn't work*
-;; I can't do it within the flow-trace lang.
-;; So what I need to do is create a new main module, which will just
-;; require the actual main module and then return the trace.
-;;
-;; Or, can I just do that requiring and obtaining of the trace with eval?
 
 (module+test-begin
  (ignore
