@@ -10,7 +10,10 @@
          (only-in racket/match match)
          (for-syntax "current-precision-setting.rkt"))
 
-(provide configurable-ctc)
+(provide configurable-ctc
+         define/ctc-helper
+         define-syntax-rule/ctc-helper
+         define-syntax/ctc-helper)
 
 ;; Usage:
 ;; (configurable-ctc [<unquoted-precision-config> contract?] ...)
@@ -248,3 +251,12 @@
                   x))
   (assert (foo5 x x)))
 
+(define-syntax-rule (define-ctc-helpers [ctc-helper-id expansion] ...)
+  (begin
+    (define-syntax ctc-helper-id (make-rename-transformer #'expansion))
+    ...))
+
+(define-ctc-helpers
+  [define/ctc-helper define]
+  [define-syntax-rule/ctc-helper define-syntax-rule]
+  [define-syntax/ctc-helper define-syntax])

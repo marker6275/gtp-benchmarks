@@ -4,8 +4,7 @@
   forth-eval*
 ))
 (require (only-in racket/file file->lines)
-         (only-in "../../../ctcs/precision-config.rkt"
-                  configurable-ctc)
+         "../../../ctcs/precision-config.rkt"
          racket/contract
          (only-in racket/math natural?))
 
