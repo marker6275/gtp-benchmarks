@@ -100,22 +100,6 @@
 (struct distance (value) #:transparent)
 (struct no-blame () #:transparent)
 (struct label-missing (label) #:transparent)
-#|???
-blamed-label85: unbound identifier;
- also, no #%top syntax transformer is bound
-  in: blamed-label85
-???|#
-#;(define/match (trace-distance-between mutated-label blamed-label trace)
-  [{(? symbol? mutated)
-    (? symbol? blamed-label)
-    (hash-table (mutated (label-bounds lower _))
-                (blamed-label (label-bounds _ upper))
-                _ ...)}
-   (distance (- upper lower))]
-  [{(? symbol? mutated) (? symbol? blamed) trace}
-   (label-missing (if (hash-has-key? trace mutated) blamed mutated))]
-  [{_ _ _}
-   (no-blame)])
 (define (trace-distance-between mutated-label blamed-label trace)
   (cond [(false? blamed-label)
          (no-blame)]
