@@ -176,7 +176,7 @@
                                                            height
                                                            width
                                                            direction))
-                                cell%?)
+                                cell%/c)
                        ;; ll: I don't think these can (reasonably) be
                        ;; refined (note that they still have the default
                        ;; room contract, see definition of room-with/c)
@@ -332,7 +332,7 @@
                                                            11
                                                            11
                                                            dir))
-                                cell%?)
+                                cell%/c)
                        any/c
                        any/c))])]
    [types (grid? array-coord? direction? . -> . (or-#f/c any-room?))])
