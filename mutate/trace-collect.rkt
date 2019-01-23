@@ -36,11 +36,13 @@
 (define (trace-of main-module-path
                   mutated-module-path
                   mutated-module-stx
-                  other-modules-to-trace)
+                  other-modules-to-trace
+                  #:suppress-output? [suppress-output? #t])
   (run-with-tracing main-module-path
                     other-modules-to-trace
                     mutated-module-path
-                    mutated-module-stx))
+                    mutated-module-stx
+                    #:suppress-output? suppress-output?))
 
 (define (last-label trace)
   (for/fold ([max-label #f]
@@ -53,10 +55,12 @@
         (values max-label max-index))))
 
 (define (mutant-outcomes/for-modules bench main-module mutatable-modules
-                                     #:report-progress [report-progress #f])
+                                     #:report-progress [report-progress #f]
+                                     #:suppress-output? [suppress-output? #t])
   (run-all-mutants/with-modules
    main-module
    mutatable-modules
+   #:suppress-output? suppress-output?
    #:make-result
    (match-lambda
      [(and run-statuses
@@ -71,7 +75,8 @@
       (define trace (trace-of main-module
                               mutated-module
                               mutated-stx
-                              mutatable-modules))
+                              mutatable-modules
+                              #:suppress-output? suppress-output?))
       (map (match-lambda
              [(run-status outcome blame _ _ precision _)
               (define blamed-id (if (exn? blame) (last-label trace) blame))
