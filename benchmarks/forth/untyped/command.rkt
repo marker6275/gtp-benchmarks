@@ -201,7 +201,7 @@
                  (args E S v)
                  [result (if (and (is-or-starts-with? (curry equal? 'swap)
                                                       v)
-                                  (singleton-list? v))
+                                  ((list-with-min-size/c 2) S))
                              (equal?/c
                               (cons E
                                     (cons (second S)
