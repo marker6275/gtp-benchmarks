@@ -367,8 +367,8 @@
                      #:memory/gb memory/gb
                      #:oom-result #f
                      #:suppress-output? suppress-output?))
-  (when run-result
-    (displayln (format "Warning: unexpected tracing run result ~a" run-result)
+  (when (exn? run-result)
+    (displayln (format "Warning: unexpected tracing run result ~.a" run-result)
                (current-error-port)))
   ;; Sharing of global trace store means we can just look at it after
   ;; running the program
