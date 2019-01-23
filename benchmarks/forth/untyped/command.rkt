@@ -37,7 +37,8 @@
   stack-swap
 ))
 
-(define (assert v p)
+(define/contract (assert v p)
+  any/c
   (unless (p v) (error 'assert))
   v)
 
