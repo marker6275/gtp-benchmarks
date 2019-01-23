@@ -56,7 +56,7 @@
       descr
       exec)))
 
-(define ((env-with/c cmd-ids) env)
+(define/ctc-helper ((env-with/c cmd-ids) env)
   (cond [(env? env)
          (define env-cmd-ids
            (for/list ([env-cmd (in-list env)])
@@ -83,7 +83,7 @@
 ;; Create a binary operation command.
 ;; Command is recognized by its identifier,
 ;;  the identifier is then applied to the top 2 numbers on the stack.
-(define binop-command%/c
+(define/ctc-helper binop-command%/c
   (and/c command%/c
          (class/c* (field/all
                     [binop symbol?]
@@ -138,7 +138,7 @@
                (eq? '#,(syntax-e #'opcode) (car v))
                (cons E (stack-cmd S))))))]))
 
-(define (is-or-starts-with? predicate v)
+(define/ctc-helper (is-or-starts-with? predicate v)
   (or (and (symbol? v)
            (predicate v))
       (and (list? v)
