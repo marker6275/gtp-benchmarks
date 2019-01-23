@@ -36,8 +36,8 @@
 
 ;; =============================================================================
 
-(define array-coord? (vector/c index? index?))
-(define (arrayof val-ctc)
+(define/ctc-helper array-coord? (vector/c index? index?))
+(define/ctc-helper (arrayof val-ctc)
   (vectorof (vectorof val-ctc)))
 
 (define/contract (array-set! g p v)
@@ -71,7 +71,7 @@
 
 ;; a Grid is a math/array Mutable-Array of cell%
 ;; (mutability is required for dungeon generation)
-(define grid? (arrayof cell%?))
+(define/ctc-helper grid? (arrayof cell%?))
 
 ;; parses a list of strings into a grid, based on the printed representation
 ;; of each cell
@@ -134,7 +134,7 @@
   (and (<= 0 (vector-ref pos 0) (sub1 (grid-height g)))
        (<= 0 (vector-ref pos 1) (sub1 (grid-width  g)))))
 
-(define ((within-grid/c g) pos)
+(define/ctc-helper ((within-grid/c g) pos)
   (within-grid? g pos))
 
 
@@ -156,7 +156,7 @@
   (and (within-grid? g pos)
        (vector-ref (vector-ref g (vector-ref pos 0)) (vector-ref pos 1))))
 
-(define direction? (->* (array-coord?) [index?]
+(define/ctc-helper direction? (->* (array-coord?) [index?]
                         array-coord?))
 
 (define/contract (left pos [n 1])

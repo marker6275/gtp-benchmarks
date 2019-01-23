@@ -73,7 +73,7 @@
 ;(define-type ExtPoints (Listof (Pairof Pos Room)))
 ;; dungeon generation
 
-(define (alistof key/c val/c)
+(define/ctc-helper (alistof key/c val/c)
   (listof (cons/c key/c val/c)))
 
 (struct room
@@ -85,7 +85,7 @@
    extension-points) ; where a corridor could sprout
   #:mutable)
 
-(define (room-with/c height/c
+(define/ctc-helper (room-with/c height/c
                      width/c
                      poss->cells/c
                      free-cells/c
@@ -101,7 +101,7 @@
                    free-cells/c)
             (and/c (listof array-coord?)
                    extension-points/c)))
-(define any-room? (room-with/c any/c any/c any/c any/c any/c))
+(define/ctc-helper any-room? (room-with/c any/c any/c any/c any/c any/c))
 
 
 ;; -----------------------------------------------------------------------------
@@ -127,7 +127,7 @@
 
 ;; -----------------------------------------------------------------------------
 
-(define (room-bounds x y height width direction
+(define/ctc-helper (room-bounds x y height width direction
                      [dimension-randomizer identity])
   (define min-x (match direction
                   [(== down) x]
@@ -148,7 +148,7 @@
   (values min-x max-x
           min-y max-y))
 
-(define ((coord-within-box/c start-pos height width direction) cell-coord)
+(define/ctc-helper ((coord-within-box/c start-pos height width direction) cell-coord)
   (match-define (vector start-x start-y) start-pos)
   (match-define (vector cell-x cell-y) cell-coord)
   (define-values (min-x max-x min-y max-y)
@@ -380,7 +380,7 @@
   (try-add-rectangle grid pos h w dir))
 
 
-(define (door-count grid)
+(define/ctc-helper (door-count grid)
   (define height (grid-height grid))
   (define width (grid-width grid))
   (for/fold ([doors 0])
@@ -390,10 +390,10 @@
        (vector-count (curry is-a? door%)
                      (vector-ref grid row-index)))))
 
-(define (room-count grid)
+(define/ctc-helper (room-count grid)
   (/ (door-count grid) 4))
 
-(define ((room-count>=/c n) grid)
+(define/ctc-helper ((room-count>=/c n) grid)
   (>= (room-count grid) n))
 
 ;; ll: temporal: this should display things IF `animate-generation?`
@@ -556,7 +556,8 @@
          (hash-set! free-cache pos res)
          res]))
 
-(define (hash-clear! h)
+(define/contract (hash-clear! h)
+  any/c
   (void))
 
 ;; wall smoothing, for aesthetic reasons

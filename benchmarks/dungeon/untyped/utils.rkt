@@ -51,7 +51,7 @@
 
   (begin0 (car (unbox r*)) (set-box! r* (cdr (unbox r*)))))
 
-(define (list+titlecases . los)
+(define/ctc-helper (list+titlecases . los)
   (append los
           (map string-titlecase los)))
 
@@ -72,7 +72,7 @@
           (if capitalize? "A"  "a"))))
 
 
-(define (random-result-between/c min max)
+(define/ctc-helper (random-result-between/c min max)
   (and/c exact-nonnegative-integer?
          (>=/c min)
          (<=/c max)))
