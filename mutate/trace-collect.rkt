@@ -56,11 +56,13 @@
 
 (define (mutant-outcomes/for-modules bench main-module mutatable-modules
                                      #:report-progress [report-progress #f]
-                                     #:suppress-output? [suppress-output? #t])
+                                     #:suppress-output? [suppress-output? #t]
+                                     #:memory/gb [memory/gb 3])
   (run-all-mutants/with-modules
    main-module
    mutatable-modules
    #:suppress-output? suppress-output?
+   #:memory/gb memory/gb
    #:make-result
    (match-lambda
      [(and run-statuses
@@ -209,7 +211,6 @@
                                                    index
                                                    'max)))
 
-;; lltodo: wiw: debugging dungeon tracing crashing
 (module+ dungeon-traces
   (define bench "dungeon")
   (define main-module "../benchmarks/dungeon/untyped/main.rkt")
@@ -265,4 +266,5 @@
        (printf "benchmark, precision, mutated-id, mutant-index, \
 outcome, blamed, distance~n")
        (mutant-outcomes/for-modules name main-module mutatable-modules
-                                    #:report-progress #t)))))
+                                    #:report-progress #t
+                                    #:memory/gb 8)))))
