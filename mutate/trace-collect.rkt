@@ -116,11 +116,11 @@
 
 ;; temp: Comment out everything but one very short module
 (define benchmarks-to-mutate
-  '(#;("forth" ("../benchmarks/forth/untyped/main.rkt"
+  '(("forth" ("../benchmarks/forth/untyped/main.rkt"
               ("../benchmarks/forth/untyped/command.rkt"
                "../benchmarks/forth/untyped/eval.rkt"
                "../benchmarks/forth/untyped/stack.rkt")))
-    ("snake" ("../benchmarks/snake/untyped/main.rkt"
+    #;("snake" ("../benchmarks/snake/untyped/main.rkt"
               ("../benchmarks/snake/untyped/collide.rkt"
                "../benchmarks/snake/untyped/const.rkt"
                "../benchmarks/snake/untyped/cut-tail.rkt"
