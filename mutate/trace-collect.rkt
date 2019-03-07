@@ -2,6 +2,7 @@
 
 (require "mutation-runner.rkt"
          "trace.rkt"
+         ;; ll: for label-bounds accessors
          (submod flow-trace/collapsing compressed trace-api))
 
 ;; Desired data:
@@ -30,19 +31,6 @@
                               trace)
   #:transparent)
 
-;; Assume have a function that will run a given module with a given
-;; mutation with the tracing framework and return a list of labels.
-;; trace-of: Path Path syntax? -> Trace
-(define (trace-of main-module-path
-                  mutated-module-path
-                  mutated-module-stx
-                  other-modules-to-trace
-                  #:suppress-output? [suppress-output? #t])
-  (run-with-tracing main-module-path
-                    other-modules-to-trace
-                    mutated-module-path
-                    mutated-module-stx
-                    #:suppress-output? suppress-output?))
 
 (define (last-label trace)
   (for/fold ([max-label #f]
@@ -57,31 +45,33 @@
 (define (mutant-outcomes/for-modules bench main-module mutatable-modules
                                      #:report-progress [report-progress #f]
                                      #:suppress-output? [suppress-output? #t]
+                                     #:timeout/s [timeout/s (* 3 60)]
                                      #:memory/gb [memory/gb 3])
   (run-all-mutants/with-modules
    main-module
    mutatable-modules
    #:suppress-output? suppress-output?
    #:memory/gb memory/gb
+   #:timeout/s timeout/s
    #:make-result
    (match-lambda
+     ;; ll: this is a list of statuses for a single mutant, with
+     ;; different ctc levels
      [(and run-statuses
-           (list (run-status outcomes blames
-                             mutated-module* mutated-id*
-                             precisions index*)
+           (list (run-status traces
+                             outcomes blames
+                             mutated-module* mutated-id* index*
+                             precisions)
                  ...))
+      ;; ll: index, mutated-module, and mutated-id are all the same
+      ;; since all statuses refer to the same mutant
       (define index (first index*))
       (define mutated-module (first mutated-module*))
       (define mutated-id (first mutated-id*))
-      (define-values (mutated-stx _) (mutate-module mutated-module index))
-      (define trace (trace-of main-module
-                              mutated-module
-                              mutated-stx
-                              mutatable-modules
-                              #:suppress-output? suppress-output?))
+
       (map (match-lambda
-             [(run-status outcome blame _ _ precision _)
-              (define blamed-id (if (exn? blame) (last-label trace) blame))
+             [(run-status trace outcome blame _ _ _ precision)
+              (define blamed-id blame #;(if (exn? blame) (last-label trace) blame))
               (define distance (trace-distance-between mutated-id
                                                        blamed-id
                                                        trace))
@@ -135,7 +125,7 @@
                  "../benchmarks/dungeon/untyped/utils.rkt")))))
 
 
-(module+ snake-traces
+#;(module+ snake-traces
   ;; Demonstration that traces are different when collected repeatedly
   (define bench "snake")
   (define main-module "../benchmarks/snake/untyped/main.rkt")
@@ -181,7 +171,7 @@
                (equal? trace/none trace/max))
     (error "Collected traces don't match!")))
 
-(module+ forth-traces
+#;(module+ forth-traces
   (define bench "forth")
   (define main-module "../benchmarks/forth/untyped/main.rkt")
   (define mutatable-modules '("../benchmarks/forth/untyped/command.rkt"
@@ -211,7 +201,7 @@
                                                    index
                                                    'max)))
 
-(module+ dungeon-traces
+#;(module+ dungeon-traces
   (define bench "dungeon")
   (define main-module "../benchmarks/dungeon/untyped/main.rkt")
   (define mutatable-modules '("../benchmarks/dungeon/base/un-types.rkt"
