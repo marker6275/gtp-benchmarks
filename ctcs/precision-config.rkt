@@ -8,7 +8,8 @@
          racket/contract
          (only-in racket/function curry)
          (only-in racket/match match)
-         (for-syntax "current-precision-setting.rkt"))
+         (for-syntax "current-precision-setting.rkt")
+         (for-syntax flow-trace/require-introducer))
 
 (provide configurable-ctc
          define/ctc-helper
@@ -50,8 +51,8 @@
     (define-syntax (ctc-helper-id stx)
       (syntax-parse stx
         [(_ id/sig . body)
-         (with-syntax ([local-req (datum->syntax stx '(local-require racket))])
-           #'(expansion id/sig (let () local-req . body)))]))
+         (with-syntax ([body/escaped (escape-tracing #'body)])
+           #'(expansion id/sig . body/escaped))]))
     ...))
 
 (define-ctc-helpers
