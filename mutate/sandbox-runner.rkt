@@ -13,8 +13,8 @@
                          #:timeout/s [timeout-secs #f]
                          #:memory/gb [memory-limit-gb #f]
                          #:suppress-output? [suppress-output? #f]
-                         #:oom-result [oom-result 'oom]
-                         #:timeout-result [timeout-result 'timeout])
+                         #:oom-result [make-oom-result (λ () 'oom)]
+                         #:timeout-result [make-timeout-result (λ () 'timeout)])
   (define run-custodian (make-custodian))
   (define shutdown-box
     (make-custodian-box run-custodian 'available))
@@ -50,9 +50,9 @@
   (cond
     ;; Check if oom or timed out
     [(not (custodian-box-value shutdown-box))
-     oom-result]
+     (make-oom-result)]
     [(not ended-event)
-     timeout-result]
+     (make-timeout-result)]
     ;; if not, get the result of the thunk
     [else
      (async-channel-get outcome-channel)]))
