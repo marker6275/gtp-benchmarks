@@ -6,7 +6,6 @@
          report-progress
          make-mutated-module-runner
          make-precision-config-module
-         print-mutation
          mutate-module
          [struct-out run-status])
 
@@ -16,7 +15,9 @@
          "../ctcs/current-precision-setting.rkt"
          "sandbox-runner.rkt"
          "instrumented-module-runner.rkt"
-         "trace.rkt")
+         "trace.rkt"
+
+         (submod flow-trace/collapsing compressed trace-api))
 
 ;; Produce the mutated syntax for the module at the given path
 (define (mutate-module module-stx mutation-index)
@@ -57,7 +58,8 @@
        (and (not (member main-module other-modules))
             (not (member module-to-mutate other-modules)))
 
-       [result (-> any)])
+       (values [runner (-> any)]
+               [mutated-id symbol?]))
 
   ;; (define-values (mutated-stx mutated-id) (mutate-module stx mutation-index))
 
@@ -74,9 +76,9 @@
        (mutate-module stx mutation-index))
      ;; ll: see above...
      (set-box! mutated-id-box mutated-id)
-     (trace-module mutated-stx)]
-    [{_ stx}
-     (trace-module stx)])
+     (trace-module module-to-mutate mutated-stx)]
+    [{path stx}
+     (trace-module path stx)])
 
   ;; Old code had this as first thin eval'd in namespace. Why?
   ;; (eval '(require "mutate.rkt"))
@@ -98,18 +100,21 @@
                               trace-api))
           ns)
     (eval '(current-trace-reset!) ns))
-  (define (get-trace ns _)
-    (eval '(current-trace) ns))
+
+  (define other-modules-to-mutate
+    (if (equal? main-module module-to-mutate)
+        (list* precision-config-module-path
+               other-modules)
+        (list* precision-config-module-path
+               module-to-mutate
+               other-modules)))
 
   (define runner
     (make-instrumented-module-runner main-module
-                                     (list* precision-config-module-path
-                                            module-to-mutate
-                                            other-modules)
+                                     other-modules-to-mutate
                                      instrument-module
                                      #:setup-namespace setup-namespace!
-                                     #:before-main before-main-setup!
-                                     #:make-result get-trace))
+                                     #:before-main before-main-setup!))
   (define mutated-id (unbox mutated-id-box))
 
   (values runner mutated-id))
@@ -171,27 +176,31 @@ Blamed: ~a
                                   other-modules
                                   mutation-index
                                   ctc-precision-config))
-    (define (make-status* status-sym [blamed #f] [result #f])
-      (make-status status-sym blamed mutated-id result))
+    (define ((make-status* status-sym) [blamed #f])
+      (make-status status-sym
+                   blamed
+                   mutated-id
+                   (current-trace)))
     (define run/handled
       (λ _
         (with-handlers
           ([exn:fail:contract:blame? (compose
-                                      (curry make-status* 'blamed)
+                                      (make-status* 'blamed)
                                       (match-lambda [`(function ,id) id]
                                                     [`(definition ,id) id]
                                                     [other other])
                                       blame-positive
                                       exn:fail:contract:blame-object)]
-           [exn:fail:out-of-memory? (curry make-status* 'oom)]
-           [exn? (curry make-status* 'crashed)])
-          (make-status* 'completed #f (run)))))
+           [exn:fail:out-of-memory? (λ _ ((make-status* 'oom)))]
+           [exn? (make-status* 'crashed)])
+          (run)
+          ((make-status* 'completed)))))
     (run-with-limits run/handled
                      #:timeout/s timeout/s
                      #:timeout-result (make-status* 'timeout)
                      #:memory/gb memory/gb
                      #:oom-result (make-status* 'oom)
-                     #:suppress-output? suppress-output?)))
+                     #:suppress-output? #f #;suppress-output?)))
 
 (define/contract (run-all-mutants/of-module main-module
                                             module-to-mutate
@@ -277,12 +286,22 @@ Blamed: ~a
 
 
 ;; for debugging
-(define (print-mutation module-to-mutate mutation-index)
-  (define-values (mutated-program-stx mutated-id)
-    (mutate-module module-to-mutate mutation-index))
-  (printf "--------------------\nMutated: ~a\n\n"
-          mutated-id)
-  (pretty-print (syntax->datum mutated-program-stx)))
+(module+ debug
+  (provide print-mutation)
+
+  (require syntax/modread)
+  (define (read-module path)
+    (check-module-form
+     (with-module-reading-parameterization
+       (λ () (with-input-from-file path
+               (λ () (port-count-lines! (current-input-port)) (read-syntax)))))
+     'ignored path))
+  (define (print-mutation module-to-mutate mutation-index)
+    (define-values (mutated-program-stx mutated-id)
+      (mutate-module (read-module module-to-mutate) mutation-index))
+    (printf "--------------------\nMutated: ~a\n\n"
+            mutated-id)
+    (pretty-print (syntax->datum mutated-program-stx))))
 
 (module+ test
   (require ruinit)
