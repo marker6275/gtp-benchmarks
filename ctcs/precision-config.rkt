@@ -52,7 +52,8 @@
       (syntax-parse stx
         [(_ id/sig . body)
          (with-syntax ([body/escaped (escape-tracing #'body)])
-           #'(expansion id/sig . body/escaped))]))
+           (syntax/loc stx
+             (expansion id/sig . body/escaped)))]))
     ...))
 
 (define-ctc-helpers
