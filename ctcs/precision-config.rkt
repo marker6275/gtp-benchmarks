@@ -58,5 +58,4 @@
 
 (define-ctc-helpers
   [define define/ctc-helper]
-  [define-syntax-rule define-syntax-rule/ctc-helper]
   [define-syntax define-syntax/ctc-helper])
