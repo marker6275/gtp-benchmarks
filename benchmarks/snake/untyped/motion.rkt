@@ -90,11 +90,6 @@
          (world-food w)))
 
 
-(define-syntax-rule/ctc-helper (save-random-excursion generator body ...)
-  (let ([generator-state (pseudo-random-generator->vector generator)])
-    (begin0
-        (begin body ...)
-      (vector->pseudo-random-generator! generator generator-state))))
 
 ;; snake-eat : World -> World
 ;; Eat the food and generate a new one.
