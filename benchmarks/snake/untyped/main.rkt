@@ -1,4 +1,4 @@
-#lang racket
+#lang flow-trace
 
 (require "data.rkt"
          "const.rkt"
@@ -18,20 +18,16 @@
    [types (world-type? (listof (listof (or/c symbol? string?))) . -> . void?)])
 
   (reset!)
-  (let loop ((w w0) (h hist))
-    (if (empty? h)
-        w
-        (let ()
-          (loop
-           (match (car h)
-             [`(on-key ,(? string? ke))
-              (handle-key w ke)]
-             [`(on-tick)
-              (world->world w)]
-             [`(stop-when)
-              (game-over? w)
-              w])
-           (cdr h)))))
+  (for/fold ([w w0])
+            ([cmd (in-list hist)])
+    (match cmd
+      [`(on-key ,(? string? ke))
+       (handle-key w ke)]
+      [`(on-tick)
+       (world->world w)]
+      [`(stop-when)
+       (game-over? w)
+       w]))
   (void))
 
 (define/contract DATA

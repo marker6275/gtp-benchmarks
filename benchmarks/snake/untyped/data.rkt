@@ -1,4 +1,4 @@
-#lang racket
+#lang flow-trace
 
 (require "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt")
