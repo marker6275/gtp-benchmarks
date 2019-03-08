@@ -13,7 +13,6 @@
 
 (provide configurable-ctc
          define/ctc-helper
-         define-syntax-rule/ctc-helper
          define-syntax/ctc-helper)
 
 ;; Usage:
