@@ -1,4 +1,4 @@
-#lang racket/base
+#lang flow-trace
 
 (require racket/contract
          racket/list
