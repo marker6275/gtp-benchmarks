@@ -1,5 +1,7 @@
 #lang racket
 
+(provide precision-config-lattice)
+
 (module+ test
   (require ruinit))
 
@@ -18,15 +20,30 @@
                    (equal? level (last levels))])))
 
 
-;; ModuleConfig = Module x Level
+;; mod-config = path-string? symbol?
 (struct mod-config (mod level) #:transparent)
 
 (define bench-config? (set/c mod-config?))
 
-;; point is `bench-config?` and a set of points (parents)
-(struct point (config parents))
-
 (define path? (listof bench-config?))
+
+;; lattice-point = bench-config? (set/c path?)
+(struct lattice-point (config paths-to))
+
+
+(define/contract (make-lattice start increment max?)
+  (bench-config?
+   (mod-config? . -> . mod-config?)
+   (mod-config? . -> . boolean?)
+   . -> .
+   (set/c lattice-point?))
+
+  (define h (make-lattice-hash start increment max?))
+  (for/set ([(config paths) h])
+    (lattice-point config paths)))
+
+
+
 
 
 (module+ test
@@ -41,7 +58,7 @@
   (define (parse-paths-hash p)
       (for/hash ([(c path-list) p])
         (values (parse-config c)
-                (map (curry map parse-config) path-list))))
+                (list->set (map (curry map parse-config) path-list)))))
   (define-test (test-path-maps=? actual expected)
     (unless (equal? actual expected)
       (fail "Path maps differ.\nActual:\n~a\nExpected:\n~a\n"
@@ -83,40 +100,51 @@
                        [(A T) (B M) (C N)]
                        [(A T) (B T) (C T)]})))
 
-(define/contract (make-lattice start increment max?)
+(define/contract (make-lattice-hash start increment max?)
   (bench-config?
    (mod-config? . -> . mod-config?)
    (mod-config? . -> . boolean?)
    . -> .
-   (hash/c bench-config? (listof path?)))
+   (hash/c bench-config? (set/c path?)))
 
-  (let loop (;; hash of bench-config? -> (listof path?)
-             [paths (hash start '(()))]
+  (let loop (;; hash of bench-config? -> (set/c path?)
+             [paths (hash start (set '()))]
              ;; set of bench-config?
              [seen (set)]
-             ;; set of bench-config?
-             [to-process (set start)])
+             ;; list of bench-config?
+             [to-process (list start)])
     (cond [(set-empty? to-process)
            paths]
 
           [else
-           (define bench (set-first to-process))
+           (define bench (first to-process))
            (define parents (parents-of bench increment max?))
-           (define parents/unseen (set-subtract parents seen))
+           (define parents/unseen (set->list (set-subtract parents seen)))
            (define paths+bench->parents
              (add-paths paths bench parents))
            (loop paths+bench->parents
                  (set-add seen bench)
-                 (set-union (set-rest to-process)
-                            parents/unseen))])))
+                 (append (rest to-process)
+                         parents/unseen))])))
 
 (module+ test
   (define-test (test-lattice start expected)
     (define start/parsed (parse-config start))
     (define expected/parsed (parse-paths-hash expected))
-    (test-path-maps=? (make-lattice start/parsed inc max?)
+    (test-path-maps=? (make-lattice-hash start/parsed inc max?)
                       expected/parsed))
   (test-begin
+    (test-lattice
+     '[(A N)]
+     (hash '[(A N)]
+           '(())
+
+           '[(A T)]
+           '(([(A N)]))
+
+           '[(A M)]
+           '(([(A T)] [(A N)]))))
+
     (test-lattice
      '[(A N) (B N)]
      (hash '[(A N) (B N)]
@@ -158,21 +186,21 @@
              ([(A T) (B M)] [(A T) (B T)] [(A N) (B T)] [(A N) (B N)]))))))
 
 (define/contract (add-paths paths config parent-configs)
-  ((hash/c bench-config? (listof path?))
+  ((hash/c bench-config? (set/c path?))
    bench-config?
    (set/c bench-config?)
    . -> .
-   (hash/c bench-config? (listof path?)))
+   (hash/c bench-config? (set/c path?)))
 
   (define config-paths (hash-ref paths config))
   (for*/fold ([new-paths paths])
-             ([parent parent-configs]
-              [config-path config-paths])
-    (define parent-paths (hash-ref new-paths parent (const empty)))
+             ([parent (in-set parent-configs)]
+              [config-path (in-set config-paths)])
+    (define parent-paths (hash-ref new-paths parent (const (set))))
     (define new-path (cons config config-path))
     (hash-set new-paths
               parent
-              (cons new-path parent-paths))))
+              (set-add parent-paths new-path))))
 
 (module+ test
   (define-test (test-add-paths paths config parent-configs new-paths)
