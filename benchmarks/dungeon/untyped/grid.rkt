@@ -1,4 +1,4 @@
-#lang racket
+#lang flow-trace
 
 (provide
   left
@@ -162,12 +162,12 @@
 (define/contract (left pos [n 1])
   (configurable-ctc
    [max (and/c direction?
-               (->i ([pos array-coord?]
-                     [n exact-nonnegative-integer?])
+               (->i ([pos array-coord?])
+                    ([n exact-nonnegative-integer?])
                     [result
                      (pos n)
                      (vector/c (vector-ref pos 0)
-                               (max (- (vector-ref pos 1) n) 0))]))]
+                               (max (- (vector-ref pos 1) (if (unsupplied-arg? n) 1 n)) 0))]))]
    [types direction?])
 
   (vector (vector-ref pos 0)
@@ -176,12 +176,12 @@
 (define/contract (right pos [n 1])
   (configurable-ctc
    [max (and/c direction?
-               (->i ([pos array-coord?]
-                     [n exact-nonnegative-integer?])
+               (->i ([pos array-coord?])
+                    ([n exact-nonnegative-integer?])
                     [result
                      (pos n)
                      (vector/c (vector-ref pos 0)
-                               (max (+ (vector-ref pos 1) n) 0))]))]
+                               (max (+ (vector-ref pos 1) (if (unsupplied-arg? n) 1 n)) 0))]))]
    [types direction?])
 
   (vector (vector-ref pos 0)
@@ -190,9 +190,11 @@
 (define/contract (up pos [n 1])
   (configurable-ctc
    [max (and/c direction?
-               (->i ([pos array-coord?]
-                     [n exact-nonnegative-integer?])
-                    [result (pos n) (vector/c (max (- (vector-ref pos 0) n) 0)
+               (->i ([pos array-coord?])
+                    ([n exact-nonnegative-integer?])
+                    [result (pos n) (vector/c (max (- (vector-ref pos 0)
+                                                      (if (unsupplied-arg? n) 1 n))
+                                                   0)
                                               (vector-ref pos 1))]))]
    [types direction?])
 
@@ -202,9 +204,11 @@
 (define/contract (down pos [n 1])
   (configurable-ctc
    [max (and/c direction?
-               (->i ([pos array-coord?]
-                     [n exact-nonnegative-integer?])
-                    [result (pos n) (vector/c (max (+ (vector-ref pos 0) n) 0)
+               (->i ([pos array-coord?])
+                    ([n exact-nonnegative-integer?])
+                    [result (pos n) (vector/c (max (+ (vector-ref pos 0)
+                                                      (if (unsupplied-arg? n) 1 n))
+                                                   0)
                                               (vector-ref pos 1))]))]
    [types direction?])
 

@@ -10,6 +10,15 @@
 (define ((memberof/c l) x)
   (member x l))
 
+(define (count-occurrences l)
+  (for/fold ([occurrences (hash)])
+            ([elem (in-list l)])
+    (hash-update occurrences elem add1 0)))
+
+(define (permutationof/c l)
+  (define l-occ (count-occurrences l))
+  (λ (x) (equal? l-occ (count-occurrences x))))
+
 (define-syntax (class/c* stx)
   (syntax-parse stx
     #:datum-literals (field/all all inherit+super)

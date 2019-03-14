@@ -1,4 +1,4 @@
-#lang racket/base
+#lang flow-trace
 
 (provide
   article
@@ -16,7 +16,8 @@
   (only-in racket/file file->value)
   racket/contract
   (only-in "../../../ctcs/common.rkt"
-           memberof/c)
+           memberof/c
+           permutationof/c)
   "../../../ctcs/precision-config.rkt"
 )
 
@@ -38,7 +39,7 @@
   (configurable-ctc
    [max (->* ()
              void?
-             #:post (equal? r* orig))]
+             #:post (equal? (unbox r*) orig))]
    [types (-> void?)])
 
   (set-box! r* orig))
@@ -113,7 +114,7 @@
 (define/contract (shuffle l)
   (configurable-ctc
    [max (->i ([l (listof any/c)])
-             [result (l) (memberof/c (permutations l))])]
+             [result (l) (permutationof/c l)])]
    [types ((listof any/c) . -> . (listof any/c))])
 
   (reverse l))

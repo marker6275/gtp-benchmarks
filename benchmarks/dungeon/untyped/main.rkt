@@ -1,4 +1,4 @@
-#lang racket
+#lang flow-trace
 
 ;; -----------------------------------------------------------------------------
 
@@ -400,11 +400,11 @@
             ([row-index (in-range height)])
     ;; lltodo: test
     (+ doors
-       (vector-count (curry is-a? door%)
+       (vector-count (curryr is-a? door%)
                      (vector-ref grid row-index)))))
 
 (define/ctc-helper (room-count grid)
-  (/ (door-count grid) 4))
+  (add1 (door-count grid)))
 
 (define/ctc-helper ((room-count>=/c n) grid)
   (>= (room-count grid) n))
