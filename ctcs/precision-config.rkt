@@ -8,9 +8,14 @@
          racket/contract
          (only-in racket/function curry)
          (only-in racket/match match)
-         (for-syntax "current-precision-setting.rkt"))
+         (for-syntax "current-precision-setting.rkt")
+         (only-in (submod flow-trace/collapsing compressed)
+                  define/ctc-helper
+                  define-syntax/ctc-helper
+                  define-syntax-rule/ctc-helper))
 
-(provide configurable-ctc)
+(provide configurable-ctc
+         (all-from-out (submod flow-trace/collapsing compressed)))
 
 ;; Usage:
 ;; (configurable-ctc [<unquoted-precision-config> contract?] ...)
