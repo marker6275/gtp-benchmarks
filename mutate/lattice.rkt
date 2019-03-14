@@ -1,18 +1,17 @@
 #lang racket
 
-(provide (contract-out [make-lattice
-                        (point?
+(provide (contract-out
+          [make-lattice (point?
                          (point? . -> . (set/c point?))
                          . -> .
                          (set/c lattice-point?))])
          (struct-out lattice-point))
 
-(module+ test
-  (require ruinit))
-
 
 (define point? any/c)
+
 (define path? (listof point?))
+
 ;; lattice-point = point? (set/c path?)
 (struct lattice-point (value paths-to) #:transparent)
 
@@ -26,6 +25,7 @@
 
 
 (module+ test
+  (require ruinit)
   (struct mod-config (mod level) #:transparent)
   (define inc (match-lambda [(mod-config m 'T) (mod-config m 'M)]
                             [(mod-config m 'N) (mod-config m 'T)]))
@@ -50,6 +50,7 @@
                 (list->set (map (curry map parse-config) path-list)))))
   (define-test (test-path-maps=? actual expected)
     (unless (equal? actual expected)
+      ;; Manually pretty print because the maps can be big
       (fail "Path maps differ.\nActual:\n~a\nExpected:\n~a\n"
             (pretty-format actual)
             (pretty-format expected)))))
