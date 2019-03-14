@@ -31,7 +31,8 @@
 
 (define/contract (assert v p)
   (configurable-ctc
-   [max (any/c (any/c . -> . boolean?) . -> . any/c)]
+   [max #;(parametric->/c [A] (A (A . -> . boolean?) . -> . A))
+        (any/c (any/c . -> . boolean?) . -> . any/c)]
    [types (any/c (any/c . -> . boolean?) . -> . any/c)])
 
   (unless (p v) (error 'assert))
@@ -171,4 +172,3 @@
            (null? (cdr v*)))
       (de-nest (car v*))
       v*))
-
