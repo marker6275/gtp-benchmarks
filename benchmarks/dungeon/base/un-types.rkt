@@ -1,4 +1,4 @@
-#lang racket/base
+#lang flow-trace
 
 (require racket/contract
          "../../../ctcs/precision-config.rkt")
@@ -10,7 +10,8 @@
 
 (define/contract (assert v p)
   (configurable-ctc
-   [max (parametric->/c [A] (A (A . -> . boolean?) . -> . A))]
+   [max #;(parametric->/c [A] (A (A . -> . boolean?) . -> . A))
+        (any/c (any/c . -> . boolean?) . -> . any/c)]
    [types (any/c (any/c . -> . boolean?) . -> . any/c)])
 
   (if (p v)

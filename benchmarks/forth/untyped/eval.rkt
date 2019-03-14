@@ -1,4 +1,4 @@
-#lang racket/base
+#lang flow-trace
 
 (provide forth-eval*)
 
@@ -31,7 +31,7 @@
 
 (define/contract (assert v p)
   (configurable-ctc
-   [max (parametric->/c [A] (A (A . -> . boolean?) . -> . A))]
+   [max (any/c (any/c . -> . boolean?) . -> . any/c)]
    [types (any/c (any/c . -> . boolean?) . -> . any/c)])
 
   (unless (p v) (error 'assert))

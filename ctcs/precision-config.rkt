@@ -8,12 +8,9 @@
          racket/contract
          (only-in racket/function curry)
          (only-in racket/match match)
-         (for-syntax "current-precision-setting.rkt")
-         (for-syntax flow-trace/require-introducer))
+         (for-syntax "current-precision-setting.rkt"))
 
-(provide configurable-ctc
-         define/ctc-helper
-         define-syntax/ctc-helper)
+(provide configurable-ctc)
 
 ;; Usage:
 ;; (configurable-ctc [<unquoted-precision-config> contract?] ...)
@@ -42,19 +39,3 @@
          (with-syntax ([ctc-for-current-level current-ctc-stx])
            (syntax/loc current-ctc-stx
              ctc-for-current-level))))]))
-
-
-
-(define-syntax-rule (define-ctc-helpers [expansion ctc-helper-id] ...)
-  (begin
-    (define-syntax (ctc-helper-id stx)
-      (syntax-parse stx
-        [(_ id/sig . body)
-         (with-syntax ([body/escaped (escape-tracing #'body)])
-           (syntax/loc stx
-             (expansion id/sig . body/escaped)))]))
-    ...))
-
-(define-ctc-helpers
-  [define define/ctc-helper]
-  [define-syntax define-syntax/ctc-helper])

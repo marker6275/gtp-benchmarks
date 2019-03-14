@@ -1,4 +1,4 @@
-#lang racket/base
+#lang flow-trace
 
 (provide
   command%
@@ -90,7 +90,7 @@
                     [exec any/c #|Same as command%/c|#]))))
 
 (require (for-syntax syntax/parse))
-(define-syntax (binop-command%/c-for stx)
+(define-syntax/ctc-helper (binop-command%/c-for stx)
   (syntax-parse stx
     [(_ binop)
      #'(command%?-with-exec

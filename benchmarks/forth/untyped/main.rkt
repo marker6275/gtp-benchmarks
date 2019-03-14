@@ -1,4 +1,4 @@
-#lang racket/base
+#lang flow-trace
 
 (require (only-in "eval.rkt"
   forth-eval*
