@@ -151,14 +151,29 @@ Blamed: ~a
 
 
 
-(define (run-with-mutated-module main-module
-                                 module-to-mutate
-                                 other-modules
-                                 mutation-index
-                                 ctc-precision-config
-                                 #:suppress-output? [suppress-output? #t]
-                                 #:timeout/s [timeout/s (* 3 60)]
-                                 #:memory/gb [memory/gb 3])
+(define/contract (run-with-mutated-module main-module
+                                          module-to-mutate
+                                          other-modules
+                                          mutation-index
+                                          ctc-precision-config
+                                          #:suppress-output? [suppress-output? #t]
+                                          #:timeout/s [timeout/s (* 3 60)]
+                                          #:memory/gb [memory/gb 3])
+  (->i ([main-module path-string?]
+        [module-to-mutate path-string?]
+        [other-modules (listof path-string?)]
+        [mutation-index natural?]
+        [ctc-precision-config (hash/c string? symbol?)])
+       (#:suppress-output? [suppress-output? boolean?]
+        #:timeout/s [timeout/s number?]
+        #:memory/gb [memory/gb number?])
+
+       #:pre (main-module module-to-mutate other-modules)
+       (and (not (member main-module other-modules))
+            (not (member module-to-mutate other-modules)))
+
+       [result run-status?])
+
   (define (make-status status-sym [blamed #f] [mutated-id #f] [result #f])
     (run-status result
                 status-sym
