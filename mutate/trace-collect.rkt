@@ -1,5 +1,8 @@
 #lang racket
 
+(provide make-trace-distance-results
+         display-mutant-outcome/csv)
+
 (require "mutation-runner.rkt"
          "trace.rkt"
          ;; ll: for label-bounds accessors
@@ -42,6 +45,40 @@
         (values label label-index)
         (values max-label max-index))))
 
+(define/match (make-trace-distance-results bench _)
+  ;; ll: this is a list of statuses for a single mutant, with
+  ;; different ctc levels
+  [{bench
+    (and run-statuses
+         (list (run-status traces
+                           outcomes blames
+                           mutated-module* mutated-id* index*
+                           precisions)
+               ...))}
+   ;; ll: index, mutated-module, and mutated-id are all the same
+   ;; since all statuses refer to the same mutant
+   (define index (first index*))
+   (define mutated-module (first mutated-module*))
+   (define mutated-id (first mutated-id*))
+
+   (map (match-lambda
+          [(run-status trace outcome blame _ _ _ precision)
+           (define blamed-id blame #;(if (exn? blame) (last-label trace) blame))
+           (define distance (trace-distance-between mutated-id
+                                                    blamed-id
+                                                    trace))
+           (define this-mutant-outcome
+             (mutant-outcome bench
+                             precision
+                             outcome
+                             blamed-id
+                             mutated-id
+                             distance
+                             index
+                             trace))
+           this-mutant-outcome])
+        run-statuses)])
+
 (define (mutant-outcomes/for-modules bench main-module mutatable-modules
                                      #:report-progress [report-progress #f]
                                      #:suppress-output? [suppress-output? #t]
@@ -54,40 +91,12 @@
    #:memory/gb memory/gb
    #:timeout/s timeout/s
    #:make-result
-   (match-lambda
-     ;; ll: this is a list of statuses for a single mutant, with
-     ;; different ctc levels
-     [(and run-statuses
-           (list (run-status traces
-                             outcomes blames
-                             mutated-module* mutated-id* index*
-                             precisions)
-                 ...))
-      ;; ll: index, mutated-module, and mutated-id are all the same
-      ;; since all statuses refer to the same mutant
-      (define index (first index*))
-      (define mutated-module (first mutated-module*))
-      (define mutated-id (first mutated-id*))
-
-      (map (match-lambda
-             [(run-status trace outcome blame _ _ _ precision)
-              (define blamed-id blame #;(if (exn? blame) (last-label trace) blame))
-              (define distance (trace-distance-between mutated-id
-                                                       blamed-id
-                                                       trace))
-              (define this-mutant-outcome
-                (mutant-outcome bench
-                                precision
-                                outcome
-                                blamed-id
-                                mutated-id
-                                distance
-                                index
-                                trace))
-              (when report-progress
-                (display-mutant-outcome/csv this-mutant-outcome))
-              this-mutant-outcome])
-           run-statuses)])))
+   (λ args
+     (define mutant-outcomes (apply make-trace-distance-results bench args))
+     (when report-progress
+       (for ([this-mutant-outcome mutant-outcomes])
+         (display-mutant-outcome/csv this-mutant-outcome)))
+     mutant-outcomes)))
 
 (struct distance (value) #:transparent)
 (struct no-blame () #:transparent)
