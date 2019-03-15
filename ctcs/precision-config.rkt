@@ -17,6 +17,8 @@
 (provide configurable-ctc
          (all-from-out (submod flow-trace/collapsing compressed)))
 
+(define-for-syntax benchmarks-path "../../gtp-benchmarks/benchmarks")
+
 ;; Usage:
 ;; (configurable-ctc [<unquoted-precision-config> contract?] ...)
 ;;
@@ -32,11 +34,29 @@
     [(_ [level ctc] ...)
      (let* ([levels (syntax->datum #'(level ...))]
             [ctcs (flatten (syntax->list #'(ctc ...)))]
+            [current-module-path/absolute (path->string (syntax-source stx))]
+            [current-module-path/relative
+             (second
+              (regexp-match #rx"^.*/gtp-benchmarks/benchmarks/(.+)"
+                            current-module-path/absolute))]
+            [current-module-precision
+             (hash-ref current-precision-config
+                       current-module-path/relative
+                       (λ _ (error 'configurable-ctc
+                                   "Current module has no configuration: ~a"
+                                   current-module-path/relative)))]
             [current-level-index (index-of levels
-                                           current-precision-config)]
-            [current-ctc-stx (if (number? current-level-index)
-                                 (list-ref ctcs current-level-index)
-                                 #'any/c)])
+                                           current-module-precision)]
+            [current-ctc-stx
+             (cond [(number? current-level-index)
+                    (list-ref ctcs current-level-index)]
+                   ;; none wasn't really intended to be specified
+                   [(equal? current-module-precision 'none)
+                    #'any/c]
+                   [else
+                    (error 'configurable-ctc
+                           "Contract fails to specify current module precision: ~a"
+                           current-module-precision)])])
        (begin
          (unless (andmap (curryr member precision-configs) levels)
            (error 'configurable-ctc
