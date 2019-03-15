@@ -202,6 +202,25 @@ Blamed: ~a
                      #:oom-result (make-status* 'oom)
                      #:suppress-output? #f #;suppress-output?)))
 
+(define (run-all-precisions/of-mutant main-module
+                                      module-to-mutate
+                                      other-modules
+                                      mutation-index
+                                      #:suppress-output? [suppress-output? #t]
+                                      #:timeout/s [timeout/s (* 3 60)]
+                                      #:memory/gb [memory/gb 3])
+  (for/list ([ctc-precision precision-configs])
+    (when (report-progress)
+      (displayln "."))
+    (run-with-mutated-module main-module
+                             module-to-mutate
+                             other-modules
+                             mutation-index
+                             ctc-precision
+                             #:suppress-output? suppress-output?
+                             #:timeout/s timeout/s
+                             #:memory/gb memory/gb)))
+
 (define/contract (run-all-mutants/of-module main-module
                                             module-to-mutate
                                             other-modules
@@ -230,17 +249,13 @@ Blamed: ~a
   (let loop ([index-so-far start-index]
              [results-so-far empty])
     (define results/this-index
-      (for/list ([ctc-precision precision-configs])
-        (when (report-progress)
-          (displayln "."))
-        (run-with-mutated-module main-module
-                                 module-to-mutate
-                                 other-modules
-                                 index-so-far
-                                 ctc-precision
-                                 #:suppress-output? suppress-output?
-                                 #:timeout/s timeout/s
-                                 #:memory/gb memory/gb)))
+      (run-all-precisions/of-mutant main-module
+                                    module-to-mutate
+                                    other-modules
+                                    index-so-far
+                                    #:suppress-output? suppress-output?
+                                    #:timeout/s timeout/s
+                                    #:memory/gb memory/gb))
     (cond [(index-exceeded? (first results/this-index))
            (flatten (reverse results-so-far))]
           [else
