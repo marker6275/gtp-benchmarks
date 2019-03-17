@@ -4,7 +4,9 @@
                         ((listof path-string?)
                          (listof symbol?)
                          . -> .
-                         (set/c lattice-point?))]))
+                         (set/c lattice-point?))])
+         (struct-out mod-config)
+         (struct-out lattice-point))
 
 (require "lattice.rkt")
 
