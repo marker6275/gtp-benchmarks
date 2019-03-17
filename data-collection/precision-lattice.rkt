@@ -1,10 +1,10 @@
 #lang racket
 
 (provide (contract-out [precision-config-lattice
-                        ((listof any/c)
+                        ((listof path-string?)
                          (listof symbol?)
                          . -> .
-                         (listof lattice-point?))]))
+                         (set/c lattice-point?))]))
 
 (require "lattice.rkt")
 
