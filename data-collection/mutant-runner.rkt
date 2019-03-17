@@ -24,7 +24,6 @@
   (define benchmark-name (make-parameter #f))
   (define module-to-mutate (make-parameter #f))
   (define mutation-index (make-parameter #f))
-  (define output-file (make-parameter #f))
 
   ;; lltodo: this doesn't work actually: basically the job queue
   ;; manager is going to have to specify everything
@@ -46,11 +45,7 @@
    [("-i" "--mutation-index")
     index
     "Mutation index"
-    (mutation-index (string->number index))]
-   [("-o" "--output")
-    outfile
-    "Output file"
-    (output-file outfile)])
+    (mutation-index (string->number index))])
 
   (define ((invalid-arg fmt-str . fmt-args))
     (printf "Invalid argument: ~a\n" (apply format fmt-str fmt-args))
