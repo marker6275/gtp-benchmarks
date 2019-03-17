@@ -5,6 +5,7 @@
          make-mutated-module-runner
          make-precision-config-module
          mutate-module
+         mutation-index-exception?
          [struct-out run-status])
 
 (require syntax/parse
