@@ -124,13 +124,14 @@ HERE
  (let ([mutant-results (hash mutant0 (set mutant0-proc)
                              mutant1 (set mutant1-proc/1)
                              mutant2 (set mutant2-proc))])
-   (test-equal? (try-consolidate-mutant-results mutant-results)
-                mutant-results))
+   (test/for/and ([m (in-list mutant0 mutant1 mutant2)])
+    (test-equal? (try-consolidate-mutant-results mutant-results m)
+                 mutant-results)))
  ;; Two mutants in same set, can consolidate them
  (let ([mutant-results (hash mutant0 (set mutant0-proc mutant1-proc/1)
                              mutant2 (set mutant2-proc))])
    (test/and/message
-    [(test-equal? (try-consolidate-mutant-results mutant-results)
+    [(test-equal? (try-consolidate-mutant-results mutant-results mutant0)
                   (hash
                    mutant0 (set (set-first (hash-ref mutant-results mutant0)))
                    mutant2 (set mutant2-proc)))
