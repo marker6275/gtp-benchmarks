@@ -5,14 +5,16 @@
                          run-status?
                          . -> .
                          mutant-outcome?)])
-         display-mutant-outcome/csv)
+         display-mutant-outcome/csv
+         write-mutant-outcome/sexp)
 
 (require "mutation-runner.rkt"
          "trace.rkt"
          ;; ll: for label-bounds accessors
          (submod flow-trace/collapsing compressed trace-api))
 
-(struct mutant-outcome (bench precision
+(struct mutant-outcome (bench module
+                              precision
                               outcome
                               blamed
                               mutated
@@ -42,6 +44,7 @@
                                             blamed-id
                                             trace))
    (mutant-outcome bench
+                   mutated-module
                    precision
                    outcome
                    blamed-id
@@ -68,6 +71,7 @@
 
 (define/match (display-mutant-outcome/csv outcome)
   [{(mutant-outcome bench
+                    mutated-module
                     precision
                     outcome
                     blamed
@@ -87,3 +91,27 @@
            outcome
            blamed
            distance/repr)])
+
+(define/match (write-mutant-outcome/sexp outcome)
+  [{(mutant-outcome bench
+                    mutated-module
+                    precision
+                    outcome
+                    blamed
+                    mutated
+                    maybe-distance
+                    index
+                    _)}
+   (define distance/repr (match maybe-distance
+                           [(distance n) n]
+                           [(no-blame) 'N/A]
+                           [(label-missing _) 'M/L]))
+   (write (list bench
+                (path->string mutated-module)
+                mutated
+                index
+                outcome
+                (if (path? blamed) (path->string blamed) blamed)
+                precision))
+   (newline)])
+

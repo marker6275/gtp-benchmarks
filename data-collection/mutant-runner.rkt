@@ -55,7 +55,6 @@
     (hash-ref benchmarks (benchmark-name)
               (invalid-arg "benchmark ~a unknown" (benchmark-name))))
 
-  (displayln "Enter serialized module precision map:")
   (define module-to-precision-map (deserialize (read)))
   #;(define module-to-precision-map/full
     (hash-union module-to-precision-map
@@ -75,9 +74,7 @@
                        (module-to-mutate)
                        (benchmark-name)))]))
 
-  (displayln result)
-
   (define trace-distance-results
     (make-trace-distance-results (benchmark-name) result))
 
-  (display-mutant-outcome/csv trace-distance-results))
+  (write-mutant-outcome/sexp trace-distance-results))
