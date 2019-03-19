@@ -111,7 +111,9 @@
                 mutated
                 index
                 outcome
-                (if (path? blamed) (path->string blamed) blamed)
+                (cond [(path? blamed) (path->string blamed)]
+                      [(equal? outcome 'crashed) (~a blamed)]
+                      [else blamed])
                 precision))
    (newline)])
 
