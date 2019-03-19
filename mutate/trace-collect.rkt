@@ -36,13 +36,13 @@
 (define/match (make-trace-distance-results bench _)
   [{bench
     (run-status trace
-                  outcome blame
-                  mutated-module mutated-id index
-                  precision)}
+                outcome blame
+                mutated-module mutated-id index
+                precision)}
    (define blamed-id blame #;(if (exn? blame) (last-label trace) blame))
    (define distance (trace-distance-between mutated-id
                                             blamed-id
-                                            trace))
+                                            (raw-trace trace)))
    (mutant-outcome bench
                    mutated-module
                    precision
@@ -107,6 +107,7 @@
                            [(no-blame) 'N/A]
                            [(label-missing _) 'M/L]))
    (write (list bench
+                distance/repr
                 (path->string mutated-module)
                 mutated
                 index
