@@ -7,20 +7,31 @@
   (provide test-begin/with-env)
 
   (define-simple-macro (define-test-env (setup:id cleanup:id)
-                         [filename:id path:str contents] ...)
+                         ({~datum directories}
+                          [dir:id dirpath:expr] ...)
+                         ({~datum files}
+                          [filename:id path:expr contents] ...))
     (begin
+      (define dir dirpath) ...
       (define filename path) ...
       (define (setup)
         (cleanup)
+        (make-directory dirpath) ...
         (display-to-file contents filename) ...)
       (define (cleanup)
         (for ([f (in-list (list filename ...))])
           (when (file-exists? f)
-            (delete-file f))))
-      (provide filename ...)))
+            (delete-file f)))
+        (for ([d (in-list (list dir ...))])
+          (when (directory-exists? d)
+            (delete-directory/files d))))
+      (provide filename ... dir ...)))
   (define-test-env (setup-test-env! cleanup-test-env!)
-    [e-path "e.rkt"
-            #<<HERE
+    (directories [test-mutant-dir "./test-mutants"]
+                 [test-bench "../benchmarks/mutant-test"])
+    (files
+     [e-path (string-append test-bench "/e.rkt")
+             #<<HERE
 #lang racket
 
 (provide baz)
@@ -30,9 +41,10 @@
   (if (even? x)
       y
       (/ y x)))
+
 HERE
 ]
-[d-path "d.rkt"
+[d-path (string-append test-bench "/d.rkt")
         #<<HERE
 #lang racket
 
@@ -40,26 +52,25 @@ HERE
 
 (define/contract (foo x)
   any/c
-  (+ x 2))
+  (- x))
 
-(define/contract (bar x)
-  any/c
-  (if x
-      (foo 42)
-      (baz 42 -42)))
+(foo (baz 0 22))
 
-(bar 22)
 HERE
 ]
 [mutant0-path "m0.rktd"
               "(a b c)\n"]
-[mutant1-path "m1.rktd"
-              "(d e f)\n"]
+[mutant1-path/1 "m11.rktd"
+                "(d e f)\n"]
+[mutant1-path/2 "m12.rktd"
+                "(j k l)\n"]
 [mutant2-path "m2.rktd"
-              "(g h i)\n"])
+              "(g h i)\n"]))
 
-(define-simple-macro (test-begin/with-env e ...)
+(define-simple-macro (test-begin/with-env name
+                                          e ...)
   (test-begin
+    #:name name
     #:short-circuit
     #:before (setup-test-env!)
     #:after (cleanup-test-env!)
@@ -74,12 +85,17 @@ HERE
 
 ;; max-mutation-index-exceeded?
 (test-begin/with-env
+ test:max-mutation-index-exceeded?
+
  (test/for/and ([i (in-range 3)])
-               (test/not (max-mutation-index-exceeded? "e.rkt" i #t)))
- (max-mutation-index-exceeded? "e.rkt" 3 #t)
- (test/not
-  (max-mutation-index-exceeded? "../benchmarks/forth/untyped/main.rkt"
-                                0))
+               (not (max-mutation-index-exceeded? e-path i #t)))
+ (max-mutation-index-exceeded? e-path 3 #t)
+
+ (not (max-mutation-index-exceeded? d-path 0 #t))
+ (max-mutation-index-exceeded? d-path 1 #t)
+
+ (not (max-mutation-index-exceeded? "../benchmarks/forth/untyped/main.rkt"
+                                    0))
  (max-mutation-index-exceeded? "../benchmarks/forth/untyped/main.rkt"
                                1))
 
@@ -101,13 +117,13 @@ HERE
                                        (lattice-point (hash 'm1 'max
                                                             'm2 'none)
                                                       '())
-                                       mutant1-path
+                                       mutant1-path/1
                                        (λ _ (mutant1-status))))
 (define mutant1-proc/2 (mutant-process mutant1
-                                       (lattice-point (hash 'm1 'max
-                                                            'm2 'none)
+                                       (lattice-point (hash 'm1 'types
+                                                            'm2 'max)
                                                       '())
-                                       mutant1-path
+                                       mutant1-path/2
                                        (λ _ (mutant1-status))))
 
 (define mutant2 (mutant mutant2-mod 2))
@@ -120,80 +136,38 @@ HERE
 
 ;; try-consolidate-mutant-results
 (test-begin/with-env
+ test:try-consolidate-mutant-results
+
  ;; All mutants have just one process, nothing to consolidate
  (let ([mutant-results (hash mutant0 (set mutant0-proc)
                              mutant1 (set mutant1-proc/1)
                              mutant2 (set mutant2-proc))])
-   (test/for/and ([m (in-list mutant0 mutant1 mutant2)])
-    (test-equal? (try-consolidate-mutant-results mutant-results m)
-                 mutant-results)))
+   (test/for/and ([m (in-list (list mutant0 mutant1 mutant2))])
+                 (test-equal? (try-consolidate-mutant-results mutant-results m)
+                              mutant-results)))
  ;; Two mutants in same set, can consolidate them
- (let ([mutant-results (hash mutant0 (set mutant0-proc mutant1-proc/1)
+ (let ([mutant-results (hash mutant1 (set mutant1-proc/1 mutant1-proc/2)
                              mutant2 (set mutant2-proc))])
    (test/and/message
-    [(test-equal? (try-consolidate-mutant-results mutant-results mutant0)
+    [(test-equal? (try-consolidate-mutant-results mutant-results mutant1)
                   (hash
-                   mutant0 (set (set-first (hash-ref mutant-results mutant0)))
+                   mutant1 (set (set-first (hash-ref mutant-results mutant1)))
                    mutant2 (set mutant2-proc)))
      "hash mismatch:"]
-    [(file-exists? mutant0-path)
-     "Mutant file 0 expected to be preserved, but it wasn't"]
-    [(not (file-exists? mutant1-path))
-     "mutant1/1 file not deleted"]
-    [(test-equal? (file->string mutant0-path)
-                  "(a b c)\n(d e f)\n")
-     "mutant0 file doesn't contain mutant1/1:"])))
-
-;; maybe-sweep-dead-mutants
-(let ([mutant-results (hash mutant0 (set mutant0-proc))]
-      ;; duplicate mutant1 to simulate diff configs of same mutant
-      [active-mutants (set mutant1-proc/1 mutant1-proc/2
-                           mutant2-proc)])
-  (test-begin
-    (parameterize [[process-limit 100]
-                   [mutant1-status 'running]
-                   [mutant2-status 'done-ok]]
-      ;; `process-limit` well above active count, nothing to sweep
-      (call-with-values
-       (λ _ (maybe-sweep-dead-mutants mutant-results active-mutants
-                                      #:block? #f))
-       (λ (r a n)
-         (test/and (test-equal? r mutant-results)
-                   (test-equal? a active-mutants)
-                   (test-= n (set-count active-mutants))))))
-
-    (parameterize [[process-limit 1]
-                   [mutant1-status 'running]
-                   [mutant2-status 'running]]
-      ;; All active mutants running, nothing to sweep
-      (call-with-values
-       (λ _ (maybe-sweep-dead-mutants mutant-results active-mutants
-                                      #:block? #f))
-       (λ (r a n)
-         (test/and (test-equal? r mutant-results)
-                   (test-equal? a active-mutants)
-                   (test-= n (set-count active-mutants))))))
-
-    (parameterize [[process-limit 1]
-                   [mutant1-status 'done-ok]
-                   [mutant2-status 'running]]
-      ;; Too many processes running and some of them have completed
-      (call-with-values
-       (λ _ (maybe-sweep-dead-mutants mutant-results active-mutants
-                                      #:block? #f))
-       (λ (r a n)
-         (test/and
-          (test-equal? r
-                       (hash mutant0 (set mutant0-proc)
-                             mutant1 (set mutant1-proc/1
-                                          mutant1-proc/2)))
-          (test-equal? a (set mutant2-proc))
-          (test-= n 1)))))))
+    [(xor (file-exists? mutant1-path/1) (file-exists? mutant1-path/2))
+     "Only one mutant file expected to be preserved"]
+    [(if (file-exists? mutant1-path/1)
+         (test-equal? (file->string mutant1-path/1)
+                      "(d e f)\n(j k l)\n")
+         (test-equal? (file->string mutant1-path/2)
+                      "(j k l)\n(d e f)\n"))
+     "Preserved mutant file doesn't contain the other:"])))
 
 
 ;; add-mutant-result
 (test-begin
-  (test-equal? (add-mutant-result (hash) mutant1-proc/1)
+  (test-equal? (add-mutant-result (hash)
+                                  mutant1-proc/1)
                (hash mutant1 (set mutant1-proc/1)))
   (test-equal? (add-mutant-result (hash mutant0 (set mutant0-proc))
                                   mutant1-proc/1)
@@ -203,9 +177,108 @@ HERE
                                         mutant1 (set mutant1-proc/1))
                                   mutant1-proc/2)
                (hash mutant0 (set mutant0-proc)
-                     mutant1 (set mutant1-proc/1
-                                  mutant1-proc/2))))
+                     mutant1 (set mutant1-proc/1 mutant1-proc/2))))
 
+
+;; sweep-dead-mutants
+(let ([mutant-results (hash mutant0 (set mutant0-proc))]
+      [active-mutants (set mutant1-proc/1 mutant1-proc/2
+                           mutant2-proc)])
+  (test-begin/with-env
+   test:sweep-dead-mutants
+
+   (parameterize ([mutant1-status 'done-ok]
+                  [mutant2-status 'running])
+     (call-with-values
+      (λ _ (sweep-dead-mutants mutant-results
+                               active-mutants
+                               (set-count active-mutants)))
+      (λ (r a n)
+        (test/and/message
+         [(test-equal? a (set mutant2-proc))
+          "not all mutant1's were swept:"]
+         ;; Consolidation is done after every sweep, so the set of
+         ;; procs mapped by a mutant that was just sweeped is always 1
+         ;;
+         ;; Note that either /1 or /2 could be picked, doesn't matter
+         [(test/or (test-equal? r
+                                (hash mutant0 (set mutant0-proc)
+                                      mutant1 (set mutant1-proc/1)))
+                   (test-equal? r
+                                (hash mutant0 (set mutant0-proc)
+                                      mutant1 (set mutant1-proc/2))))
+          "not everything is in mutant results:"]
+         [(test-= n 1)
+          "remaining active mutant count is wrong:"]))))))
+
+
+;; maybe-sweep-dead-mutants
+(let ([mutant-results (hash mutant0 (set mutant0-proc))]
+      [active-mutants (set mutant1-proc/1 mutant1-proc/2
+                           mutant2-proc)])
+  (test-begin/with-env
+   test:maybe-sweep-dead-mutants
+
+   (parameterize ([process-limit 100]
+                  [mutant1-status 'running]
+                  [mutant2-status 'done-ok])
+     ;; `process-limit` well above active count, nothing to sweep
+     (call-with-values
+      (λ _ (maybe-sweep-dead-mutants mutant-results active-mutants
+                                     #:block? #f))
+      (λ (r a n)
+        (test/and (test-equal? r mutant-results)
+                  (test-equal? a active-mutants)
+                  (test-= n (set-count active-mutants))))))
+
+   (parameterize ([process-limit 1]
+                  [mutant1-status 'running]
+                  [mutant2-status 'running])
+     ;; All active mutants running, nothing to sweep
+     (call-with-values
+      (λ _ (maybe-sweep-dead-mutants mutant-results active-mutants
+                                     #:block? #f))
+      (λ (r a n)
+        (test/and (test-equal? r mutant-results)
+                  (test-equal? a active-mutants)
+                  (test-= n (set-count active-mutants))))))
+
+   (parameterize ([process-limit 1]
+                  [mutant1-status 'done-ok]
+                  [mutant2-status 'running])
+     ;; Too many processes running and some of them have completed
+     (call-with-values
+      (λ _ (maybe-sweep-dead-mutants mutant-results active-mutants
+                                     #:block? #f))
+      (λ (r a n)
+        (test/and/message
+         [(test-equal? a (set mutant2-proc))
+          "not all mutant1's were swept:"]
+         [(test/or (test-equal? r
+                                (hash mutant0 (set mutant0-proc)
+                                      mutant1 (set mutant1-proc/1)))
+                   (test-equal? r
+                                (hash mutant0 (set mutant0-proc)
+                                      mutant1 (set mutant1-proc/2))))
+          "not everything is in mutant results:"]
+         [(test-= n 1)
+          "remaining active mutant count is wrong:"]))))))
+
+
+
+;; Full run test
+(parameterize ([data-output-dir test-mutant-dir]
+               [process-limit 5])
+  (define d&e-mutant-total 4)
+  (test-begin/with-env
+   test:full-run
+
+   (ignore (define mutant-results (run-all-mutants*configs "mutant-test"))
+           (define files (directory-list test-mutant-dir)))
+   (test-= (length files) d&e-mutant-total)
+   (test/for/and ([f files])
+                 (test/not (test-= (file-size (build-path test-mutant-dir f))
+                                   0)))))
 
 
 
