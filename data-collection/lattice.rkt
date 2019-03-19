@@ -74,9 +74,10 @@
           [else
            (define bench (first to-process))
            (define parents (parents-of bench))
-           (define parents/unseen (set->list (set-subtract parents seen)))
-           (define paths+bench->parents
-             (add-paths paths bench parents))
+           (define parents/unseen
+             (set-subtract (set->list (set-subtract parents seen))
+                           to-process))
+           (define paths+bench->parents (add-paths paths bench parents))
            (loop paths+bench->parents
                  (set-add seen bench)
                  (append (rest to-process)
