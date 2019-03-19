@@ -270,8 +270,13 @@
                    new-active-mutants
                    new-active-mutant-count)]
           [(equal? mutant-status 'done-error)
-           (log-factory-warning "WARNING: Runner errored on mutant ~a."
-                                mutant-proc)
+           (define mutant (mutant-process-mutant mutant-proc))
+           (log-factory-warning
+            "*** WARNING: Runner errored on mutant ***\n ~a @ ~a with config ~a\n**********\n\n"
+            (mutant-module mutant)
+            (mutant-index mutant)
+            ;; Don't print the paths, they're huge
+            (lattice-point-value (mutant-process-config mutant-proc)))
            (values new-results
                    (set-add new-active-mutants mutant-proc)
                    (add1 new-active-mutant-count))]
