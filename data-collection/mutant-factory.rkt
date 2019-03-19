@@ -19,7 +19,12 @@
            try-consolidate-mutant-results
            process-limit
            maybe-sweep-dead-mutants
-           add-mutant-result))
+           sweep-dead-mutants
+           add-mutant-result
+           process-limit
+           data-output-dir
+           path-to-benchmarks
+           run-all-mutants*configs))
 
 (define mutant-runner-path (make-parameter "mutant-runner.rkt"))
 (define process-limit (make-parameter 3))
@@ -249,15 +254,11 @@
              [new-active-mutant-count 0])
             ([mutant-proc active-mutants])
     (define mutant-status ((mutant-process-ctl mutant-proc) 'status))
-    (cond [(equal? mutant-status 'running)
-           (values new-results
-                   (set-add new-active-mutants mutant-proc)
-                   (add1 new-active-mutant-count))]
-          [else
+    (cond [(equal? mutant-status 'done-ok)
            (define mutant (mutant-process-mutant mutant-proc))
            (log-factory-info
             (format
-             "Sweeping up dead mutant: ~a @ ~a with config ~a"
+             "Sweeping up dead mutant: ~a @ ~a with config ~a."
              (mutant-module mutant)
              (mutant-index mutant)
              ;; Don't print the paths, they're huge
@@ -267,7 +268,17 @@
            ;; same mutant, to keep the number of files low
            (values (try-consolidate-mutant-results mutant-results* mutant)
                    new-active-mutants
-                   new-active-mutant-count)])))
+                   new-active-mutant-count)]
+          [(equal? mutant-status 'done-error)
+           (log-factory-warning "WARNING: Runner errored on mutant ~a."
+                                mutant-proc)
+           (values new-results
+                   (set-add new-active-mutants mutant-proc)
+                   (add1 new-active-mutant-count))]
+          [(equal? mutant-status 'running)
+           (values new-results
+                   (set-add new-active-mutants mutant-proc)
+                   (add1 new-active-mutant-count))])))
 
 ;; mutant-results? mutant-process? -> mutant-results?
 (define (add-mutant-result mutant-results mutant-proc)
@@ -334,17 +345,24 @@
   (define consolidated-mutant-process (set-first mutant-processes))
   (match-define (mutant-process _ _ consolidated-file _)
     consolidated-mutant-process)
-  (log-factory-debug
-   "Picked mutant output file ~a to preserve..."
-   consolidated-file)
+  (log-factory-debug "Picked mutant output file ~a to preserve..."
+                     consolidated-file)
   (define out (open-output-file consolidated-file #:exists 'append))
   (for ([proc (in-set (set-rest mutant-processes))])
     (define other-file (mutant-process-file proc))
-    (log-factory-debug "Consolidating file ~a." other-file)
+    (when (equal? consolidated-file other-file)
+      ;; This causes copy-port to never terminate and basically be a
+      ;; zip bomb
+      (error
+       'consolidate-mutant-results
+       "Set of mutant processes contains two with the same output file; ~a"
+       mutant-processes))
+    (log-factory-debug "Consolidating file ~a..." other-file)
     (define in (open-input-file other-file))
     (copy-port in out)
     (close-input-port in)
-    (delete-file other-file))
+    (delete-file other-file)
+    (log-factory-debug "Done."))
   (close-output-port out)
   consolidated-mutant-process)
 
