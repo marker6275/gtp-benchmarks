@@ -39,7 +39,11 @@
                 outcome blame
                 mutated-module mutated-id index
                 precision)}
-   (define blamed-id blame #;(if (exn? blame) (last-label trace) blame))
+   ;; having the exn in the output is useful for debugging, but the
+   ;; distance we should use for crashes is the max
+   (define blamed-id (if (equal? outcome 'crashed)
+                         (trace-last-label trace)
+                         blame))
    (define distance (trace-distance-between mutated-id
                                             blamed-id
                                             (raw-trace trace)))
