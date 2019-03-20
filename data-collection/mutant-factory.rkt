@@ -5,12 +5,14 @@
          "../ctcs/current-precision-setting.rkt"
          "../mutate/mutation-runner.rkt"
          "../mutate/instrumented-module-runner.rkt"
+         racket/file
+         racket/format
          racket/match
          racket/system
          racket/serialize
          racket/set
          racket/port
-         racket/file)
+         racket/runtime-path)
 
 (module+ test
   (provide max-mutation-index-exceeded?
@@ -21,15 +23,16 @@
            maybe-sweep-dead-mutants
            sweep-dead-mutants
            add-mutant-result
-           process-limit
            data-output-dir
-           path-to-benchmarks
+           benchmarks-dir-path
            run-all-mutants*configs))
 
-(define mutant-runner-path (make-parameter "mutant-runner.rkt"))
+(define-runtime-path mutant-runner-path "mutant-runner.rkt")
+(define-runtime-path benchmarks-dir-path "../benchmarks/")
+(define racket-path (find-executable-path (find-system-path 'exec-file)))
+
 (define process-limit (make-parameter 3))
 (define data-output-dir (make-parameter "./mutant-data"))
-(define path-to-benchmarks (make-parameter "../benchmarks"))
 (define mutant-error-log (make-parameter "./mutant-errors.txt"))
 
 (define-logger factory)
@@ -39,20 +42,21 @@
                              mutation-index
                              lattice-point
                              outfile)
-  (define config-hash (lattice-point->config-hash lattice-point))
-  (match-define (list runner-out runner-in _ runner-err runner-ctl)
-    (process (format "racket-7.2 '~a' -b '~a' -m '~a' -i ~a > '~a' 2>> ~a"
-                     (mutant-runner-path)
-                     benchmark-name
-                     module-to-mutate
-                     mutation-index
-                     outfile
-                     (mutant-error-log))))
-  (write (serialize config-hash) runner-in)
-  (close-input-port runner-out)
-  (close-output-port runner-in)
-  (close-input-port runner-err)
-  runner-ctl)
+  (call-with-output-file outfile #:mode 'text
+    (λ (outfile-port)
+      (call-with-output-file (mutant-error-log) #:mode 'text #:exists 'append
+        (λ (error-log-port)
+          (define config-hash (lattice-point->config-hash lattice-point))
+          (match-define (list #f runner-in _ #f runner-ctl)
+            (process*/ports outfile-port #f error-log-port
+                            racket-path "--"
+                            mutant-runner-path
+                            "-b" benchmark-name
+                            "-m" module-to-mutate
+                            "-i" (~a mutation-index)))
+          (write (serialize config-hash) runner-in)
+          (close-output-port runner-in)
+          runner-ctl)))))
 
 (struct mutant (module index) #:transparent)
 (struct mutant-process (mutant config file ctl) #:transparent)
@@ -301,7 +305,7 @@
                                       [full-path? #f])
   (define path (if full-path?
                    module-to-mutate
-                   (build-path (path-to-benchmarks)
+                   (build-path benchmarks-dir-path
                                module-to-mutate)))
   ;; `mutate-module` throws if index is too large, so just try
   ;; mutating to see whether or not it throws
@@ -396,10 +400,6 @@
     n
     "Data output directory."
     (process-limit (string->number n))]
-   [("-d" "--benchmarks-directory")
-    dir
-    "Directory containing benchmarks. Default: ../benchmarks"
-    (path-to-benchmarks dir)]
    [("-e" "--error-log")
     path
     "File to which to append mutant errors. Default: ./mutant-errors.txt"
