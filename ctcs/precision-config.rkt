@@ -4,7 +4,9 @@
                      racket/list
                      racket/base
                      (only-in racket/function
-                              curryr))
+                              curryr)
+                     racket/path
+                     racket/runtime-path)
          racket/contract
          (only-in racket/function curry)
          (only-in racket/match match)
@@ -17,7 +19,10 @@
 (provide configurable-ctc
          (all-from-out (submod flow-trace/collapsing compressed)))
 
-(define-for-syntax benchmarks-path "../../gtp-benchmarks/benchmarks")
+(begin-for-syntax
+  (define-runtime-path benchmarks-directory "../benchmarks/")
+  ; resolve the “..” component in the path, which define-runtime-path doesn’t do
+  (define simplified-benchmarks-directory (simplify-path benchmarks-directory)))
 
 ;; Usage:
 ;; (configurable-ctc [<unquoted-precision-config> contract?] ...)
@@ -36,14 +41,13 @@
             [ctcs (flatten (syntax->list #'(ctc ...)))]
             [current-module-path/absolute (path->string (syntax-source stx))]
             [current-module-path/relative
-             (second
-              (regexp-match #rx"^.*/gtp-benchmarks/benchmarks/(.+)"
-                            current-module-path/absolute))]
+             (find-relative-path simplified-benchmarks-directory
+                                 current-module-path/absolute)]
             [current-module-precision
              (hash-ref current-precision-config
-                       current-module-path/relative
+                       (path->string current-module-path/relative)
                        (λ _ (error 'configurable-ctc
-                                   "Current module has no configuration: ~a"
+                                   "Current module has no configuration: ~v"
                                    current-module-path/relative)))]
             [current-level-index (index-of levels
                                            current-module-precision)]
