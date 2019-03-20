@@ -89,7 +89,7 @@
   (define config-lattice (precision-config-lattice mutatable-modules
                                                    precision-configs))
   (log-factory info "Built config lattice with ~a configurations."
-                    (set-count config-lattice))
+                    (set-count (lattice-points config-lattice)))
   ;; Ensure data output directory exists
   (unless (directory-exists? (data-output-dir))
     (log-factory debug "Creating output directory ~a."
@@ -172,7 +172,7 @@
              [active-mutants active-mutants]
              [active-mutant-count (set-count active-mutants)]
              #:result (values mutant-results active-mutants))
-            ([precision-config config-lattice]
+            ([precision-config (lattice-points config-lattice)]
              [i (in-naturals)])
 
     (define-values (mutant-results* active-mutants* active-mutant-count*)

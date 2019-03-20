@@ -4,7 +4,7 @@
                         ((listof path-string?)
                          (listof symbol?)
                          . -> .
-                         (set/c lattice-point?))])
+                         lattice?)])
          (struct-out mod-config)
          (struct-out lattice-point))
 
@@ -36,7 +36,8 @@
   [{(mod-config _ level) levels}
    (equal? level (last levels))])
 
-(define ((parents-of levels) bench-config)
+(define/contract ((parents-of levels) bench-config)
+  ((listof symbol?) . -> . (bench-config? . -> . (set/c bench-config?)))
   (for/fold ([parents (set)])
             ([mod-config bench-config])
     (define other-mods (set-remove bench-config mod-config))
@@ -114,9 +115,11 @@
              ([(A T) (B M)] [(A N) (B M)] [(A N) (B T)] [(A N) (B N)])
              ([(A T) (B M)] [(A T) (B T)] [(A T) (B N)] [(A N) (B N)])
              ([(A T) (B M)] [(A T) (B T)] [(A N) (B T)] [(A N) (B N)]))))))
-    (test-equal?
-     (precision-config-lattice '(A B) '(N T M))
-     (for/set ([(point paths) h])
-       (lattice-point point paths))))
+    (test-match (precision-config-lattice '(A B) '(N T M))
+                (lattice
+                 (lattice-point (== (parse-config '[(A N) (B N)])) '())
+                 (lattice-point (== (parse-config '[(A M) (B M)])) _)
+                 (== (for/set ([(point paths) h])
+                       (lattice-point point paths))))))
 
   (display-test-results))

@@ -4,21 +4,32 @@
           [make-lattice (point?
                          (point? . -> . (set/c point?))
                          . -> .
-                         (set/c lattice-point?))])
-         (struct-out lattice-point))
+                         lattice?)])
+         (struct-out lattice-point)
+         (struct-out lattice))
 
 
 (define point? any/c)
 
 (define path? (listof point?))
 
-;; lattice-point = point? (set/c path?)
+;; value:    point?
+;; paths-to: (set/c path?)
 (struct lattice-point (value paths-to) #:transparent)
 
+;; min:    lattice-point?
+;; max:    lattice-point?
+;; points: (set/c lattice-point?)
+(struct lattice (min max points) #:transparent)
+
+;; point? (point? . -> . (set/c point?)) -> lattice?
 (define (make-lattice start parents-of)
-  (define h (make-lattice-hash start parents-of))
-  (for/set ([(point paths) h])
-    (lattice-point point paths)))
+  (define-values (points-hash max) (explore-lattice start parents-of))
+  (define min-point (lattice-point start '()))
+  (define max-point (lattice-point max (hash-ref points-hash max)))
+  (define points (for/set ([(point paths) points-hash])
+                   (lattice-point point paths)))
+  (lattice min-point max-point points))
 
 
 
@@ -47,48 +58,45 @@
   (define (parse-paths-hash p)
       (for/hash ([(c path-list) p])
         (values (parse-config c)
-                (list->set (map (curry map parse-config) path-list)))))
-  (define-test (test-path-maps=? actual expected)
-    (unless (equal? actual expected)
-      ;; Manually pretty print because the maps can be big
-      (fail "Path maps differ.\nActual:\n~a\nExpected:\n~a\n"
-            (pretty-format actual)
-            (pretty-format expected)))))
+                (list->set (map (curry map parse-config) path-list))))))
 
 
-(define/contract (make-lattice-hash start parents-of)
+(define/contract (explore-lattice start parents-of)
   (point?
    (point? . -> . (set/c point?))
    . -> .
-   (hash/c point? (set/c path?)))
+   (values (hash/c point? (set/c path?))
+           point?))
 
   (let loop (;; hash of point? -> (set/c path?)
              [paths (hash start (set '()))]
              ;; set of point?
              [seen (set)]
              ;; list of point?
-             [to-process (list start)])
-    (cond [(set-empty? to-process)
-           paths]
+             [to-process (list start)]
+             ;; point?
+             [last-processed start])
+    (cond [(empty? to-process)
+           (values paths last-processed)]
 
           [else
-           (define bench (first to-process))
-           (define parents (parents-of bench))
+           (define point (first to-process))
+           (define parents (parents-of point))
            (define parents/unseen
              (set-subtract (set->list (set-subtract parents seen))
                            to-process))
-           (define paths+bench->parents (add-paths paths bench parents))
+           (define paths+bench->parents (add-paths paths point parents))
            (loop paths+bench->parents
-                 (set-add seen bench)
-                 (append (rest to-process)
-                         parents/unseen))])))
+                 (set-add seen point)
+                 (append (rest to-process) parents/unseen)
+                 point)])))
 
 (module+ test
   (define-test (test-lattice start expected)
     (define start/parsed (parse-config start))
     (define expected/parsed (parse-paths-hash expected))
-    (test-path-maps=? (make-lattice-hash start/parsed parents-of)
-                      expected/parsed))
+    (define-values (lattice-hash max) (explore-lattice start/parsed parents-of))
+    (test-equal? lattice-hash expected/parsed))
   (test-begin
     (test-lattice
      '[(A N)]
@@ -165,7 +173,7 @@
     (define paths/parsed (parse-paths-hash paths))
     (define new-paths/parsed (parse-paths-hash new-paths))
     (define actual (add-paths paths/parsed config/parsed parent-configs/parsed))
-    (test-path-maps=? actual new-paths/parsed))
+    (test-equal? actual new-paths/parsed))
 
   (test-begin
     (test-add-paths (hash '[(A N) (B N)] '(()))
