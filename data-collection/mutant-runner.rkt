@@ -7,7 +7,7 @@
          racket/serialize
          racket/cmdline
          racket/match
-         (only-in racket/hash hash-union))
+         racket/runtime-path)
 
 (for ([(bench precision) current-precision-config])
     (unless (equal? precision 'none)
@@ -16,9 +16,9 @@
        precision
        bench)))
 
-(define path-to-benchmarks "../benchmarks")
+(define-runtime-path benchmarks-dir-path "../benchmarks/")
 (define (resolve-bench-path p)
-  (build-path path-to-benchmarks p))
+  (build-path benchmarks-dir-path p))
 
 (module+ main
   (define benchmark-name (make-parameter #f))

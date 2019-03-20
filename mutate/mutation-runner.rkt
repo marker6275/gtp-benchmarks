@@ -8,7 +8,8 @@
          mutation-index-exception?
          [struct-out run-status])
 
-(require syntax/parse
+(require racket/runtime-path
+         syntax/parse
          syntax/strip-context
          "mutate.rkt"
          "../ctcs/current-precision-setting.rkt"
@@ -43,7 +44,7 @@
        ;; it makes the syntax '#hash(("path" . setting) ...)
        (define current-precision-config '#,precision-config))))
 
-(define precision-config-module-path "../ctcs/current-precision-setting.rkt")
+(define-runtime-path precision-config-module-path "../ctcs/current-precision-setting.rkt")
 
 (define/contract (make-mutated-module-runner main-module
                                              module-to-mutate
