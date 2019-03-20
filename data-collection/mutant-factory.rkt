@@ -10,7 +10,9 @@
          racket/serialize
          racket/set
          racket/port
-         racket/file)
+         racket/file
+         racket/logging
+         racket/date)
 
 (module+ test
   (provide max-mutation-index-exceeded?
@@ -33,6 +35,13 @@
 (define mutant-error-log (make-parameter "./mutant-errors.txt"))
 
 (define-logger factory)
+(define-syntax-rule (log-factory level msg v ...)
+  (when (log-level? factory-logger 'level)
+    (log-message factory-logger
+                 'level
+                 (format (string-append "[~a] " msg)
+                         (date->string (current-date) #t)
+                         v ...))))
 
 (define (spawn-mutant-runner benchmark-name
                              module-to-mutate
@@ -68,17 +77,17 @@
                                       "Unknown benchmark: ~v" bench-name))))
   (define mutatable-modules (cons (benchmark-main bench)
                                   (benchmark-others bench)))
-  (log-factory-info "Running mutants of benchmark ~a, which has modules:~n~a"
+  (log-factory info "Running mutants of benchmark ~a, which has modules:~n~a"
                     bench-name
                     mutatable-modules)
-  (log-factory-debug "Creating config lattice...")
+  (log-factory debug "Creating config lattice...")
   (define config-lattice (precision-config-lattice mutatable-modules
                                                    precision-configs))
-  (log-factory-info "Built config lattice with ~a configurations."
+  (log-factory info "Built config lattice with ~a configurations."
                     (set-count config-lattice))
   ;; Ensure data output directory exists
   (unless (directory-exists? (data-output-dir))
-    (log-factory-debug "Creating output directory ~a."
+    (log-factory debug "Creating output directory ~a."
                        (data-output-dir))
     (make-directory (data-output-dir)))
 
@@ -89,7 +98,7 @@
                [active-mutants (set)])
               ([module-to-mutate mutatable-modules])
 
-      (log-factory-info "Spawning mutant runners for module ~a."
+      (log-factory info "Spawning mutant runners for module ~a."
                         module-to-mutate)
       (spawn-mutants/of-module module-to-mutate
                                bench-name
@@ -97,8 +106,8 @@
                                mutant-results
                                active-mutants)))
 
-  (log-factory-info "Finished spawning all mutant runners.")
-  (log-factory-debug "Active mutant count: ~a." (set-count active-mutants))
+  (log-factory info "Finished spawning all mutant runners.")
+  (log-factory debug "Active mutant count: ~a." (set-count active-mutants))
   (babysit-mutants mutant-results active-mutants))
 
 ;; path-string?
@@ -119,7 +128,7 @@
                     [mutant-results mutant-results]
                     [active-mutants active-mutants])
 
-    (log-factory-info "Spawning runners for mutant ~a @ ~a."
+    (log-factory info "Spawning runners for mutant ~a @ ~a."
                       module-to-mutate
                       mutation-index)
 
@@ -165,14 +174,14 @@
       (maybe-sweep-dead-mutants mutant-results
                                 active-mutants
                                 active-mutant-count))
-    (log-factory-debug "Active mutants: ~a." active-mutant-count*)
+    (log-factory debug "Active mutants: ~a." active-mutant-count*)
     (define outfile (build-path (data-output-dir)
                                 (format "~a_~a__index~a_~a.rktd"
                                         bench-name
                                         (basename module-to-mutate)
                                         mutation-index
                                         i)))
-    (log-factory-info "Spawning configured mutant runner #~a for ~a @ ~a > ~a."
+    (log-factory info "Spawning configured mutant runner #~a for ~a @ ~a > ~a."
                        i
                        module-to-mutate
                        mutation-index
@@ -203,7 +212,7 @@
     (define-values (mutant-results* active-mutants* active-mutant-count*)
       (maybe-sweep-dead-mutants results active #:force? #t))
     (cond [(zero? active-mutant-count*)
-           (log-factory-info "Performing final consolidation of results...")
+           (log-factory info "Performing final consolidation of results...")
            (for/fold ([mutant-results** mutant-results*])
                      ([mutant (in-hash-keys mutant-results*)])
              (try-consolidate-mutant-results mutant-results** mutant))]
@@ -228,7 +237,7 @@
                                    (set-count active-mutants)))
   (cond [(or force?
              (>= active-mutant-count* (process-limit)))
-         (log-factory-debug "Mutants (~a) at process limit (~a)."
+         (log-factory debug "Mutants (~a) at process limit (~a)."
                             active-mutant-count*
                             (process-limit))
          (sleep 2)
@@ -250,7 +259,7 @@
 ;; (set/c mutant-process?)
 ;; natural?
 (define (sweep-dead-mutants mutant-results active-mutants active-mutant-count)
-  (log-factory-debug "Checking active mutant set for dead mutants...")
+  (log-factory debug "Checking active mutant set for dead mutants...")
   (for/fold ([new-results mutant-results]
              [new-active-mutants (set)]
              [new-active-mutant-count 0])
@@ -258,7 +267,7 @@
     (define mutant-status ((mutant-process-ctl mutant-proc) 'status))
     (cond [(equal? mutant-status 'done-ok)
            (define mutant (mutant-process-mutant mutant-proc))
-           (log-factory-info
+           (log-factory info
             (format
              "Sweeping up dead mutant: ~a @ ~a with config ~a."
              (mutant-module mutant)
@@ -273,7 +282,7 @@
                    new-active-mutant-count)]
           [(equal? mutant-status 'done-error)
            (define mutant (mutant-process-mutant mutant-proc))
-           (log-factory-warning
+           (log-factory warning
             "*** WARNING: Runner errored on mutant ***\n ~a @ ~a with config ~a\n**********\n\n"
             (mutant-module mutant)
             (mutant-index mutant)
@@ -330,10 +339,10 @@
 ;;   ie their `ctl` does not return 'running
 ;; - `mutant-results` contains `mutant`
 (define (try-consolidate-mutant-results mutant-results mutant)
-  (log-factory-debug "Trying to consolidate mutant output files...")
+  (log-factory debug "Trying to consolidate mutant output files...")
   (define processes (hash-ref mutant-results mutant))
   (cond [(> (set-count processes) 1)
-         (log-factory-debug
+         (log-factory debug
           "Consolidating results of mutant: ~a @ ~a, which has ~a processes."
           (mutant-module mutant)
           (mutant-index mutant)
@@ -352,7 +361,7 @@
   (define consolidated-mutant-process (set-first mutant-processes))
   (match-define (mutant-process _ _ consolidated-file _)
     consolidated-mutant-process)
-  (log-factory-debug "Picked mutant output file ~a to preserve..."
+  (log-factory debug "Picked mutant output file ~a to preserve..."
                      consolidated-file)
   (define out (open-output-file consolidated-file #:exists 'append))
   (for ([proc (in-set (set-rest mutant-processes))])
@@ -364,12 +373,12 @@
        'consolidate-mutant-results
        "Set of mutant processes contains two with the same output file; ~a"
        mutant-processes))
-    (log-factory-debug "Consolidating file ~a..." other-file)
+    (log-factory debug "Consolidating file ~a..." other-file)
     (define in (open-input-file other-file))
     (copy-port in out)
     (close-input-port in)
     (delete-file other-file)
-    (log-factory-debug "Done."))
+    (log-factory debug "Done."))
   (close-output-port out)
   consolidated-mutant-process)
 
@@ -412,4 +421,5 @@
     (match (read)
       [(or 'y 'yes) (delete-directory/files (data-output-dir))]
       [_ (eprintf "Not deleted.~n")]))
-  (run-all-mutants*configs (bench-to-run)))
+  (parameterize ([date-display-format 'iso-8601])
+    (run-all-mutants*configs (bench-to-run))))
