@@ -30,6 +30,7 @@
 (define process-limit (make-parameter 3))
 (define data-output-dir (make-parameter "./mutant-data"))
 (define path-to-benchmarks (make-parameter "../benchmarks"))
+(define mutant-error-log (make-parameter "./mutant-errors.txt"))
 
 (define-logger factory)
 
@@ -40,12 +41,13 @@
                              outfile)
   (define config-hash (lattice-point->config-hash lattice-point))
   (match-define (list runner-out runner-in _ runner-err runner-ctl)
-    (process (format "racket-7.2 '~a' -b '~a' -m '~a' -i ~a > '~a'"
+    (process (format "racket-7.2 '~a' -b '~a' -m '~a' -i ~a > '~a' 2>> ~a"
                      (mutant-runner-path)
                      benchmark-name
                      module-to-mutate
                      mutation-index
-                     outfile)))
+                     outfile
+                     (mutant-error-log))))
   (write (serialize config-hash) runner-in)
   (close-input-port runner-out)
   (close-output-port runner-in)
@@ -397,7 +399,11 @@
    [("-d" "--benchmarks-directory")
     dir
     "Directory containing benchmarks. Default: ../benchmarks"
-    (path-to-benchmarks dir)])
+    (path-to-benchmarks dir)]
+   [("-e" "--error-log")
+    path
+    "File to which to append mutant errors. Default: ./mutant-errors.txt"
+    (mutant-error-log path)])
   (unless (bench-to-run)
     (error 'mutant-factory "Must provide benchmark to run."))
   (when (directory-exists? (data-output-dir))
