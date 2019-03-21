@@ -1,14 +1,16 @@
 #lang racket
 
-(provide (contract-out [precision-config-lattice
-                        ((listof path-string?)
-                         (listof symbol?)
-                         . -> .
-                         lattice?)])
+(provide (contract-out
+          [precision-config-lattice
+           ((listof path-string?) (listof symbol?) . -> . lattice?)]
+          [sample-lattice
+           (lattice? natural? . -> . (listof lattice-point?))])
          (struct-out mod-config)
+         (struct-out lattice)
          (struct-out lattice-point))
 
-(require "lattice.rkt")
+(require "lattice.rkt"
+         racket/random)
 
 ;; The precision config lattice is composed of a bunch of
 ;; `bench-config`s, where each `bench-config` is a set of
@@ -46,6 +48,12 @@
            (define bench-config-with-mod+1
              (set-add other-mods (increment-mod-config mod-config levels)))
            (set-add parents bench-config-with-mod+1)])))
+
+
+
+(define (sample-lattice a-lattice n)
+  (random-sample (lattice-points a-lattice) n #:replacement? #f))
+
 
 (module+ test
   (require ruinit)
@@ -123,3 +131,4 @@
                        (lattice-point point paths))))))
 
   (display-test-results))
+
