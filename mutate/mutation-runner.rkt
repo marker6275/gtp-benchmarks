@@ -369,13 +369,14 @@ Blamed: ~a
 ")
 
 (test-match
- (run-status 'oom _ _ _ _ _ _)
  (run-with-mutated-module "a.rkt" "a.rkt" 2 'none
                           #:timeout/s 100
-                          #:memory/gb 1))
+                          #:memory/gb 1)
+ (run-status 'oom _ _ _ _ _ _))
 
 (parameterize ([report-progress #t])
   (test-match
+   (run-all-mutants/with-modules "a.rkt" '("a.rkt" "b.rkt"))
    (list
     (run-status _ 'completed #f "a.rkt" 'a 0 'none)
     (run-status _ 'completed #f "a.rkt" 'a 0 'types)
@@ -404,8 +405,7 @@ Blamed: ~a
     (run-status _ 'blamed 'd "b.rkt" 'd 1 'max)
     (run-status _ 'completed #f "b.rkt" 'd 2 'none)
     (run-status _ 'completed #f "b.rkt" 'd 2 'types)
-    (run-status _ 'blamed 'd "b.rkt" 'd 2 'max))
-   (run-all-mutants/with-modules "a.rkt" '("a.rkt" "b.rkt")))))))
+    (run-status _ 'blamed 'd "b.rkt" 'd 2 'max)))))))
 
 
 ;; for debugging
