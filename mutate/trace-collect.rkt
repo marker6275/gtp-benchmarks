@@ -6,7 +6,8 @@
                          . -> .
                          mutant-outcome?)])
          display-mutant-outcome/csv
-         write-mutant-outcome/sexp)
+         write-mutant-outcome/sexp
+         make-config-safe-for-reading)
 
 (require "mutation-runner.rkt"
          "trace.rkt"
@@ -96,6 +97,14 @@
            blamed
            distance/repr)])
 
+(define (maybe-path->string mp)
+  (if (path? mp) (path->string mp) mp))
+(define (make-config-safe-for-reading config)
+  (for/hash ([(mod-path mod-config) (in-hash config)])
+    (values (maybe-path->string mod-path)
+            (for/hash ([(id precision) (in-hash mod-config)])
+              (values (maybe-path->string id) precision)))))
+
 (define/match (write-mutant-outcome/sexp outcome)
   [{(mutant-outcome bench
                     mutated-module
@@ -110,15 +119,19 @@
                            [(distance n) n]
                            [(no-blame) 'N/A]
                            [(label-missing _) 'M/L]))
-   (write (list bench
-                distance/repr
-                (path->string mutated-module)
-                mutated
-                index
-                outcome
-                (cond [(path? blamed) (path->string blamed)]
-                      [(equal? outcome 'crashed) (~a blamed)]
-                      [else blamed])
-                precision))
-   (newline)])
+   (define result (list bench
+                        distance/repr
+                        (path->string mutated-module)
+                        mutated
+                        index
+                        outcome
+                        (cond [(path? blamed) (path->string blamed)]
+                              [(vector? blamed)
+                               (match-define (vector id mod) blamed)
+                               (vector (maybe-path->string id)
+                                       (maybe-path->string mod))]
+                              [(equal? outcome 'crashed) (~a blamed)]
+                              [else blamed])
+                        (make-config-safe-for-reading precision)))
+   (writeln result)])
 

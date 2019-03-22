@@ -4,6 +4,7 @@
          "../ctcs/current-precision-setting.rkt"
          "../mutate/mutation-runner.rkt"
          "../mutate/instrumented-module-runner.rkt"
+         "../mutate/trace-collect.rkt"
          racket/file
          racket/format
          racket/match
@@ -110,19 +111,19 @@
 ;; ctl:    process-ctl-fn? (see `process` docs)
 ;; will:   will?
 ;;     A transformation of the factory to be performed upon death of the mutant
-(struct mutant-process (mutant config file ctl will) #:transparent)
+(struct mutant-process (mutant config file ctl will id) #:transparent)
 ;; result: result?
-(struct dead-mutant-process (mutant config result) #:transparent)
+(struct dead-mutant-process (mutant config result id) #:transparent)
 (struct aggregate-mutant-result (mutant file) #:transparent)
 
-;; (define mutant-results? (hash mutant? (set mutant-process?)))
+;; mutant-results? := (hash mutant? aggregate-mutant-result?)
 
 ;; name:       string?
 ;; max-config: config?
-(struct bench-info (name max-config))
+(struct bench-info (name max-config) #:transparent)
 
 ;; bench: bench-info?
-;; results: mutant? |-> aggregate-mutant-result?
+;; results: mutant-results?
 ;;     The map from mutant to completed processes (which contain a data file).
 ;; active-mutants: (set mutant-process?)
 ;;     The set of actively running mutant processes.
@@ -139,16 +140,15 @@
                  active-mutants
                  active-mutant-count
                  mutant-samples
-                 total-mutants-spawned))
+                 total-mutants-spawned)
+  #:transparent)
 
 ;; string?
 ;; path-string?
 ;; ->
 ;; mutant-results?
 (define (run-all-mutants*configs bench-name)
-  (define bench (hash-ref benchmarks bench-name
-                          (λ _ (error 'run-all-mutants*configs
-                                      "Unknown benchmark: ~v" bench-name))))
+  (define bench (lookup-benchmark-with-name bench-name))
   (define mutatable-modules (cons (benchmark-main bench)
                                   (benchmark-others bench)))
   (define max-config (make-max-bench-config bench))
@@ -162,10 +162,10 @@
 
   (define factory-state
     (for/fold ([factory-state (factory (bench-info bench-name max-config)
-                                       (hash) (set) (set) (set))])
+                                       (hash) (set) 0 (hash) 0)])
               ([module-to-mutate mutatable-modules])
 
-      (log-factory info "Spawning mutant runners for module ~a."
+      (log-factory info "Processing mutants of module ~a."
                         module-to-mutate)
       (spawn-mutants/of-module factory-state module-to-mutate)))
 
@@ -180,13 +180,8 @@
   ;; This must be an unbounded loop, number of mutants unknown
   (let next-mutant ([mutation-index 0]
                     [current-factory the-factory])
-
-    (log-factory info "Spawning runners for mutant ~a @ ~a."
-                      module-to-mutate
-                      mutation-index)
-
     (cond [(max-mutation-index-exceeded? module-to-mutate mutation-index)
-           the-factory]
+           current-factory]
 
           [else
            (next-mutant
@@ -204,7 +199,7 @@
 (define (maybe-spawn-configured-mutants the-factory mutant-program)
   (match-define (mutant module-to-mutate mutation-index) mutant-program)
   (log-factory debug
-               "Spawning test mutant for ~a @ ~a."
+               "  Trying to spawn test mutant for ~a @ ~a."
                module-to-mutate
                mutation-index)
   (define max-config (bench-info-max-config (factory-bench the-factory)))
@@ -213,11 +208,21 @@
                 mutation-index
                 max-config
                 ;; mutant will
-                (λ (the-factory dead-proc)
-                  (if (blame-outcome? dead-proc)
-                      (spawn-mutants/precision-sampling the-factory
-                                                        mutant-program)
-                      the-factory))))
+                (λ (current-factory dead-proc)
+                  (cond
+                    [(blame-outcome? dead-proc)
+                     (log-factory info
+                                  "  Mutant ~a @ ~a has blame. Sampling..."
+                                  module-to-mutate
+                                  mutation-index)
+                     (spawn-mutants/precision-sampling current-factory
+                                                       mutant-program)]
+                    [else
+                     (log-factory info
+                                  "  Mutant ~a @ ~a has no blame; discarding."
+                                  module-to-mutate
+                                  mutation-index)
+                     current-factory]))))
 
 ;; path-string? mutant? -> factory?
 (define (spawn-mutants/precision-sampling the-factory mutant-program)
@@ -234,18 +239,25 @@
       [else
        (values sample
                (add-mutant-sample a-factory mutant-program sample))]))
-  (for/fold ([current-factory the-factory])
-            ([sampled-config (in-set samples)])
-    (define factory+sample
-      (add-mutant-sample current-factory mutant-program sampled-config))
-    (try-spawn-blame-following-mutant factory+sample
-                                      mutant-program
-                                      sampled-config
-                                      resample)))
+  (define new-factory
+    (for/fold ([current-factory the-factory])
+              ([sampled-config (in-set samples)])
+      (define factory+sample
+        (add-mutant-sample current-factory mutant-program sampled-config))
+      (try-spawn-blame-following-mutant factory+sample
+                                        mutant-program
+                                        sampled-config
+                                        resample)))
+  (log-factory info
+               "    Completed sampling for mutant ~a @ ~a."
+               (mutant-module mutant-program)
+               (mutant-index mutant-program))
+  new-factory)
 
 (define (add-mutant-sample the-factory mutant-program new-sample)
   (define mutant-samples (factory-mutant-samples the-factory))
-  (define samples-for-mutant (hash-ref mutant-samples mutant-program))
+  (define samples-for-mutant (hash-ref mutant-samples mutant-program
+                                       (λ _ (set))))
   (define mutant-samples+sample
     (hash-set mutant-samples mutant-program
               (set-add samples-for-mutant new-sample)))
@@ -266,15 +278,17 @@
                                           mutant-program
                                           config
                                           resample)
+  (log-factory debug
+               "    Trying to spawn blame-following mutant")
   (spawn-mutant the-factory
                 (mutant-module mutant-program)
                 (mutant-index mutant-program)
                 config
                 (make-blame-following-will/with-fallback
-                 (λ (the-factory* dead-proc)
+                 (λ (current-factory dead-proc)
                    ;; Try sampling another config
                    (define-values (new-sample new-factory)
-                     (resample the-factory*))
+                     (resample current-factory))
                    (try-spawn-blame-following-mutant new-factory
                                                      mutant-program
                                                      new-sample
@@ -287,7 +301,7 @@
 ;;
 ;; Spawns a mutant that follows the blame trail starting at `dead-proc`
 (define (spawn-mutant/following-blame the-factory dead-proc blamed)
-  (match-define (mutant-process (mutant mod index) config _ _ _) dead-proc)
+  (match-define (dead-mutant-process (mutant mod index) config _ id) dead-proc)
   (cond [(config-at-max-precision-for? blamed config)
          ;; Blamed region is at max ctcs, so the path ends here
          the-factory]
@@ -296,18 +310,18 @@
            (increment-config-precision-for blamed config))
          (define will:keep-following-blame
            (make-blame-following-will/with-fallback
-            (λ (the-factory* dead-successor)
+            (λ (_ dead-successor)
               ;; The blame suddenly disappeared?
               (log-factory fatal
                            (failure-msg
                             "Blame disappeared while following blame trail.
-Mutant: ~a @ ~a with config:
+Mutant: ~a @ ~a with id [~a] and config:
 ~a
-Predecessor blamed ~a and had config:
+Predecessor (id [~a]) blamed ~a and had config:
 ~a")
-                           mod index
+                           mod index (mutant-process-id dead-successor)
                            (mutant-process-config dead-successor)
-                           blamed
+                           id blamed
                            config)
               (exit 1))))
          (spawn-mutant the-factory
@@ -338,14 +352,14 @@ Predecessor blamed ~a and had config:
                       mutation-index
                       precision-config
                       mutant-will)
-  (let try-again ([the-factory the-factory])
-    (define active-mutant-count (factory-active-mutant-count the-factory))
+  (let try-again ([current-factory the-factory])
+    (define active-mutant-count (factory-active-mutant-count current-factory))
     (cond [(>= active-mutant-count (process-limit))
-           (log-factory debug "Mutants (~a) at process limit (~a)."
+           (log-factory debug "    Mutants (~a) at process limit (~a)."
                         active-mutant-count
                         (process-limit))
            (sleep 2)
-           (try-again (sweep-dead-mutants the-factory))]
+           (try-again (sweep-dead-mutants current-factory))]
           [else
            (match-define (factory (bench-info bench-name _)
                                   _
@@ -353,32 +367,35 @@ Predecessor blamed ~a and had config:
                                   active-mutant-count
                                   _
                                   mutants-spawned)
-             the-factory)
+             current-factory)
            (define outfile (build-path (data-output-dir)
                                        (format "~a_~a__index~a_~a.rktd"
                                                bench-name
                                                (basename module-to-mutate)
                                                mutation-index
                                                mutants-spawned)))
-           (log-factory info
-                        "Spawning mutant runner #~a for ~a @ ~a > ~a."
-                        mutants-spawned
-                        module-to-mutate
-                        mutation-index
-                        outfile)
            (define mutant-ctl (spawn-mutant-runner bench-name
                                                    module-to-mutate
                                                    mutation-index
                                                    precision-config
                                                    outfile))
-           (define mutant
+           (define mutant-proc
              (mutant-process (mutant module-to-mutate mutation-index)
                              precision-config
                              outfile
                              mutant-ctl
-                             mutant-will))
-           (struct-copy factory the-factory
-                        [active-mutants (set-add active-mutants mutant)]
+                             mutant-will
+                             mutants-spawned))
+
+           (log-factory info
+                        "    Spawned mutant runner with id [~a] for ~a @ ~a > ~a."
+                        mutants-spawned
+                        module-to-mutate
+                        mutation-index
+                        outfile)
+
+           (struct-copy factory current-factory
+                        [active-mutants (set-add active-mutants mutant-proc)]
                         [active-mutant-count (add1 active-mutant-count)]
                         [total-mutants-spawned (add1 mutants-spawned)])])))
 
@@ -390,7 +407,7 @@ Predecessor blamed ~a and had config:
     (define sweeped-factory (sweep-dead-mutants current-factory))
     (cond [(zero? (factory-active-mutant-count sweeped-factory))
            (log-factory info "Babysitting complete. All mutants are dead.")
-           the-factory]
+           current-factory]
           [else
            (sleep 2)
            (check-again sweeped-factory)])))
@@ -398,7 +415,7 @@ Predecessor blamed ~a and had config:
 
 ;; factory? -> factory?
 (define (sweep-dead-mutants the-factory)
-  (log-factory debug "Checking active mutant set for dead mutants...")
+  (log-factory debug "      Checking active mutant set for dead mutants...")
   (for/fold ([factory-so-far the-factory])
             ([mutant-proc (in-set (factory-active-mutants the-factory))])
     (define mutant-status ((mutant-process-ctl mutant-proc) 'status))
@@ -407,61 +424,70 @@ Predecessor blamed ~a and had config:
           [else
            (define mutant (mutant-process-mutant mutant-proc))
            (if (equal? mutant-status 'done-ok)
-               (log-factory info
-                            (format
-                             "Sweeping up dead mutant: ~a @ ~a with config ~a."
-                             (mutant-module mutant)
-                             (mutant-index mutant)
-                             (mutant-process-config mutant-proc)))
-               (log-factory warning
-                            "*** WARNING: Runner errored on mutant ***
+               (log-factory
+                info
+                "      Sweeping up dead mutant [~a]: ~a @ ~a, config ~a."
+                (mutant-process-id mutant-proc)
+                (mutant-module mutant)
+                (mutant-index mutant)
+                (mutant-process-config mutant-proc))
+               (log-factory
+                warning
+                "*** WARNING: Runner errored on mutant ***
 ~a @ ~a with config ~a
 **********\n\n"
-                            (mutant-module mutant)
-                            (mutant-index mutant)
-                            (mutant-process-config mutant-proc)))
+                (mutant-module mutant)
+                (mutant-index mutant)
+                (mutant-process-config mutant-proc)))
            (process-dead-mutant factory-so-far mutant-proc)])))
 
 ;; factory? mutant-process? -> factory?
 ;; Note that processing a dead mutant may cause new mutants to be spawned,
 ;; since it executes the will of the dead mutant.
 (define (process-dead-mutant the-factory mutant-proc)
-  (match-define (mutant-process mutant config file _ will) mutant-proc)
+  (match-define (mutant-process mutant config file _ will id) mutant-proc)
+  (match-define (factory _ results active-mutants active-count _ _) the-factory)
+
+
   ;; Read the result of the mutant before possible consolidation
   (define result (get-mutant-result mutant-proc))
-  (define dead-mutant-proc (dead-mutant-process mutant config result))
+  (define dead-mutant-proc (dead-mutant-process mutant config result id))
   ;; Do the consolidation
-  (define factory+result (add-mutant-result the-factory dead-mutant-proc file))
+  (define results+dead-mutant (add-mutant-result results dead-mutant-proc file))
+  (define new-active-mutants (set-remove active-mutants mutant-proc))
+  (define new-active-count (sub1 active-count))
 
-  (will factory+result dead-mutant-proc))
+  (define new-factory
+    (struct-copy factory the-factory
+                 [results results+dead-mutant]
+                 [active-mutants new-active-mutants]
+                 [active-mutant-count new-active-count]))
 
-;; factory? dead-mutant-process? path-string? -> factory?
-(define (add-mutant-result the-factory dead-mutant-proc mutant-proc-file)
+  (will new-factory dead-mutant-proc))
+
+;; mutant-results? dead-mutant-process? path-string? -> mutant-results?
+(define (add-mutant-result mutant-results dead-mutant-proc mutant-proc-file)
   (define mutant (dead-mutant-process-mutant dead-mutant-proc))
-  (define mutant-results (factory-results the-factory))
-  (define mutant-results+dead-mutant-proc
-    (cond [(hash-has-key? mutant-results mutant)
-           (define aggregate-results (hash-ref mutant-results mutant))
-           (append-mutant-result! (dead-mutant-process-result dead-mutant-proc)
-                                  aggregate-results)
-           (delete-file mutant-proc-file)
-           mutant-results]
-          [else
-           ;; First process for this mutant to die, so its file
-           ;; becomes the aggregate data file
-           (hash-set mutant-results
-                     mutant
-                     (aggregate-mutant-result mutant mutant-proc-file))]))
-  (struct-copy factory the-factory
-               [results mutant-results+dead-mutant-proc]))
+  (cond [(hash-has-key? mutant-results mutant)
+         (define aggregate-results (hash-ref mutant-results mutant))
+         (append-mutant-result! (dead-mutant-process-result dead-mutant-proc)
+                                aggregate-results)
+         (delete-file mutant-proc-file)
+         mutant-results]
+        [else
+         ;; First process for this mutant to die, so its file
+         ;; becomes the aggregate data file
+         (hash-set mutant-results
+                   mutant
+                   (aggregate-mutant-result mutant mutant-proc-file))]))
 
 ;; path-string? natural? -> boolean?
 (define (max-mutation-index-exceeded? module-to-mutate mutation-index
                                       [full-path? #f])
   (define path (if full-path?
                    module-to-mutate
-                   (build-path benchmarks-dir-path
-                               module-to-mutate)))
+                   (simplify-path (build-path benchmarks-dir-path
+                                              module-to-mutate))))
   ;; `mutate-module` throws if index is too large, so just try
   ;; mutating to see whether or not it throws
   (with-handlers ([mutation-index-exception? (λ _ #t)])
@@ -469,7 +495,8 @@ Predecessor blamed ~a and had config:
                                 path
                                 '()
                                 mutation-index
-                                (hash))
+                                ;; A dummy config, it doesn't matter
+                                (hash (path->string path) (hash)))
     #f))
 
 ;; result? aggregate-mutant-result? -> void
@@ -478,7 +505,7 @@ Predecessor blamed ~a and had config:
   (with-output-to-file aggregate-file
     #:exists 'append
     #:mode 'text
-    (writeln result)))
+    (λ _ (writeln result))))
 
 (define (get-mutant-result mutant-proc)
   (define path (mutant-process-file mutant-proc))
@@ -488,11 +515,12 @@ Predecessor blamed ~a and had config:
 (define (blame-outcome? dead-proc)
   (and (try-get-blamed dead-proc) #t))
 
-;; dead-mutant-process? -> (or/c symbol? path-string?)
+;; dead-mutant-process? -> (vector (or/c symbol? path-string?))
 (define/match (try-get-blamed dead-proc)
-  [{(dead-mutant-process _ _ (list _ _ _ _ _ 'blamed blamed _))} blamed]
-  [{(dead-mutant-process _ _ (? list?))} #f]
-  [{(dead-mutant-process _ _ other)}
+  [{(dead-mutant-process _ _ (list _ _ _ _ _ 'blamed blamed _) _)}
+   blamed]
+  [{(dead-mutant-process _ _ (? list?) _)} #f]
+  [{(dead-mutant-process _ _ other _)}
    (log-factory fatal
                 (failure-msg "Result read from mutant output was not a list.
 Found: ~v
@@ -537,14 +565,22 @@ Config: ~v")
 
 (define (make-max-bench-config bench)
   (match-define (benchmark main others) bench)
-  (for/hash ([mod (in-list (cons main others))])
-    (define mod-ids
-      (dynamic-require `(submod
-                         ,(path->string (build-path benchmarks-dir-path mod))
-                         contract-regions)
-                       'regions))
-    (values mod (for/hash ([id (in-list mod-ids)])
-                  (values id 'max)))))
+  (define config/paths
+    (for/hash ([mod (in-list (cons main others))])
+      (define mod-path/simplified
+        (simplify-path (build-path benchmarks-dir-path mod)))
+      (define mod-ids
+        (dynamic-require `(submod
+                           ;; Must be file because `benchmarks-dir-path`
+                           ;; is an absolute path
+                           (file
+                            ,(path->string mod-path/simplified))
+                           contract-regions)
+                         'regions))
+      (values mod-path/simplified
+              (for/hash ([id (in-list mod-ids)])
+                (values id 'max)))))
+  (make-config-safe-for-reading config/paths))
 
 ;; config? natural? -> (set config?)
 ;; Produces `n` random samples of the ctc precision config lattice
@@ -557,12 +593,18 @@ Config: ~v")
 (define (random-config-variant a-config)
   (for/hash ([(mod mod-config) (in-hash a-config)])
     (values mod
-            (for/hash ([(id _) mod-config])
-              (random-ref precision-configs)))))
+            (for/hash ([(id _) (in-hash mod-config)])
+              (values id
+                      (random-ref precision-configs))))))
 
 (define (basename path)
   (define-values (_1 name _2) (split-path path))
   name)
+
+(define (lookup-benchmark-with-name name)
+  (hash-ref benchmarks name
+            (λ _ (error 'run-all-mutants*configs
+                        "Unknown benchmark: ~v" name))))
 
 
 (module+ main

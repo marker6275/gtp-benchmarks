@@ -55,7 +55,8 @@
     (hash-ref benchmarks (benchmark-name)
               (invalid-arg "benchmark ~a unknown" (benchmark-name))))
 
-  (define module-to-precision-map (deserialize (read)))
+  (define module-to-precision-map
+    (make-config-safe-for-reading (deserialize (read))))
   #;(define module-to-precision-map/full
     (hash-union module-to-precision-map
                 current-precision-config

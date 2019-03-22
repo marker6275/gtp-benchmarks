@@ -17,7 +17,14 @@
    . -> .
    syntax?)
 
-  (define config-for-this-module (hash-ref precision-config module-file-path))
+  (define mod-path/simplified (path->string (simplify-path module-file-path)))
+  (define config-for-this-module
+    (hash-ref precision-config mod-path/simplified
+              (λ _
+                (error 'trace-module
+                       "Could not find module ~v in config ~v."
+                       mod-path/simplified
+                       precision-config))))
   (syntax-parse module-stx
     #:datum-literals [module]
     [(module name lang {~and mod-body (mod-begin body ...)})
