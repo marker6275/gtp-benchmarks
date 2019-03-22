@@ -1,7 +1,6 @@
 #lang racket/base
 
-(require "precision-lattice.rkt"
-         "benchmarks.rkt"
+(require "benchmarks.rkt"
          "../ctcs/current-precision-setting.rkt"
          "../mutate/mutation-runner.rkt"
          "../mutate/instrumented-module-runner.rkt"
@@ -16,7 +15,8 @@
          racket/logging
          racket/date
          racket/runtime-path
-         racket/list)
+         racket/list
+         racket/random)
 
 (module+ test
   (provide (struct-out mutant)
@@ -45,7 +45,8 @@
            blame-outcome?
            try-get-blamed
            config-at-max-precision-for?
-           increment-config-precision-for))
+           increment-config-precision-for
+           make-max-bench-config))
 
 
 (define N-SAMPLES 10)
@@ -75,13 +76,12 @@
 (define (spawn-mutant-runner benchmark-name
                              module-to-mutate
                              mutation-index
-                             lattice-point
+                             config-hash
                              outfile)
   (call-with-output-file outfile #:mode 'text
     (λ (outfile-port)
       (call-with-output-file (mutant-error-log) #:mode 'text #:exists 'append
         (λ (error-log-port)
-          (define config-hash (lattice-point->config-hash lattice-point))
           (match-define (list #f runner-in _ #f runner-ctl)
             (process*/ports outfile-port #f error-log-port
                             racket-path "--"
@@ -99,11 +99,13 @@
 ;; index:  natural?
 (struct mutant (module index) #:transparent)
 
-;; will := (factory? dead-mutant-process? -> factory?)
-;; result := list? (see `trace-collect.rkt`)
+;; will? := (factory? dead-mutant-process? -> factory?)
+;; result? := list? (see `trace-collect.rkt`)
+;; ctc-level? := symbol?
+;; config? := (hash path-string? (hash (or symbol? path-string?) ctc-level?))
 
 ;; mutant: mutant?
-;; config: lattice-point?
+;; config: config?
 ;; file:   path-string?
 ;; ctl:    process-ctl-fn? (see `process` docs)
 ;; will:   will?
@@ -113,11 +115,11 @@
 (struct dead-mutant-process (mutant config result) #:transparent)
 (struct aggregate-mutant-result (mutant file) #:transparent)
 
-;; (define mutant-results? (hash/c mutant? (set/c mutant-process?)))
+;; (define mutant-results? (hash mutant? (set mutant-process?)))
 
-;; name: string?
-;; config-lattice: (set lattice-point?)
-(struct bench-info (name config-lattice))
+;; name:       string?
+;; max-config: config?
+(struct bench-info (name max-config))
 
 ;; bench: bench-info?
 ;; results: mutant? |-> aggregate-mutant-result?
@@ -127,7 +129,7 @@
 ;; active-mutant-count: natural?
 ;;     The size of `active-mutants`.
 ;;     INVARIANT: (= active-mutant-count (set-count active-mutants))
-;; mutant-samples: mutant? |-> (set lattice-point?)
+;; mutant-samples: mutant? |-> (set config?)
 ;;     The set of precision config samples checked for each mutant.
 ;; total-mutants-spawned: natural?
 ;;     Count of the total number of mutants spawned by this factory.
@@ -149,23 +151,18 @@
                                       "Unknown benchmark: ~v" bench-name))))
   (define mutatable-modules (cons (benchmark-main bench)
                                   (benchmark-others bench)))
+  (define max-config (make-max-bench-config bench))
   (log-factory info "Running mutants of benchmark ~a, which has modules:~n~a"
                     bench-name
                     mutatable-modules)
-  (log-factory debug "Creating config lattice...")
-  (define config-lattice (precision-config-lattice mutatable-modules
-                                                   precision-configs))
-  (log-factory info "Built config lattice with ~a configurations."
-                    (set-count (lattice-points config-lattice)))
-  ;; Ensure data output directory exists
+
   (unless (directory-exists? (data-output-dir))
     (log-factory debug "Creating output directory ~a." (data-output-dir))
     (make-directory (data-output-dir)))
 
   (define factory-state
-    (for/fold ([factory-state (factory (bench-info bench-name
-                                                         config-lattice)
-                                             (hash) (set) (set) (set))])
+    (for/fold ([factory-state (factory (bench-info bench-name max-config)
+                                       (hash) (set) (set) (set))])
               ([module-to-mutate mutatable-modules])
 
       (log-factory info "Spawning mutant runners for module ~a."
@@ -202,14 +199,15 @@
 ;; Spawns a test mutant and if that mutant has a blame result at
 ;; max contract configuration, then samples the precision lattice
 ;; and spawns mutants for each samples point
+;; Note that sampling the precision lattice is done indirectly by
+;; just generating random configs
 (define (maybe-spawn-configured-mutants the-factory mutant-program)
   (match-define (mutant module-to-mutate mutation-index) mutant-program)
   (log-factory debug
                "Spawning test mutant for ~a @ ~a."
                module-to-mutate
                mutation-index)
-  (define max-config
-    (lattice-max (bench-info-config-lattice (factory-bench the-factory))))
+  (define max-config (bench-info-max-config (factory-bench the-factory)))
   (spawn-mutant the-factory
                 module-to-mutate
                 mutation-index
@@ -223,19 +221,21 @@
 
 ;; path-string? mutant? -> factory?
 (define (spawn-mutants/precision-sampling the-factory mutant-program)
-  (define lattice (bench-info-config-lattice (factory-bench the-factory)))
-  (define samples (sample-lattice lattice N-SAMPLES))
+  (define max-config (bench-info-max-config (factory-bench the-factory)))
+  (define samples (sample-config max-config N-SAMPLES))
   (define (resample a-factory)
-    (define sample (first (sample-lattice lattice 1)))
+    (define sample (set-first (sample-config max-config 1)))
     (define samples-seen (hash-ref (factory-mutant-samples a-factory)
                                    mutant-program))
-    (cond [(set-member? samples-seen sample)
-           (resample a-factory)]
-          [else
-           (values sample
-                   (add-mutant-sample a-factory mutant-program sample))]))
+    (cond
+      ;; ll: We're sampling *with* replacement; uncomment for *without*
+      #;[(set-member? samples-seen sample)
+         (resample a-factory)]
+      [else
+       (values sample
+               (add-mutant-sample a-factory mutant-program sample))]))
   (for/fold ([current-factory the-factory])
-            ([sampled-config (in-list samples)])
+            ([sampled-config (in-set samples)])
     (define factory+sample
       (add-mutant-sample current-factory mutant-program sampled-config))
     (try-spawn-blame-following-mutant factory+sample
@@ -254,8 +254,8 @@
 
 ;; factory?
 ;; mutant?
-;; lattice-point?
-;; (factory? -> (values lattice-point? factory?))
+;; config?
+;; (factory? -> (values config? factory?))
 ;; ->
 ;; factory?
 ;;
@@ -306,10 +306,9 @@ Mutant: ~a @ ~a with config:
 Predecessor blamed ~a and had config:
 ~a")
                            mod index
-                           (lattice-point-value
-                            (mutant-process-config dead-successor))
+                           (mutant-process-config dead-successor)
                            blamed
-                           (lattice-point-value config))
+                           config)
               (exit 1))))
          (spawn-mutant the-factory
                        mod
@@ -413,18 +412,14 @@ Predecessor blamed ~a and had config:
                              "Sweeping up dead mutant: ~a @ ~a with config ~a."
                              (mutant-module mutant)
                              (mutant-index mutant)
-                             ;; Don't print the paths, they're huge
-                             (lattice-point-value
-                              (mutant-process-config mutant-proc))))
+                             (mutant-process-config mutant-proc)))
                (log-factory warning
                             "*** WARNING: Runner errored on mutant ***
 ~a @ ~a with config ~a
 **********\n\n"
                             (mutant-module mutant)
                             (mutant-index mutant)
-                            ;; Don't print the paths, they're huge
-                            (lattice-point-value
-                             (mutant-process-config mutant-proc))))
+                            (mutant-process-config mutant-proc)))
            (process-dead-mutant factory-so-far mutant-proc)])))
 
 ;; factory? mutant-process? -> factory?
@@ -477,13 +472,6 @@ Predecessor blamed ~a and had config:
                                 (hash))
     #f))
 
-;; lattice-point? -> (hash/c path-string? symbol?)
-(define/match (lattice-point->config-hash point)
-  [{(lattice-point bench-config _)}
-   (for/hash ([config (in-set bench-config)])
-      (match-define (mod-config mod level) config)
-      (values mod level))])
-
 ;; result? aggregate-mutant-result? -> void
 (define (append-mutant-result! result aggregate-results)
   (define aggregate-file (aggregate-mutant-result-file aggregate-results))
@@ -513,9 +501,13 @@ Dead mutant: ~v")
                 dead-proc)
    (exit 1)])
 
-(define (config-ref/set config blamed [set-value #f])
+;; blame-info?: (vector/c symbol? path-string?)
+
+;; config? blame-info? [any/c]
+;; ->
+;; (or/c config? any/c)
+(define (config-ref/set config-hash blamed [set-value #f])
   (match-define (vector id mod) blamed)
-  (define config-hash (lattice-point-value config))
   (define (missing-blame . _)
     (log-factory fatal
                  (failure-msg "Could not find blamed region in config.
@@ -531,9 +523,11 @@ Config: ~v")
         [else
          (hash-ref mod-ids-hash id missing-blame)]))
 
+;; blame-info? config? -> boolean?
 (define (config-at-max-precision-for? blamed config)
   (equal? (config-ref/set config blamed) MAX-CONFIG))
 
+;; blame-info? config? -> config?
 (define (increment-config-precision-for blamed config)
   (define orig-precision (config-ref/set config blamed))
   (define orig-precision-index (index-of precision-configs orig-precision))
@@ -541,6 +535,30 @@ Config: ~v")
                                   (add1 orig-precision-index)))
   (config-ref/set config blamed new-precision))
 
+(define (make-max-bench-config bench)
+  (match-define (benchmark main others) bench)
+  (for/hash ([mod (in-list (cons main others))])
+    (define mod-ids
+      (dynamic-require `(submod
+                         ,(path->string (build-path benchmarks-dir-path mod))
+                         contract-regions)
+                       'regions))
+    (values mod (for/hash ([id (in-list mod-ids)])
+                  (values id 'max)))))
+
+;; config? natural? -> (set config?)
+;; Produces `n` random samples of the ctc precision config lattice
+;; whose top element is `max-config`
+(define (sample-config max-config n)
+  (for/set ([i (in-range n)])
+    (random-config-variant max-config)))
+
+;; config? -> config?
+(define (random-config-variant a-config)
+  (for/hash ([(mod mod-config) (in-hash a-config)])
+    (values mod
+            (for/hash ([(id _) mod-config])
+              (random-ref precision-configs)))))
 
 (define (basename path)
   (define-values (_1 name _2) (split-path path))
