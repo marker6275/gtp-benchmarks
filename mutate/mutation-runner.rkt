@@ -3,7 +3,6 @@
 (provide run-with-mutated-module
          report-progress
          make-mutated-module-runner
-         make-precision-config-module
          mutate-module
          mutation-index-exception?
          [struct-out run-status])
@@ -12,7 +11,6 @@
          syntax/parse
          syntax/strip-context
          "mutate.rkt"
-         "../ctcs/current-precision-setting.rkt"
          "sandbox-runner.rkt"
          "instrumented-module-runner.rkt"
          "trace.rkt"
@@ -22,29 +20,20 @@
 ;; Produce the mutated syntax for the module at the given path
 (define (mutate-module module-stx mutation-index)
   (syntax-parse module-stx
-    #:datum-literals [module #%module-begin]
-    [(module name lang (#%module-begin body ...))
-     (define program-stx #'{body ...})
-     (match-define (mutated-program program-stx/mutated mutated-id)
-       (mutate-program/with-id program-stx mutation-index))
-     (values
-      (strip-context
-       #`(module name lang
-           (#%module-begin
-            #,@program-stx/mutated)))
-      mutated-id)]))
-
-(define (make-precision-config-module precision-config)
-  #`(module current-precision-setting racket
-      (#%module-begin
-       (provide current-precision-config
-                precision-configs)
-       (define precision-configs '(none types max))
-       ;; ll: quoting the hash literal like this should work,
-       ;; it makes the syntax '#hash(("path" . setting) ...)
-       (define current-precision-config '#,precision-config))))
-
-(define-runtime-path precision-config-module-path "../ctcs/current-precision-setting.rkt")
+    #:datum-literals [module]
+    [(module name lang {~and mod-body (mod-begin body ...)})
+     #:do [(define program-stx #'{body ...})
+           (match-define (mutated-program program-stx/mutated mutated-id)
+             (mutate-program/with-id program-stx mutation-index))]
+     #:with program/mutated program-stx/mutated
+     #:with mutated-mod-stx
+     (datum->syntax #'mod-body
+                    (syntax-e #'(mod-begin {~@ . program/mutated}))
+                    #'mod-body
+                    #'mod-body)
+     (values (strip-context
+              #'(module name lang mutated-mod-stx))
+             mutated-id)]))
 
 (define/contract (make-mutated-module-runner main-module
                                              module-to-mutate
@@ -55,7 +44,9 @@
         [module-to-mutate path-string?]
         [other-modules (listof path-string?)]
         [mutation-index natural?]
-        [ctc-precision-config (hash/c string? symbol?)])
+        [ctc-precision-config (hash/c path-string?
+                                      (hash/c (or/c symbol? path-string?)
+                                              symbol?))])
        #:pre (main-module module-to-mutate other-modules)
        (and (not (member main-module other-modules))
             (not (member module-to-mutate other-modules)))
@@ -67,19 +58,14 @@
   (define mutated-id-box (box #f))
 
   (define/match (instrument-module path-string stx)
-    [{(== precision-config-module-path) _}
-     ;; Do not trace the precision-config module, but do set the
-     ;; precision settings
-     (make-precision-config-module ctc-precision-config)]
     [{(== module-to-mutate) stx}
-     #;(trace-module mutated-stx)
      (define-values (mutated-stx mutated-id)
        (mutate-module stx mutation-index))
      ;; ll: see above...
      (set-box! mutated-id-box mutated-id)
-     (trace-module module-to-mutate mutated-stx)]
+     (trace-module module-to-mutate mutated-stx ctc-precision-config)]
     [{path stx}
-     (trace-module path stx)])
+     (trace-module path stx ctc-precision-config)])
 
   ;; ll: Old code had this as first thing eval'd in namespace. Why?
   ;; (eval '(require "mutate.rkt"))
@@ -104,10 +90,8 @@
 
   (define other-modules-to-mutate
     (if (equal? main-module module-to-mutate)
-        (list* precision-config-module-path
-               other-modules)
-        (list* precision-config-module-path
-               module-to-mutate
+        other-modules
+        (list* module-to-mutate
                other-modules)))
 
   (define runner
@@ -165,7 +149,9 @@ Blamed: ~a
         [module-to-mutate path-string?]
         [other-modules (listof path-string?)]
         [mutation-index natural?]
-        [ctc-precision-config (hash/c string? symbol?)])
+        [ctc-precision-config (hash/c path-string?
+                                      (hash/c (or/c symbol? path-string?)
+                                              symbol?))])
        (#:suppress-output? [suppress-output? boolean?]
         #:timeout/s [timeout/s number?]
         #:memory/gb [memory/gb number?])
@@ -220,132 +206,94 @@ Blamed: ~a
 
 
 
+(module+ test
+  (require ruinit
+           "../utilities/test-env.rkt")
+  (define-test-env (setup-test-env! cleanup-test-env!)
+    (directories)
+    (files
+     [a-path (resolve-path-string "a.rkt")
+             #<<HERE
+#lang flow-trace
 
+(require "b.rkt")
 
+(define/contract a
+  (configurable-ctc
+   [max (=/c 1)]
+   [types integer?])
+  1)
+(define/contract b
+  (configurable-ctc
+   [max (=/c 1)]
+   [types positive?])
+  1)
 
+(define/contract (foo x y)
+  (configurable-ctc
+   [max (->i ([x number?]
+              [y (x) (and/c number?
+                            (>=/c x))])
+             [result (x y) (and/c positive?
+                                  (=/c (- y x)))])]
+   [types (-> number? number? number?)])
+  (if #t
+      (- y x)
+      (+ (for/vector #:length 4294967296 () #f)
+         (foo x y))))
 
+(displayln (list 'a a))
+(displayln (list 'b b))
+(foo d c)
+HERE
+             ]
+[b-path (resolve-path-string "b.rkt")
+        #<<HERE
+#lang flow-trace
 
+(provide c d)
 
+(require "c.rkt")
 
-;; =================================================================
-;;                          Old Runners
-;; which ...
-;; - assume the precision is the same across the whole benchmark
-;; - run all the mutants sequentially
-;; =================================================================
-(module+ old
-  (provide run-all-precisions/of-mutant
-           run-all-mutants/of-module
-           run-all-mutants/with-modules)
-  (define (run-all-precisions/of-mutant main-module
-                                        module-to-mutate
-                                        other-modules
-                                        mutation-index
-                                        #:suppress-output? [suppress-output? #t]
-                                        #:timeout/s [timeout/s (* 3 60)]
-                                        #:memory/gb [memory/gb 3])
-    (for/list ([ctc-precision precision-configs])
-      (when (report-progress)
-        (displayln "."))
-      (run-with-mutated-module main-module
-                               module-to-mutate
-                               other-modules
-                               mutation-index
-                               ctc-precision
-                               #:suppress-output? suppress-output?
-                               #:timeout/s timeout/s
-                               #:memory/gb memory/gb)))
+(displayln "B")
 
-  (define/contract (run-all-mutants/of-module main-module
-                                              module-to-mutate
-                                              other-modules
-                                              #:suppress-output? suppress-output?
-                                              #:timeout/s timeout/s
-                                              #:memory/gb memory/gb
-                                              #:make-result
-                                              [make-result identity]
-                                              #:start-index
-                                              [start-index 0])
-    (->i ([main-module path-string?]
-          [module-to-mutate path-string?]
-          [other-modules (listof path-string?)]
-          #:suppress-output? [suppress-output? boolean?]
-          #:timeout/s [timeout/s number?]
-          #:memory/gb [memory/gb number?])
-         (#:make-result [make-result ((listof run-status?) . -> . any/c)]
-          #:start-index [start-index natural?])
-
-         #:pre (module-to-mutate main-module other-modules)
-         (and (not (member main-module other-modules))
-              (not (member module-to-mutate other-modules)))
-
-         [result (listof any/c)])
-
-    (let loop ([index-so-far start-index]
-               [results-so-far empty])
-      (define results/this-index
-        (run-all-precisions/of-mutant main-module
-                                      module-to-mutate
-                                      other-modules
-                                      index-so-far
-                                      #:suppress-output? suppress-output?
-                                      #:timeout/s timeout/s
-                                      #:memory/gb memory/gb))
-      (cond [(index-exceeded? (first results/this-index))
-             (flatten (reverse results-so-far))]
-            [else
-             (when (report-progress)
-               (displayln "-------------------------")
-               (for-each display-run-status results/this-index)
-               (displayln "-------------------------"))
-             (loop (add1 index-so-far)
-                   (cons (make-result results/this-index)
-                         results-so-far))])))
-
-  (define/contract (run-all-mutants/with-modules main-module
-                                                 mutatable-modules
-                                                 #:suppress-output?
-                                                 [suppress-output? #t]
-                                                 #:timeout/s
-                                                 [timeout/s (* 3 60)]
-                                                 #:memory/gb
-                                                 [memory/gb 3]
-                                                 #:make-result
-                                                 [make-result identity])
-    ([path-string? (listof path-string?)]
-     [#:suppress-output? boolean?
-      #:timeout/s number?
-      #:memory/gb number?
-      #:make-result ((listof run-status?) . -> . any/c)]
-     . ->* .
-     (listof any/c))
-
-    (flatten
-     (map (λ (module-to-mutate)
-            (define other-modules
-              (set-subtract mutatable-modules
-                            (list main-module module-to-mutate)))
-            (run-all-mutants/of-module main-module
-                                       module-to-mutate
-                                       other-modules
-                                       #:suppress-output? suppress-output?
-                                       #:timeout/s timeout/s
-                                       #:memory/gb memory/gb
-                                       #:make-result make-result))
-          mutatable-modules)))
-
-  (module+ test
-    (require ruinit)
-
-    (test-begin
-      (test-equal?
-       (with-output-to-string
-         (λ _ (run-with-mutated-module "a.rkt"
-                                       "a.rkt"
-                                       0
-                                       'none
-                                       #:suppress-output? #f)))
-       "B
+(define/contract c
+  (configurable-ctc
+   [max (=/c 5)]
+   [types positive?])
+  5)
+(define/contract d
+  (configurable-ctc
+   [max (=/c 1)]
+   [types number?])
+  (if #t 1 "one"))
+(displayln (list 'c c))
+(displayln (list 'd d))
+HERE
+        ]
+[c-path (resolve-path-string "c.rkt")
+        "#lang flow-trace (void)\n"]))
+(define none-config
+  (hash a-path (hash 'a 'none
+                     'b 'none
+                     a-path 'none
+                     'foo 'none)
+        b-path (hash 'c 'none
+                     b-path 'none
+                     'd 'none)
+        c-path (hash c-path 'none)))
+(test-begin
+  #:before (setup-test-env!)
+  #:after (cleanup-test-env!)
+    (test-equal?
+     (with-output-to-string
+       (λ _ (run-with-mutated-module a-path
+                                     a-path
+                                     (list b-path c-path)
+                                     0
+                                     none-config
+                                     #:suppress-output? #f)))
+     "B
 (c 5)
 (d 1)
 (a 0)
@@ -355,10 +303,11 @@ Blamed: ~a
 
 (test-equal?
  (with-output-to-string
-   (λ _ (run-with-mutated-module "a.rkt"
-                                 "b.rkt"
+   (λ _ (run-with-mutated-module a-path
+                                 b-path
+                                 (list c-path)
                                  0
-                                 'none
+                                 none-config
                                  #:suppress-output? #f)))
  "B
 (c -1)
@@ -369,43 +318,13 @@ Blamed: ~a
 ")
 
 (test-match
- (run-with-mutated-module "a.rkt" "a.rkt" 2 'none
+ (run-with-mutated-module a-path a-path
+                          (list b-path c-path)
+                          2
+                          none-config
                           #:timeout/s 100
                           #:memory/gb 1)
- (run-status 'oom _ _ _ _ _ _))
-
-(parameterize ([report-progress #t])
-  (test-match
-   (run-all-mutants/with-modules "a.rkt" '("a.rkt" "b.rkt"))
-   (list
-    (run-status _ 'completed #f "a.rkt" 'a 0 'none)
-    (run-status _ 'completed #f "a.rkt" 'a 0 'types)
-    (run-status _ 'blamed 'a "a.rkt" 'a 0 'max)
-    (run-status _ 'completed #f "a.rkt" 'b 1 'none)
-    (run-status _ 'blamed 'b "a.rkt" 'b 1 'types)
-    (run-status _ 'blamed 'b "a.rkt" 'b 1 'max)
-    (run-status _ 'oom #f "a.rkt" 'foo 2 'none)
-    (run-status _ 'oom #f "a.rkt" 'foo 2 'types)
-    (run-status _ 'oom #f "a.rkt" 'foo 2 'max)
-    (run-status _ 'completed #f "a.rkt" 'foo 3 'none)
-    (run-status _ 'completed #f "a.rkt" 'foo 3 'types)
-    (run-status _ 'blamed 'foo "a.rkt" 'foo 3 'max)
-    (run-status _ 'completed #f "a.rkt" 'foo 4 'none)
-    (run-status _ 'completed #f "a.rkt" 'foo 4 'types)
-    (run-status _ 'blamed 'foo "a.rkt" 'foo 4 'max)
-    (run-status _ 'completed #f "a.rkt" 'foo
-                (or 5 6 7 8 9 10 11 12)
-                (or 'none 'types 'max))
-    ___
-    (run-status _ 'completed #f "b.rkt" 'c 0 'none)
-    (run-status _ 'blamed 'c "b.rkt" 'c 0 'types)
-    (run-status _ 'blamed 'c "b.rkt" 'c 0 'max)
-    (run-status _ 'crashed (? exn:fail:contract?) "b.rkt" 'd 1 'none)
-    (run-status _ 'blamed 'd "b.rkt" 'd 1 'types)
-    (run-status _ 'blamed 'd "b.rkt" 'd 1 'max)
-    (run-status _ 'completed #f "b.rkt" 'd 2 'none)
-    (run-status _ 'completed #f "b.rkt" 'd 2 'types)
-    (run-status _ 'blamed 'd "b.rkt" 'd 2 'max)))))))
+ (run-status _ 'oom _ _ _ _ _))))
 
 
 ;; for debugging
