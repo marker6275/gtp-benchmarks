@@ -4,15 +4,19 @@
          resolve-path-string)
 
 (require syntax/parse/define
-         racket/file)
+         racket/file
+         racket/runtime-path
+         (for-syntax racket/base))
 
 (define-simple-macro (define-test-env (setup:id cleanup:id)
-                       ({~datum directories}
-                        [dir:id dirpath:expr] ...)
-                       ({~datum files}
-                        [filename:id path:expr contents] ...))
+                       #:directories ([dir:id dirpath:expr] ...)
+                       #:files ([filename:id path:expr contents] ...)
+                       {~optional {~and #:provide provide-kw}})
+  #:with maybe-provides (if (attribute provide-kw)
+                            #'(provide filename ... dir ...)
+                            #'(void))
   (begin
-    (define dir dirpath) ...
+    (define-runtime-path dir dirpath) ...
     (define filename path) ...
     (define (setup)
       (cleanup)
@@ -25,7 +29,7 @@
       (for ([d (in-list (list dir ...))])
         (when (directory-exists? d)
           (delete-directory/files d))))
-    (provide filename ... dir ...)))
+    maybe-provides))
 
 (define (resolve-path-string path-str)
   (path->string (path->complete-path (string->path path-str))))

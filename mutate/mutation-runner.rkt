@@ -210,9 +210,8 @@ Blamed: ~a
   (require ruinit
            "../utilities/test-env.rkt")
   (define-test-env (setup-test-env! cleanup-test-env!)
-    (directories)
-    (files
-     [a-path (resolve-path-string "a.rkt")
+    #:directories ()
+    #:files ([a-path (resolve-path-string "a.rkt")
              #<<HERE
 #lang flow-trace
 
