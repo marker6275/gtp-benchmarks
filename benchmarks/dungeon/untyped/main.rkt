@@ -8,7 +8,6 @@
   "../base/un-types.rkt"
   racket/match
   racket/contract
-  "../../../ctcs/precision-config.rkt"
   (only-in "../../../ctcs/common.rkt" or-#f/c)
 )
 (require (only-in racket/set

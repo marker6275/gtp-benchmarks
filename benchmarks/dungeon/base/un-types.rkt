@@ -1,7 +1,6 @@
 #lang flow-trace
 
-(require racket/contract
-         "../../../ctcs/precision-config.rkt")
+(require racket/contract)
 
 (provide
   index?

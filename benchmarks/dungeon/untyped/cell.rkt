@@ -22,7 +22,6 @@
  racket/class
  "../base/un-types.rkt"
  racket/contract
- "../../../ctcs/precision-config.rkt"
  (only-in "../../../ctcs/common.rkt" class/c*)
  )
 (require (only-in racket/function
@@ -40,8 +39,8 @@
 
 (define-syntax-rule/ctc-helper (make-cell%/c-with self-id show-char
                                        free?/occupant-comparer)
-  (class/c* (field/all [items list?]     ;; ll: never seems to
-                       [occupant any/c]) ;; actually be used
+  (class/c* (init-field/all [items list?]     ;; ll: never seems to
+                            [occupant any/c]) ;; actually be used
 
             (all
              [open (->m void?)]

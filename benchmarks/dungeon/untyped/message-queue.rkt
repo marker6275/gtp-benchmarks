@@ -1,8 +1,7 @@
 #lang flow-trace
 
 (require racket/contract
-         (only-in racket/list first empty? rest)
-          "../../../ctcs/precision-config.rkt")
+         (only-in racket/list first empty? rest))
 
 (provide
   enqueue-message!

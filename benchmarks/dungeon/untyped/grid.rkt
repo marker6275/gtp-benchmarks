@@ -24,7 +24,6 @@
   require-typed-check
   ;math/array ;; TODO it'd be nice to use this
  racket/contract
- "../../../ctcs/precision-config.rkt"
  (only-in "../../../ctcs/common.rkt" or-#f/c)
 )
 (require (only-in "cell.rkt"
