@@ -38,7 +38,9 @@
 ))
 
 (define/contract (assert v p)
-  any/c
+  (configurable-ctc
+   [max any/c]
+   [types any/c])
   (unless (p v) (error 'assert))
   v)
 
