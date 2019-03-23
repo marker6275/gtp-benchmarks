@@ -71,7 +71,7 @@
                    mutated-module
                    precision
                    outcome
-                   blamed-id
+                   (if blamed-id blame #f)
                    mutated-id
                    distance
                    index
