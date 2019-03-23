@@ -41,19 +41,19 @@ HERE
 HERE
 ]
 [mutant0-path "m0.rktd"
-              "(\"test\" 102 \"m0.rkt\" foo 0 crashed #f #hash((\"m0.rkt\" . #hash((foo . max) (\"m0.rkt\" . none)))))
+              "(\"test\" 102 \"m0.rkt\" foo 0 crashed #f #hash((\"m0.rkt\" . #hash((foo . max) (\"m0.rkt\" . none)))) #f)
 
 "]
 [mutant1-path/1 "m11.rktd"
-                "(\"test\" 102 \"m1.rkt\" foo 0 blamed foo #hash((\"m1.rkt\" . #hash((foo . max) (\"m1.rkt\" . none)))))
+                "(\"test\" 102 \"m1.rkt\" foo 0 blamed foo #hash((\"m1.rkt\" . #hash((foo . max) (\"m1.rkt\" . none)))) #f)
 
 "]
 [mutant1-path/2 "m12.rktd"
-                "(\"test\" 102 \"m1.rkt\" foo 0 blamed foo #hash((\"m1.rkt\" . #hash((foo . types) (\"m1.rkt\" . none)))))
+                "(\"test\" 102 \"m1.rkt\" foo 0 blamed foo #hash((\"m1.rkt\" . #hash((foo . types) (\"m1.rkt\" . none)))) #f)
 
 "]
 [mutant2-path "m2.rktd"
-              "(\"test\" 102 \"m2.rkt\" foo 0 blamed bar #hash((\"m2.rkt\" . #hash((foo . max) (bar . none) (\"m2.rkt\" . none)))))
+              "(\"test\" 102 \"m2.rkt\" foo 0 crashed #f #hash((\"m2.rkt\" . #hash((foo . max) (bar . none) (\"m2.rkt\" . none)))) #f)
 
 "])
 
@@ -154,8 +154,10 @@ HERE
                          crashed
                          #f
                          ,(hash 'baz 'none
-                                (path->string e-path) 'none))
-                       0))
+                                (path->string e-path) 'none)
+                         #f)
+                       42
+                       'no-blame))
 (define dead-e-proc/completed
   (struct-copy dead-mutant-process
                dead-e-proc/crashed
@@ -167,7 +169,8 @@ HERE
                          completed
                          #f
                          ,(hash 'baz 'none
-                                (path->string e-path) 'none))]))
+                                (path->string e-path) 'none)
+                         #f)]))
 (define dead-e-proc/blame-e
   (struct-copy dead-mutant-process
                dead-e-proc/crashed
@@ -179,7 +182,9 @@ HERE
                          blamed
                          ,e-path
                          ,(hash 'baz 'none
-                                (path->string e-path) 'none))]))
+                                (path->string e-path) 'none)
+                         #f)]
+               [blame-trail-id 42]))
 (define dead-e-proc/blame-baz
   (struct-copy dead-mutant-process
                dead-e-proc/crashed
@@ -191,7 +196,8 @@ HERE
                          blamed
                          baz
                          ,(hash 'baz 'none
-                                (path->string e-path) 'none))]))
+                                (path->string e-path) 'none)
+                         #f)]))
 (test-begin/with-env
  #:name dead-process-blame
  (not (try-get-blamed dead-e-proc/crashed))
@@ -235,7 +241,8 @@ HERE
                                      mutant0-path
                                      (λ _ (mutant0-status))
                                      empty-will
-                                     0))
+                                     0
+                                     'no-blame))
 (define mutant1 (mutant mutant1-mod 1))
 (define mutant1-proc/1 (mutant-process mutant1
                                        (hash 'm1 'max
@@ -243,14 +250,16 @@ HERE
                                        mutant1-path/1
                                        (λ _ (mutant1-status))
                                        empty-will
-                                       1))
+                                       1
+                                       2))
 (define mutant1-proc/2 (mutant-process mutant1
                                        (hash 'm1 'types
                                              'm2 'max)
                                        mutant1-path/2
                                        (λ _ (mutant1-status))
                                        empty-will
-                                       2))
+                                       2
+                                       'no-blame))
 
 (define mutant2 (mutant mutant2-mod 2))
 (define mutant2-called? (make-parameter #f))
@@ -263,7 +272,8 @@ HERE
                                      mutant2-path
                                      (λ _ (mutant2-status))
                                      mutant2-will
-                                     3))
+                                     3
+                                     'no-blame))
 
 
 (test-begin/with-env
@@ -275,24 +285,29 @@ HERE
 
  (ignore
   (define aggregate-file (mutant-process-file mutant1-proc/2))
-  (define aggregate-file-contents (file->string aggregate-file))
+  (define aggregate-file-contents (call-with-input-file aggregate-file read))
   (define mutant1-proc/1-file (mutant-process-file mutant1-proc/1))
-  (define mutant1-proc/1-file-contents (file->string mutant1-proc/1-file))
+  (define mutant1-proc/1-file-contents
+    (call-with-input-file mutant1-proc/1-file read))
   (define dead-mutant1-proc/1
     (dead-mutant-process mutant1
                          (mutant-process-config mutant1-proc/1)
                          mutant1-proc/1-result
-                         (mutant-process-id mutant1-proc/1)))
+                         (mutant-process-id mutant1-proc/1)
+                         (mutant-process-blame-trail-id mutant1-proc/1)))
   (append-mutant-result!
+   (dead-mutant-process-blame-trail-id dead-mutant1-proc/1)
    (dead-mutant-process-result dead-mutant1-proc/1)
    (aggregate-mutant-result (mutant-process-mutant mutant1-proc/2)
                             (mutant-process-file mutant1-proc/2))))
  (test-equal?
   ;; ll: appending the file contents as opposed to the read-write
   ;; round trip causes an extra newline, so just add that to the expected output
-  (string-append (file->string aggregate-file) "\n")
-  (string-append aggregate-file-contents
-                 mutant1-proc/1-file-contents)))
+  (call-with-input-file aggregate-file
+    (λ (in) (list (read in) (read in))))
+  (list aggregate-file-contents
+        (cons (dead-mutant-process-blame-trail-id dead-mutant1-proc/1)
+              mutant1-proc/1-file-contents))))
 
 
 
@@ -305,12 +320,24 @@ HERE
     (define mutant2-proc-result (call-with-input-file mutant2-path
                                   read))
     (define aggregate-file (mutant-process-file mutant1-proc/2))
-    (define aggregate-file-contents (file->string aggregate-file))
+    (define aggregate-file-contents
+      (cons (mutant-process-id mutant1-proc/2)
+            (call-with-input-file aggregate-file
+              read)))
+    ;; make the aggregate file be in the right state
+    (call-with-output-file aggregate-file #:exists 'replace
+      (λ (out) (writeln aggregate-file-contents out)))
     (define mutant1-aggregate (aggregate-mutant-result mutant1
                                                        aggregate-file))
     (define mutant1-proc/1-file (mutant-process-file mutant1-proc/1))
-    (define mutant1-proc/1-file-contents (file->string mutant1-proc/1-file))
+    (define mutant1-proc/1-file-contents (call-with-input-file mutant1-proc/1-file
+                                           read))
+    (define mutant1-proc/1-file-contents+blame-trail
+      (cons (mutant-process-id mutant1-proc/2)
+            mutant1-proc/1-file-contents))
     (define mutant2-proc-file (mutant-process-file mutant2-proc))
+    (define mutant2-proc-file-contents (call-with-input-file mutant2-proc-file
+                                         read))
     (define orig-results (hash mutant1
                                mutant1-aggregate
                                ;; extra garbage not relevant
@@ -328,13 +355,15 @@ HERE
     (define new-factory/processed-mutant1-proc/1
       (process-dead-mutant orig-factory mutant1-proc/1))
     (define new-factory/processed-mutant2
-      (process-dead-mutant orig-factory mutant2-proc)))
+      (process-dead-mutant orig-factory mutant2-proc))
 
-   ;; ll: appending the file contents as opposed to the read-write
-   ;; round trip causes an extra newline, so just add that to the expected output
-   (test-equal? (string-append (file->string aggregate-file) "\n")
-                (string-append aggregate-file-contents
-                               mutant1-proc/1-file-contents))
+    (define new-aggregate-file-contents
+      (call-with-input-file aggregate-file
+        (λ (in) (list (read in) (read in))))))
+
+   (test-equal? new-aggregate-file-contents
+                (list aggregate-file-contents
+                      mutant1-proc/1-file-contents+blame-trail))
    ;; Due to consolidation, results map is unchanged
    (test-equal? (factory-results new-factory/processed-mutant1-proc/1)
                 orig-results)
@@ -357,6 +386,10 @@ HERE
                                                mutant0-path)))
    ;; and its file persists as the aggregate file
    (file-exists? mutant2-proc-file)
+   ;; but it has its blame trail info included now
+   (test-equal? (call-with-input-file mutant2-proc-file
+                  read)
+                (cons 'no-blame mutant2-proc-file-contents))
    ;; and the will of mutant2 was executed
    (mutant2-called?)))
 
@@ -404,23 +437,20 @@ HERE
                                _
                                _
                                (== empty-will)
-                               _))))
+                               _
+                               'no-blame))))
 
 
 
 ;; Full run test
 (parameterize ([data-output-dir test-mutant-dir]
-               [process-limit 1])
+               [process-limit 7]
+               [sample-size 10])
   (define d&e-mutant-total 4)
   (test-begin/with-env
    #:name test:full-run
 
-   (ignore (displayln 'waiting)
-           (displayln `(exists? ,e-path ,(file-exists? e-path)))
-           (displayln `(exists? ,d-path ,(file-exists? d-path)))
-           ;; (sleep 120)
-           (displayln 'starting)
-           (define mutant-results (run-all-mutants*configs "mutant-test")))
+   (ignore (define mutant-results (run-all-mutants*configs "mutant-test")))
    (test-= (length (directory-list test-mutant-dir)) d&e-mutant-total)
    (test/for/and ([f (in-directory test-mutant-dir)])
                  (test/not (test-= (file-size f)
