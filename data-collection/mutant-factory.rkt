@@ -356,7 +356,7 @@ Mutant: ~a @ ~a with id [~a] and config:
 Predecessor (id [~a]) blamed ~a and had config:
 ~a")
                            blame-trail-id
-                           mod index (mutant-process-id dead-successor)
+                           mod index (dead-mutant-process-id dead-successor)
                            (mutant-process-config dead-successor)
                            id blamed
                            config)
@@ -462,31 +462,32 @@ Predecessor (id [~a]) blamed ~a and had config:
 (define (sweep-dead-mutants the-factory)
   (log-factory debug "      Checking active mutant set for dead mutants...")
   ;; ll: ugly way to filter a set, there's no set-filter
-  (define a-dead-mutant
+  (define a-freshly-dead-mutant
     (for/first ([mutant-proc (in-set (factory-active-mutants the-factory))]
                 #:unless (equal? ((mutant-process-ctl mutant-proc) 'status)
                                  'running))
       mutant-proc))
-  (cond [a-dead-mutant
-         (define mutant (mutant-process-mutant a-dead-mutant))
-         (if (equal? ((mutant-process-ctl a-dead-mutant) 'status) 'done-ok)
+  (cond [a-freshly-dead-mutant
+         (define mutant (mutant-process-mutant a-freshly-dead-mutant))
+         (if (equal? ((mutant-process-ctl a-freshly-dead-mutant) 'status)
+                     'done-ok)
              (log-factory
               info
               "      Sweeping up dead mutant [~a]: ~a @ ~a, config ~a."
-              (mutant-process-id a-dead-mutant)
+              (mutant-process-id a-freshly-dead-mutant)
               (mutant-module mutant)
               (mutant-index mutant)
-              (mutant-process-config a-dead-mutant))
+              (mutant-process-config a-freshly-dead-mutant))
              (log-factory
               warning
               "*** WARNING: Runner errored on mutant ***
 [~a] ~a @ ~a with config ~a
 **********\n\n"
-                (mutant-process-id a-dead-mutant)
+                (mutant-process-id a-freshly-dead-mutant)
                 (mutant-module mutant)
                 (mutant-index mutant)
-                (mutant-process-config a-dead-mutant)))
-           (process-dead-mutant the-factory a-dead-mutant)]
+                (mutant-process-config a-freshly-dead-mutant)))
+           (process-dead-mutant the-factory a-freshly-dead-mutant)]
         [else
          the-factory]))
 
