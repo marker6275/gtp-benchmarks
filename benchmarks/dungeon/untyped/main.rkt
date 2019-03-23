@@ -109,12 +109,14 @@
 (define/contract N exact-nonnegative-integer? 1)
 
 (define/contract wall-cache
+  #:mutable
   (configurable-ctc
    [max (hash/c array-coord? boolean?)]
    [types hash?])
   (make-hash))
 
 (define/contract free-cache
+  #:mutable
   (configurable-ctc
    [max (hash/c array-coord? boolean?)]
    [types hash?])

@@ -13,6 +13,7 @@
 ;; list of strings (messages) which were produced since the previous
 ;; previous display, and need to be displayed now
 (define/contract message-queue
+  #:mutable
   (configurable-ctc
    [max (listof string?)]
    [types (listof string?)])
