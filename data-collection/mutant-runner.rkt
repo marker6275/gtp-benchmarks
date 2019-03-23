@@ -70,7 +70,8 @@
                                 (resolve-bench-path (module-to-mutate))
                                 (map resolve-bench-path others)
                                 (mutation-index)
-                                module-to-precision-map)]
+                                module-to-precision-map
+                                #:timeout/s (* 5 60))]
       [_ ((invalid-arg "module-to-mutate ~a is not a module in benchmark ~a"
                        (module-to-mutate)
                        (benchmark-name)))]))
