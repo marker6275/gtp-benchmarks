@@ -21,7 +21,8 @@
                               mutated
                               distance
                               mutation-index
-                              trace)
+                              trace
+                              message)
   #:transparent)
 
 (define (last-label trace)
@@ -48,16 +49,21 @@
    ;; having the exn in the output is useful for debugging, but the
    ;; distance we should use for crashes is the max
    (define crashed? (equal? outcome 'crashed))
-   (define blamed-id (cond [(trace-empty? trace)
-                            (if crashed?
-                                (try-get-exn-message blame)
-                                (error 'make-trace-distance-results
-                                       "Got empty trace but mutant didn't crash; blame: ~v"
-                                       blame))]
-                           [crashed?
-                            (trace-last-label trace)]
-                           [else
-                            blame]))
+   (define blamed-id
+     (match* {outcome blame}
+       [{'blamed (vector id mod)} id]
+       [{'blamed other} (error 'make-trace-distance-results
+                               "Got blame that's not a vector: ~v"
+                               other)]
+       [{_ _} #f]))
+   (define message
+     (if (equal? outcome 'crashed)
+         (try-get-exn-message blame)
+         #f))
+   (when (and blamed-id (trace-empty? trace))
+     (error 'make-trace-distance-results
+            "Got a blamed id (~a) but empty trace"
+            blamed-id))
    (define distance (trace-distance-between mutated-id
                                             blamed-id
                                             (raw-trace trace)))
@@ -69,7 +75,8 @@
                    mutated-id
                    distance
                    index
-                   trace)])
+                   trace
+                   message)])
 
 (struct distance (value) #:transparent)
 (struct no-blame () #:transparent)
@@ -82,8 +89,14 @@
          (distance (- (label-bounds-upper (hash-ref trace blamed-label))
                       (label-bounds-lower (hash-ref trace mutated-label))))]
         [(hash-has-key? trace mutated-label)
+         (error 'trace-distance-between
+                "Blamed label ~a not found in trace"
+                blamed-label)
          (label-missing blamed-label)]
         [else
+         (error 'trace-distance-between
+                "Mutated label (bug) ~a not found in trace"
+                mutated-label)
          (label-missing mutated-label)]))
 
 
@@ -96,7 +109,8 @@
                     mutated
                     maybe-distance
                     index
-                    _)}
+                    _
+                    msg)}
    (define distance/repr (match maybe-distance
                            [(distance n) n]
                            [(no-blame) 'N/A]
@@ -127,7 +141,8 @@
                     mutated
                     maybe-distance
                     index
-                    _)}
+                    _
+                    msg)}
    (define distance/repr (match maybe-distance
                            [(distance n) n]
                            [(no-blame) 'N/A]
@@ -143,8 +158,8 @@
                                (match-define (vector id mod) blamed)
                                (vector (maybe-path->string id)
                                        (maybe-path->string mod))]
-                              [(equal? outcome 'crashed) (~a blamed)]
                               [else blamed])
-                        (make-config-safe-for-reading precision)))
+                        (make-config-safe-for-reading precision)
+                        msg))
    (writeln result)])
 
