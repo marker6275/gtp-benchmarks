@@ -21,13 +21,15 @@
 
 (define-syntax (class/c* stx)
   (syntax-parse stx
-    #:datum-literals (field/all all inherit+super)
+    #:datum-literals (field/all init-field/all all inherit+super)
     [(_ (~alt (~optional (field/all f-spec ...))
+              (~optional (init-field/all i-f-spec ...))
               (~optional (all all-spec ...))
               (~optional (inherit+super i+s-spec ...))) ...
         other-specs ...)
-     #'(class/c (~? (field f-spec ...))
-                (~? (inherit-field f-spec ...))
+     #'(class/c (~? (init-field i-f-spec ...))
+                (~? (field f-spec ...))
+                (~? (inherit-field f-spec ... i-f-spec ...))
                 ;; all
                 (~? (inherit all-spec ...))
                 (~? (super all-spec ...))
@@ -48,7 +50,7 @@
 
 (define command%/c
   (class/c*
-   (field/all
+   (init-field/all
     [id symbol?]
     [descr string?]
     [exec ((listof
