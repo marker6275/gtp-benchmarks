@@ -34,6 +34,11 @@
         (values label label-index)
         (values max-label max-index))))
 
+(define (try-get-exn-message maybe-exn)
+  (if (exn? maybe-exn)
+      (exn-message maybe-exn)
+      maybe-exn))
+
 (define/match (make-trace-distance-results bench _)
   [{bench
     (run-status trace
@@ -42,9 +47,17 @@
                 precision)}
    ;; having the exn in the output is useful for debugging, but the
    ;; distance we should use for crashes is the max
-   (define blamed-id (if (equal? outcome 'crashed)
-                         (trace-last-label trace)
-                         blame))
+   (define crashed? (equal? outcome 'crashed))
+   (define blamed-id (cond [(trace-empty? trace)
+                            (if crashed?
+                                (try-get-exn-message blame)
+                                (error 'make-trace-distance-results
+                                       "Got empty trace but mutant didn't crash; blame: ~v"
+                                       blame))]
+                           [crashed?
+                            (trace-last-label trace)]
+                           [else
+                            blame]))
    (define distance (trace-distance-between mutated-id
                                             blamed-id
                                             (raw-trace trace)))
