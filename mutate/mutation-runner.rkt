@@ -328,18 +328,21 @@ HERE
 
 ;; for debugging
 (module+ debug
-  (provide print-mutation)
+  (provide diff-mutation)
 
-  (require syntax/modread)
+  (require syntax/modread
+           ruinit/diff)
   (define (read-module path)
     (check-module-form
      (with-module-reading-parameterization
        (λ () (with-input-from-file path
                (λ () (port-count-lines! (current-input-port)) (read-syntax)))))
      'ignored path))
-  (define (print-mutation module-to-mutate mutation-index)
+  (define (diff-mutation module-to-mutate mutation-index)
+    (define orig-module-stx (read-module module-to-mutate))
     (define-values (mutated-program-stx mutated-id)
-      (mutate-module (read-module module-to-mutate) mutation-index))
-    (printf "--------------------\nMutated: ~a\n\n"
-            mutated-id)
-    (pretty-print (syntax->datum mutated-program-stx))))
+      (mutate-module orig-module-stx mutation-index))
+    (printf "--------------------\nMutated: ~a\n" mutated-id)
+    (displayln (dumb-diff-lines/string
+                (pretty-format (syntax->datum orig-module-stx))
+                (pretty-format (syntax->datum mutated-program-stx))))))
