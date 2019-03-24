@@ -365,10 +365,13 @@
                             (add1 (length E)))
                          "^Available commands:")]
                 [(or (list (? symbol? s)) (? symbol? s))
-                 (if (find-command E s)
-                     (get-field descr (find-command E s))
-                     (format "Unknown command '~a'" s))]
-                [x (format "Cannot help with '~a'" x)])
+                 (regexp-quote
+                  (if (find-command E s)
+                      (get-field descr (find-command E s))
+                      (format "Unknown command '~a'" s)))]
+                [x
+                 (regexp-quote
+                  (format "Cannot help with '~a'" x))])
               result))]
    [types (env? any/c . -> . string?)])
 
