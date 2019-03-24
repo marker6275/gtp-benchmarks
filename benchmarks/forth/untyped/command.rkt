@@ -87,9 +87,20 @@
 ;;  the identifier is then applied to the top 2 numbers on the stack.
 (define/ctc-helper binop-command%/c
   (and/c command%/c
-         (class/c* (field/all
-                    [binop symbol?]
-                    [exec any/c #|Same as command%/c|#]))))
+         (let ([the-op (λ _ (error 'the-op
+                                   "The op wasn't set by the binop field!"))])
+           (class/c* (field/all
+                      [binop (and/c (λ (op) (set! the-op op) #t)
+                                    (number? number? . -> . number?))]
+                      [exec
+                       (->i ([E env?] [S stack?] [v any/c])
+                            [result (E S v)
+                                    (match* {S v}
+                                      [{(list v1 v2 S-rest ...)
+                                        (cons (== the-op eq?) _)}
+                                       (equal?/c
+                                        (cons E (cons (the-op v2 v1) S-rest)))]
+                                      [{_ _} #f])])])))))
 
 (require (for-syntax syntax/parse))
 (define-syntax/ctc-helper (binop-command%/c-for stx)
