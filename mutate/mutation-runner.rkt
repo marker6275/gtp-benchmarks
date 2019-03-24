@@ -345,4 +345,14 @@ HERE
     (printf "--------------------\nMutated: ~a\n" mutated-id)
     (displayln (dumb-diff-lines/string
                 (pretty-format (syntax->datum orig-module-stx))
-                (pretty-format (syntax->datum mutated-program-stx))))))
+                (pretty-format (syntax->datum mutated-program-stx)))))
+  (define (mutant-count module-to-mutate)
+    (define module-stx (read-module module-to-mutate))
+    (let next-mutant ([index 0])
+      (define index-exceeded?
+        (with-handlers ([mutation-index-exception? (λ _ #t)])
+          (mutate-module module-stx index)
+          #f))
+      (if index-exceeded?
+          index
+          (next-mutant (add1 index))))))
