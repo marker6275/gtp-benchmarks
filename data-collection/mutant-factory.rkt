@@ -358,7 +358,7 @@ Predecessor (id [~a]) blamed ~a and had config:
 ~a")
                            blame-trail-id
                            mod index (dead-mutant-process-id dead-successor)
-                           (mutant-process-config dead-successor)
+                           (dead-mutant-process-config dead-successor)
                            id blamed
                            config)
               (abort "Blame disappeared"))))
