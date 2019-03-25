@@ -334,11 +334,12 @@
                       "Blame trail {~a} ended."
                       blame-trail-id)
          (unless (blamed-is-bug? blamed result)
-           (log-factory error
-                        "***** ERROR *****
-Found mutant with blamed region at max ctcs that is not bug: ~a
-**********"
-                        dead-proc))
+           (log-factory
+            error
+            (failure-msg
+             "Found mutant with blamed region at max ctcs that is not bug: ~a
+")
+            dead-proc))
          ;; Blamed region is at max ctcs, so the path ends here
          the-factory]
         [else
@@ -360,7 +361,7 @@ Predecessor (id [~a]) blamed ~a and had config:
                            (mutant-process-config dead-successor)
                            id blamed
                            config)
-              (exit 1))))
+              (abort "Blame disappeared"))))
          (spawn-mutant the-factory
                        mod
                        index
@@ -615,7 +616,7 @@ Predecessor (id [~a]) blamed ~a and had config:
 Found: ~v
 ")
                 other)
-   (exit 1)])
+   (abort "Invalid mutant output")])
 
 ;; dead-mutant-process? -> (vector (or/c symbol? path-string?))
 (define/match (try-get-blamed dead-proc)
@@ -636,7 +637,7 @@ Blamed: ~v
 Config: ~v")
                  blamed
                  config-hash)
-    (exit 1))
+    (abort "Missing blame"))
   (define mod-ids-hash (hash-ref config-hash mod missing-blame))
   (cond [set-value
          (define new-mod-ids-hash (hash-set mod-ids-hash id set-value))
@@ -706,6 +707,22 @@ Config: ~v")
      #t]
     [_ #f]))
 
+(define (abort reason)
+  ;; Mark the mutant error file before it gets garbled with error
+  ;; messages from killing the current active mutants
+  (call-with-output-file (mutant-error-log)
+    #:exists? 'append #:mode 'text
+    (λ (out)
+      (printf "
+~n~n~n~n~n~n~n~n~n~n
+================================================================================
+                              Factory aborting
+  Reason: ~a
+================================================================================
+~n~n~n~n~n~n~n~n~n~n
+"
+              reason)))
+  (exit 1))
 
 (module+ main
   (require racket/cmdline)

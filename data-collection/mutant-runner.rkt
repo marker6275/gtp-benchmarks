@@ -48,7 +48,7 @@
     (mutation-index (string->number index))])
 
   (define ((invalid-arg fmt-str . fmt-args))
-    (printf "Invalid argument: ~a\n" (apply format fmt-str fmt-args))
+    (eprintf "Invalid argument: ~a\n" (apply format fmt-str fmt-args))
     (exit 1))
 
   (define bench
