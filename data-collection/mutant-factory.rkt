@@ -355,7 +355,7 @@
 Mutant: ~a @ ~a with id [~a] and config:
 ~a
 Predecessor (id [~a]) blamed ~a and had config:
-~a")
+~v")
                            blame-trail-id
                            mod index (dead-mutant-process-id dead-successor)
                            (dead-mutant-process-config dead-successor)
@@ -482,7 +482,7 @@ Predecessor (id [~a]) blamed ~a and had config:
              (log-factory
               warning
               "*** WARNING: Runner errored on mutant ***
-[~a] ~a @ ~a with config ~a
+[~a] ~a @ ~a with config ~v
 **********\n\n"
                 (mutant-process-id a-freshly-dead-mutant)
                 (mutant-module mutant)
