@@ -15,7 +15,10 @@
          "instrumented-module-runner.rkt"
          "trace.rkt"
 
+         (only-in flow-trace/util hash-rename-key)
          (submod flow-trace/collapsing compressed trace-api))
+
+(define-logger mutant-runner)
 
 ;; Produce the mutated syntax for the module at the given path
 (define (mutate-module module-stx mutation-index)
@@ -35,21 +38,37 @@
               #'(module name lang mutated-mod-stx))
              mutated-id)]))
 
+(define (simple-form-path? path)
+  (and (path? path)
+       (complete-path? path)
+       (for/and ([p (in-list (explode-path path))])
+         (path-for-some-system? p))))
+
 (define/contract (make-mutated-module-runner main-module
                                              module-to-mutate
                                              other-modules
                                              mutation-index
-                                             ctc-precision-config)
-  (->i ([main-module path-string?]
-        [module-to-mutate path-string?]
-        [other-modules (listof path-string?)]
+                                             ctc-precision-config
+                                             #:modules-base-path [base-path #f]
+                                             #:write-modules-to [write-to-dir #f]
+                                             #:on-module-exists [on-module-exists 'error])
+  (->i ([main-module simple-form-path?]
+        [module-to-mutate simple-form-path?]
+        [other-modules (listof simple-form-path?)]
         [mutation-index natural?]
-        [ctc-precision-config (hash/c path-string?
-                                      (hash/c (or/c symbol? path-string?)
+        [ctc-precision-config (hash/c simple-form-path?
+                                      (hash/c (or/c symbol? simple-form-path?)
                                               symbol?))])
+       (#:modules-base-path [base-path (or/c simple-form-path? #f)]
+        #:write-modules-to [write-to-dir (or/c path-string? #f)]
+        #:on-module-exists [on-module-exists (or/c 'error 'replace)])
        #:pre (main-module module-to-mutate other-modules)
        (and (not (member main-module other-modules))
             (not (member module-to-mutate other-modules)))
+       #:pre/desc (base-path write-to-dir)
+       (or (not (and write-to-dir (not (unsupplied-arg? write-to-dir))
+                     (or (not base-path) (unsupplied-arg? base-path))))
+           "must specify #:modules-base-path if #:write-modules-to is specified")
 
        (values [runner (-> any)]
                [mutated-id symbol?]))
@@ -57,15 +76,40 @@
   ;; ll: Ugly hack to get the mutated id out of the instrumentor
   (define mutated-id-box (box #f))
 
+  (define-values [ctc-precision-config/write-to mod-paths/write-to]
+    (if write-to-dir
+        (for/fold ([config ctc-precision-config]
+                   [new-paths #hash()])
+                  ([old-path (in-list (cons module-to-mutate other-modules))])
+          (define rel-path (find-relative-path base-path old-path))
+          (define new-path (simple-form-path (build-path write-to-dir rel-path)))
+          (define old-mod-config (hash-ref config old-path))
+          (define new-mod-config (hash-rename-key old-mod-config old-path new-path))
+          (values (hash-set (hash-remove config old-path) new-path new-mod-config)
+                  (hash-set new-paths old-path new-path)))
+        (values #f #f)))
+
+  (define (trace/maybe-write-module mod-path mod-stx)
+    (when write-to-dir
+      (define new-path (hash-ref mod-paths/write-to mod-path))
+      (define new-stx (trace-module new-path mod-stx ctc-precision-config/write-to))
+      (log-mutant-runner-debug "writing module configuration for ~a to ~a"
+                               (find-relative-path base-path mod-path)
+                               new-path)
+      (make-parent-directory* new-path)
+      (call-with-output-file new-path #:exists on-module-exists
+        (λ (out) (pretty-write (syntax->datum new-stx) out))))
+    (trace-module mod-path mod-stx ctc-precision-config))
+
   (define/match (instrument-module path-string stx)
     [{(== module-to-mutate) stx}
      (define-values (mutated-stx mutated-id)
        (mutate-module stx mutation-index))
      ;; ll: see above...
      (set-box! mutated-id-box mutated-id)
-     (trace-module module-to-mutate mutated-stx ctc-precision-config)]
+     (trace/maybe-write-module module-to-mutate mutated-stx)]
     [{path stx}
-     (trace-module path stx ctc-precision-config)])
+     (trace/maybe-write-module path stx)])
 
   ;; ll: Old code had this as first thing eval'd in namespace. Why?
   ;; (eval '(require "mutate.rkt"))
@@ -144,21 +188,31 @@ Blamed: ~a
                                           ctc-precision-config
                                           #:suppress-output? [suppress-output? #t]
                                           #:timeout/s [timeout/s (* 3 60)]
-                                          #:memory/gb [memory/gb 3])
-  (->i ([main-module path-string?]
-        [module-to-mutate path-string?]
-        [other-modules (listof path-string?)]
+                                          #:memory/gb [memory/gb 3]
+                                          #:modules-base-path [base-path #f]
+                                          #:write-modules-to [write-to-dir #f]
+                                          #:on-module-exists [on-module-exists 'error])
+  (->i ([main-module simple-form-path?]
+        [module-to-mutate simple-form-path?]
+        [other-modules (listof simple-form-path?)]
         [mutation-index natural?]
-        [ctc-precision-config (hash/c path-string?
-                                      (hash/c (or/c symbol? path-string?)
+        [ctc-precision-config (hash/c simple-form-path?
+                                      (hash/c (or/c symbol? simple-form-path?)
                                               symbol?))])
        (#:suppress-output? [suppress-output? boolean?]
         #:timeout/s [timeout/s number?]
-        #:memory/gb [memory/gb number?])
+        #:memory/gb [memory/gb number?]
+        #:modules-base-path [base-path (or/c simple-form-path? #f)]
+        #:write-modules-to [write-to-dir (or/c path-string? #f)]
+        #:on-module-exists [on-module-exists (or/c 'error 'replace)])
 
        #:pre (main-module module-to-mutate other-modules)
        (and (not (member main-module other-modules))
             (not (member module-to-mutate other-modules)))
+       #:pre/desc (base-path write-to-dir)
+       (or (not (and write-to-dir (not (unsupplied-arg? write-to-dir))
+                     (or (not base-path) (unsupplied-arg? base-path))))
+           "must specify #:modules-base-path if #:write-modules-to is specified")
 
        [result run-status?])
 
@@ -177,7 +231,10 @@ Blamed: ~a
                                   module-to-mutate
                                   other-modules
                                   mutation-index
-                                  ctc-precision-config))
+                                  ctc-precision-config
+                                  #:modules-base-path base-path
+                                  #:write-modules-to write-to-dir
+                                  #:on-module-exists on-module-exists))
     (define ((make-status* status-sym) [blamed #f])
       (make-status status-sym
                    blamed
@@ -211,7 +268,7 @@ Blamed: ~a
            "../utilities/test-env.rkt")
   (define-test-env (setup-test-env! cleanup-test-env!)
     #:directories ()
-    #:files ([a-path (resolve-path-string "a.rkt")
+    #:files ([a-path (simple-form-path "a.rkt")
              #<<HERE
 #lang flow-trace
 
@@ -246,7 +303,7 @@ Blamed: ~a
 (foo d c)
 HERE
              ]
-[b-path (resolve-path-string "b.rkt")
+[b-path (simple-form-path "b.rkt")
         #<<HERE
 #lang flow-trace
 
@@ -270,7 +327,7 @@ HERE
 (displayln (list 'd d))
 HERE
         ]
-[c-path (resolve-path-string "c.rkt")
+[c-path (simple-form-path "c.rkt")
         "#lang flow-trace (void)\n"]))
 (define none-config
   (hash a-path (hash 'a 'none

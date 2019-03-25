@@ -379,7 +379,7 @@ Predecessor (id [~a]) blamed ~a and had config:
    on the region blamed by the predecessor (see below) that crashed"
                                "Something has gone very wrong")
                            id blamed
-                           config)
+                           (make-safe-for-reading config))
               (abort "Blame disappeared"))))
          (spawn-mutant the-factory
                        mod
@@ -507,7 +507,7 @@ Predecessor (id [~a]) blamed ~a and had config:
                 (mutant-process-id a-freshly-dead-mutant)
                 (mutant-module mutant)
                 (mutant-index mutant)
-                (mutant-process-config a-freshly-dead-mutant)))
+                (make-safe-for-reading (mutant-process-config a-freshly-dead-mutant))))
            (process-dead-mutant the-factory a-freshly-dead-mutant)]
         [else
          the-factory]))
@@ -575,7 +575,7 @@ Predecessor (id [~a]) blamed ~a and had config:
   (call-with-output-file file
     #:mode 'text
     #:exists 'replace
-    (λ (out) (writeln (cons blame-trail-id result) out))))
+    (λ (out) (writeln (serialize (cons blame-trail-id result)) out))))
 
 ;; path-string? natural? -> boolean?
 (define (max-mutation-index-exceeded? module-to-mutate mutation-index
@@ -592,7 +592,7 @@ Predecessor (id [~a]) blamed ~a and had config:
                                 '()
                                 mutation-index
                                 ;; A dummy config, it doesn't matter
-                                (hash (path->string path) (hash)))
+                                (hash path (hash)))
     #f))
 
 ;; blame-trail-id? result? aggregate-mutant-result? -> void
@@ -601,7 +601,7 @@ Predecessor (id [~a]) blamed ~a and had config:
   (with-output-to-file aggregate-file
     #:exists 'append
     #:mode 'text
-    (λ _ (writeln (cons blame-trail-id result)))))
+    (λ _ (writeln (serialize (cons blame-trail-id result))))))
 
 (define (check-mutant-result mutant-proc result)
   (match result
@@ -636,7 +636,7 @@ Mutant: [~a] ~a @ ~a with config:
 ~v"
                         (file->string path))
                        (abort "Unreadable mutant output"))])
-      (with-input-from-file path read)))
+      (deserialize (with-input-from-file path read))))
   (check-mutant-result mutant-proc read-result))
 
 ;; dead-mutant-process? -> boolean?
@@ -693,22 +693,20 @@ Config: ~v"
 
 (define (make-max-bench-config bench)
   (match-define (benchmark main others) bench)
-  (define config/paths
-    (for/hash ([mod (in-list (cons main others))])
-      (define mod-path/simplified
-        (simplify-path (build-path benchmarks-dir-path mod)))
-      (define mod-ids
-        (dynamic-require `(submod
-                           ;; Must be file because `benchmarks-dir-path`
-                           ;; is an absolute path
-                           (file
-                            ,(path->string mod-path/simplified))
-                           contract-regions)
-                         'regions))
-      (values mod-path/simplified
-              (for/hash ([id (in-list mod-ids)])
-                (values id 'max)))))
-  (make-config-safe-for-reading config/paths))
+  (for/hash ([mod (in-list (cons main others))])
+    (define mod-path/simplified
+      (simplify-path (build-path benchmarks-dir-path mod)))
+    (define mod-ids
+      (dynamic-require `(submod
+                         ;; Must be file because `benchmarks-dir-path`
+                         ;; is an absolute path
+                         (file
+                          ,(path->string mod-path/simplified))
+                         contract-regions)
+                       'regions))
+    (values mod-path/simplified
+            (for/hash ([id (in-list mod-ids)])
+              (values id 'max)))))
 
 ;; config? natural? -> (set config?)
 ;; Produces `n` random samples of the ctc precision config lattice

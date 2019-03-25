@@ -1,7 +1,6 @@
 #lang racket/base
 
-(provide define-test-env
-         resolve-path-string)
+(provide define-test-env)
 
 (require syntax/parse/define
          racket/file
@@ -30,6 +29,3 @@
         (when (directory-exists? d)
           (delete-directory/files d))))
     maybe-provides))
-
-(define (resolve-path-string path-str)
-  (path->string (path->complete-path (string->path path-str))))
