@@ -27,7 +27,7 @@
               (~optional (all all-spec ...))
               (~optional (inherit+super i+s-spec ...))) ...
         other-specs ...)
-     #'(class/dc (~? (init-field i-f-spec ...))
+     #'(class/c (~? (init-field i-f-spec ...))
                 (~? (field f-spec ...))
                 (~? (inherit-field f-spec ... i-f-spec ...))
                 ;; all

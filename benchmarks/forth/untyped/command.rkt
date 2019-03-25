@@ -87,10 +87,12 @@
 ;;  the identifier is then applied to the top 2 numbers on the stack.
 (define/ctc-helper binop-command%/c
   (and/c command%/c
-         (class/c*
-          (init-field/all [binop (number? number? . -> . number?)])
-          (field/all [id symbol?])
-          (field [exec (binop id)
+         (class/dc
+          (init-field [binop (number? number? . -> . number?)])
+          (inherit-field [id symbol?]
+                         [binop (number? number? . -> . number?)])
+          (field [id symbol?]
+                 [exec (binop id)
                        (->i ([E env?] [S stack?] [v any/c])
                             [result (E S v)
                                     (match* {S v}
