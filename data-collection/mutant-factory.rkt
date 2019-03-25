@@ -71,9 +71,13 @@
   (when (log-level? factory-logger 'level)
     (log-message factory-logger
                  'level
-                 (format (string-append "[~a] " msg)
-                         (date->string (current-date) #t)
-                         v ...))))
+                 (format
+                  (string-append "[~a] "
+                                 (if (member 'level '(fatal error))
+                                     (failure-msg msg)
+                                     msg))
+                  (date->string (current-date) #t)
+                  v ...))))
 (define (failure-msg m)
   (string-append "***** ERROR *****\n" m "\n**********"))
 
@@ -336,9 +340,8 @@
          (unless (blamed-is-bug? blamed result)
            (log-factory
             error
-            (failure-msg
-             "Found mutant with blamed region at max ctcs that is not bug: ~a
-")
+            "Found mutant with blamed region at max ctcs that is not bug: ~a
+"
             dead-proc))
          ;; Blamed region is at max ctcs, so the path ends here
          the-factory]
@@ -357,8 +360,7 @@
                                      _)
                 dead-successor)
               (log-factory fatal
-                           (failure-msg
-                            "Blame disappeared while following blame trail {~a}.
+                           "Blame disappeared while following blame trail {~a}.
 Mutant: ~a @ ~a with id [~a] and config:
 ~v
 
@@ -366,7 +368,7 @@ produced result: ~v
 => ~a
 
 Predecessor (id [~a]) blamed ~a and had config:
-~v")
+~v"
                            blame-trail-id
                            mod index dead-succ-id
                            dead-succ-config
@@ -601,35 +603,41 @@ Predecessor (id [~a]) blamed ~a and had config:
     #:mode 'text
     (λ _ (writeln (cons blame-trail-id result)))))
 
-(define (check-mutant-result result)
+(define (check-mutant-result mutant-proc result)
   (match result
-    [(or (list _ _ _ _ _ (or 'crashed 'completed) #f _ _)
+    [(or (list _ _ _ _ _ (or 'crashed 'completed 'timeout) #f _ _)
          (list _ _ _ _ _ 'blamed (vector _ _) _ _))
      result]
     [other
+     (match-define (mutant-process (mutant mod index) config _ _ _ id _)
+       mutant-proc)
      (log-factory fatal
-                  (failure-msg
-                   "Result read from mutant output not of the expected shape.
-Expected: (or (list _ _ _ _ _ (or 'crashed 'completed) #f _ _)
+                  "Result read from mutant output not of the expected shape.
+Expected: (or (list _ _ _ _ _ (or 'crashed 'completed 'timeout) #f _ _)
               (list _ _ _ _ _ 'blamed (vector _ _) _ _))
 Found: ~v
-")
-                  other)
+
+Mutant: [~a] ~a @ ~a with config:
+~v
+"
+                  other
+                  id mod index
+                  config)
      (abort "Invalid mutant output")]))
 
 (define (get-mutant-result mutant-proc)
   (define path (mutant-process-file mutant-proc))
-  (check-mutant-result
-   (with-handlers ([exn:fail:read?
-                    (λ _
-                      (log-factory
-                       fatal
-                       (failure-msg
+  (define read-result
+    (with-handlers ([exn:fail:read?
+                     (λ _
+                       (log-factory
+                        fatal
                         "Found unreadable item in mutant output file. Contents:
-~v")
-                       (file->string path))
-                      (abort "Unreadable mutant output"))])
-     (with-input-from-file path read))))
+~v"
+                        (file->string path))
+                       (abort "Unreadable mutant output"))])
+      (with-input-from-file path read)))
+  (check-mutant-result mutant-proc read-result))
 
 ;; dead-mutant-process? -> boolean?
 (define (blame-outcome? dead-proc)
@@ -658,9 +666,9 @@ Found: ~v
   (match-define (vector id mod) blamed)
   (define (missing-blame . _)
     (log-factory fatal
-                 (failure-msg "Could not find blamed region in config.
+                 "Could not find blamed region in config.
 Blamed: ~v
-Config: ~v")
+Config: ~v"
                  blamed
                  config-hash)
     (abort "Missing blame"))
@@ -742,7 +750,8 @@ Benchmark must be one of: ~v"
   (call-with-output-file (mutant-error-log)
     #:exists 'append #:mode 'text
     (λ (out)
-      (printf "
+      (fprintf out
+               "
 ~n~n~n~n~n~n~n~n~n~n
 ================================================================================
                               Factory aborting
@@ -750,8 +759,7 @@ Benchmark must be one of: ~v"
 ================================================================================
 ~n~n~n~n~n~n~n~n~n~n
 "
-              reason
-              out)))
+              reason)))
   (exit 1))
 
 (module+ main
