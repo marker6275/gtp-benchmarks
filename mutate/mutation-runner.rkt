@@ -328,7 +328,8 @@ HERE
 
 ;; for debugging
 (module+ debug
-  (provide diff-mutation)
+  (provide diff-mutation
+           mutant-count)
 
   (require syntax/modread
            ruinit/diff)
