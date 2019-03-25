@@ -1,7 +1,8 @@
 #lang racket
 
 (module test-helper racket
-  (require ruinit
+  (require racket/serialize
+           ruinit
            "../utilities/test-env.rkt"
            syntax/parse/define)
   (provide test-begin/with-env)
@@ -41,21 +42,25 @@ HERE
 HERE
 ]
 [mutant0-path "m0.rktd"
-              "(\"test\" 102 \"m0.rkt\" foo 0 crashed #f #hash((\"m0.rkt\" . #hash((foo . max) (\"m0.rkt\" . none)))) #f)
-
-"]
+              (let ([path (string->path "m0.rkt")])
+                (format "~s\n" (serialize (list "test" 102 path 'foo 0 'crashed #f
+                                                (hash path (hash 'foo 'max path 'none))
+                                                #f))))]
 [mutant1-path/1 "m11.rktd"
-                "(\"test\" 102 \"m1.rkt\" foo 0 blamed foo #hash((\"m1.rkt\" . #hash((foo . max) (\"m1.rkt\" . none)))) #f)
-
-"]
+                (let ([path (string->path "m1.rkt")])
+                  (format "~s\n" (serialize (list "test" 102 path 'foo 0 'blamed 'foo
+                                                  (hash path (hash 'foo 'max path 'none))
+                                                  #f))))]
 [mutant1-path/2 "m12.rktd"
-                "(\"test\" 102 \"m1.rkt\" foo 0 blamed foo #hash((\"m1.rkt\" . #hash((foo . types) (\"m1.rkt\" . none)))) #f)
-
-"]
+                (let ([path (string->path "m1.rkt")])
+                  (format "~s\n" (serialize (list "test" 102 path 'foo 0 'blamed 'foo
+                                                  (hash path (hash 'foo 'types path 'none))
+                                                  #f))))]
 [mutant2-path "m2.rktd"
-              "(\"test\" 102 \"m2.rkt\" foo 0 crashed #f #hash((\"m2.rkt\" . #hash((foo . max) (bar . none) (\"m2.rkt\" . none)))) #f)
-
-"])
+              (let ([path (string->path "m2.rkt")])
+                  (format "~s\n" (serialize (list "test" 102 path 'foo 0 'crashed #f
+                                                  (hash path (hash 'foo 'max 'bar 'none path 'none))
+                                                  #f))))])
 
 #:provide)
 
@@ -71,7 +76,8 @@ HERE
 
 
 
-(require 'test-helper
+(require racket/serialize
+         'test-helper
          ruinit
          (submod "mutant-factory.rkt" test)
          "benchmarks.rkt"
@@ -80,11 +86,10 @@ HERE
 (test-begin/with-env
   #:name test:make-max-bench-config
   (test-equal? (make-max-bench-config (hash-ref benchmarks "mutant-test"))
-               (make-config-safe-for-reading
-                (hash e-path (hash (path->string e-path) 'max
-                                   'baz 'max)
-                      d-path (hash (path->string d-path) 'max
-                                   'foo 'max)))))
+               (hash e-path (hash e-path 'max
+                                  'baz 'max)
+                     d-path (hash d-path 'max
+                                  'foo 'max))))
 
 (test-begin
   #:name test:increment-config-precision-for
@@ -278,17 +283,16 @@ HERE
 
 (test-begin/with-env
  #:name mutant-results
- (ignore (define mutant1-proc/1-result (call-with-input-file mutant1-path/1
-                                         read)))
+ (ignore (define mutant1-proc/1-result (deserialize (call-with-input-file mutant1-path/1 read))))
  (test-equal? (get-mutant-result mutant1-proc/1)
               mutant1-proc/1-result)
 
  (ignore
   (define aggregate-file (mutant-process-file mutant1-proc/2))
-  (define aggregate-file-contents (call-with-input-file aggregate-file read))
+  (define aggregate-file-contents (deserialize (call-with-input-file aggregate-file read)))
   (define mutant1-proc/1-file (mutant-process-file mutant1-proc/1))
   (define mutant1-proc/1-file-contents
-    (call-with-input-file mutant1-proc/1-file read))
+    (deserialize (call-with-input-file mutant1-proc/1-file read)))
   (define dead-mutant1-proc/1
     (dead-mutant-process mutant1
                          (mutant-process-config mutant1-proc/1)
@@ -304,7 +308,7 @@ HERE
   ;; ll: appending the file contents as opposed to the read-write
   ;; round trip causes an extra newline, so just add that to the expected output
   (call-with-input-file aggregate-file
-    (λ (in) (list (read in) (read in))))
+    (λ (in) (list (deserialize (read in)) (deserialize (read in)))))
   (list aggregate-file-contents
         (cons (dead-mutant-process-blame-trail-id dead-mutant1-proc/1)
               mutant1-proc/1-file-contents))))
@@ -315,29 +319,25 @@ HERE
   (test-begin/with-env
    #:name process-dead-mutant
    (ignore
-    (define mutant1-proc/1-result (call-with-input-file mutant1-path/1
-                                    read))
-    (define mutant2-proc-result (call-with-input-file mutant2-path
-                                  read))
+    (define mutant1-proc/1-result (deserialize (call-with-input-file mutant1-path/1 read)))
+    (define mutant2-proc-result (deserialize (call-with-input-file mutant2-path read)))
     (define aggregate-file (mutant-process-file mutant1-proc/2))
     (define aggregate-file-contents
       (cons (mutant-process-id mutant1-proc/2)
-            (call-with-input-file aggregate-file
-              read)))
+            (deserialize (call-with-input-file aggregate-file read))))
     ;; make the aggregate file be in the right state
     (call-with-output-file aggregate-file #:exists 'replace
-      (λ (out) (writeln aggregate-file-contents out)))
+      (λ (out) (writeln (serialize aggregate-file-contents) out)))
     (define mutant1-aggregate (aggregate-mutant-result mutant1
                                                        aggregate-file))
     (define mutant1-proc/1-file (mutant-process-file mutant1-proc/1))
-    (define mutant1-proc/1-file-contents (call-with-input-file mutant1-proc/1-file
-                                           read))
+    (define mutant1-proc/1-file-contents (deserialize
+                                          (call-with-input-file mutant1-proc/1-file read)))
     (define mutant1-proc/1-file-contents+blame-trail
       (cons (mutant-process-id mutant1-proc/2)
             mutant1-proc/1-file-contents))
     (define mutant2-proc-file (mutant-process-file mutant2-proc))
-    (define mutant2-proc-file-contents (call-with-input-file mutant2-proc-file
-                                         read))
+    (define mutant2-proc-file-contents (deserialize (call-with-input-file mutant2-proc-file read)))
     (define orig-results (hash mutant1
                                mutant1-aggregate
                                ;; extra garbage not relevant
@@ -359,7 +359,7 @@ HERE
 
     (define new-aggregate-file-contents
       (call-with-input-file aggregate-file
-        (λ (in) (list (read in) (read in))))))
+        (λ (in) (list (deserialize (read in)) (deserialize (read in)))))))
 
    (test-equal? new-aggregate-file-contents
                 (list aggregate-file-contents
@@ -387,8 +387,7 @@ HERE
    ;; and its file persists as the aggregate file
    (file-exists? mutant2-proc-file)
    ;; but it has its blame trail info included now
-   (test-equal? (call-with-input-file mutant2-proc-file
-                  read)
+   (test-equal? (deserialize (call-with-input-file mutant2-proc-file read))
                 (cons 'no-blame mutant2-proc-file-contents))
    ;; and the will of mutant2 was executed
    (mutant2-called?)))

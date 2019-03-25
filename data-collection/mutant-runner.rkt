@@ -7,6 +7,7 @@
          racket/serialize
          racket/cmdline
          racket/match
+         racket/path
          racket/runtime-path)
 
 (for ([(bench precision) current-precision-config])
@@ -18,12 +19,14 @@
 
 (define-runtime-path benchmarks-dir-path "../benchmarks/")
 (define (resolve-bench-path p)
-  (build-path benchmarks-dir-path p))
+  (simple-form-path (build-path benchmarks-dir-path p)))
 
 (module+ main
   (define benchmark-name (make-parameter #f))
   (define module-to-mutate (make-parameter #f))
   (define mutation-index (make-parameter #f))
+  (define write-modules-to (make-parameter #f))
+  (define on-module-exists (make-parameter 'error))
 
   ;; lltodo: this doesn't work actually: basically the job queue
   ;; manager is going to have to specify everything
@@ -45,7 +48,14 @@
    [("-i" "--mutation-index")
     index
     "Mutation index"
-    (mutation-index (string->number index))])
+    (mutation-index (string->number index))]
+   [("-o" "--write-modules-to")
+    output-path
+    "Path to output mutated modules to"
+    (write-modules-to output-path)]
+   [("-f" "--overwrite-modules")
+    "When writing modules, overwrite files that already exist"
+    (on-module-exists 'replace)])
 
   (define ((invalid-arg fmt-str . fmt-args))
     (eprintf "Invalid argument: ~a\n" (apply format fmt-str fmt-args))
@@ -55,12 +65,7 @@
     (hash-ref benchmarks (benchmark-name)
               (invalid-arg "benchmark ~a unknown" (benchmark-name))))
 
-  (define module-to-precision-map
-    (make-config-safe-for-reading (deserialize (read))))
-  #;(define module-to-precision-map/full
-    (hash-union module-to-precision-map
-                current-precision-config
-                #:combine/key (λ (k p _) p)))
+  (define module-to-precision-map (deserialize (read)))
 
   (define result
     (match bench
@@ -71,7 +76,10 @@
                                 (map resolve-bench-path others)
                                 (mutation-index)
                                 module-to-precision-map
-                                #:timeout/s (* 5 60))]
+                                #:timeout/s (* 5 60)
+                                #:modules-base-path (resolve-bench-path (benchmark-name))
+                                #:write-modules-to (write-modules-to)
+                                #:on-module-exists (on-module-exists))]
       [_ ((invalid-arg "module-to-mutate ~a is not a module in benchmark ~a"
                        (module-to-mutate)
                        (benchmark-name)))]))
