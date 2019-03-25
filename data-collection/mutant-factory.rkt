@@ -349,16 +349,35 @@
            (make-blame-following-will/with-fallback
             (λ (_ dead-successor)
               ;; The blame suddenly disappeared?
+              (match-define
+                (dead-mutant-process _
+                                     dead-succ-config
+                                     dead-succ-result
+                                     dead-succ-id
+                                     _)
+                dead-successor)
               (log-factory fatal
                            (failure-msg
                             "Blame disappeared while following blame trail {~a}.
 Mutant: ~a @ ~a with id [~a] and config:
-~a
+~v
+
+produced result: ~v
+=> ~a
+
 Predecessor (id [~a]) blamed ~a and had config:
 ~v")
                            blame-trail-id
-                           mod index (dead-mutant-process-id dead-successor)
-                           (dead-mutant-process-config dead-successor)
+                           mod index dead-succ-id
+                           dead-succ-config
+                           dead-succ-result
+                           (if (and (list? dead-succ-result)
+                                    (>= (length dead-succ-result) 6)
+                                    (equal? (list-ref dead-succ-result 5)
+                                            'crashed))
+                               "Likely due to a buggy contract
+   on the region blamed by the predecessor (see below) that crashed"
+                               "Something has gone very wrong")
                            id blamed
                            config)
               (abort "Blame disappeared"))))
@@ -433,12 +452,13 @@ Predecessor (id [~a]) blamed ~a and had config:
                              mutants-spawned
                              blame-trail-id))
 
-           (log-factory info
-                        "    Spawned mutant runner with id [~a] for ~a @ ~a > ~a."
-                        mutants-spawned
-                        module-to-mutate
-                        mutation-index
-                        outfile)
+           (log-factory
+            info
+            "    Spawned mutant runner with id [~a] for ~a @ ~a > ~a."
+            mutants-spawned
+            module-to-mutate
+            mutation-index
+            outfile)
 
            (copy-factory current-factory
                          [active-mutants (set-add active-mutants mutant-proc)]
@@ -511,15 +531,18 @@ Predecessor (id [~a]) blamed ~a and had config:
         ;; but it found blame, so it is the start of a fresh blame trail
         id
         orig-blame-trail))
+  (unless (and (list? result)
+               (>= (length result) 6))
+    (log-factory fatal
+                 (failure-msg
+                  "Result of mutant [~a] not a list of expected size: ~v")
+                 id
+                 result)
+    (abort "Mutant result not a list."))
   (log-factory info
                "      Dead mutant [~a] result: ~v"
                id
-               (if (cons? result)
-                   (list-ref result 5)
-                   (error 'process-dead-mutant
-                          "Result of mutant [~a] not a list: ~a"
-                          id
-                          result)))
+               (list-ref result 5))
   (define dead-mutant-proc
     (dead-mutant-process mutant config result id blame-trail-id))
   ;; Do the consolidation
@@ -591,10 +614,14 @@ Predecessor (id [~a]) blamed ~a and had config:
 (define (get-mutant-result mutant-proc)
   (define path (mutant-process-file mutant-proc))
   (with-handlers ([exn:fail:read?
-                   (λ _ (error
-                         'get-mutant-result
-                         "Found un-readable item in mutant output file:~n~v"
-                         (file->string path)))])
+                   (λ _
+                     (log-factory
+                      fatal
+                      (failure-msg
+                       "Found un-readable item in mutant output fil. Contents:
+~v")
+                      (file->string path))
+                     (abort "Unreadable mutant output"))])
     (with-input-from-file path read)))
 
 ;; dead-mutant-process? -> boolean?
@@ -698,7 +725,10 @@ Config: ~v")
 (define (lookup-benchmark-with-name name)
   (hash-ref benchmarks name
             (λ _ (error 'run-all-mutants*configs
-                        "Unknown benchmark: ~v" name))))
+                        "Unknown benchmark: ~v
+Benchmark must be one of: ~v"
+                        name
+                        (hash-keys benchmarks)))))
 
 (define (blamed-is-bug? blamed result)
   (match-define (vector id mod) blamed)
@@ -711,7 +741,7 @@ Config: ~v")
   ;; Mark the mutant error file before it gets garbled with error
   ;; messages from killing the current active mutants
   (call-with-output-file (mutant-error-log)
-    #:exists? 'append #:mode 'text
+    #:exists 'append #:mode 'text
     (λ (out)
       (printf "
 ~n~n~n~n~n~n~n~n~n~n
@@ -721,7 +751,8 @@ Config: ~v")
 ================================================================================
 ~n~n~n~n~n~n~n~n~n~n
 "
-              reason)))
+              reason
+              out)))
   (exit 1))
 
 (module+ main
