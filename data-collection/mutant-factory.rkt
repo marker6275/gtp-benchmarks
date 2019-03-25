@@ -371,10 +371,8 @@ Predecessor (id [~a]) blamed ~a and had config:
                            mod index dead-succ-id
                            dead-succ-config
                            dead-succ-result
-                           (if (and (list? dead-succ-result)
-                                    (>= (length dead-succ-result) 6)
-                                    (equal? (list-ref dead-succ-result 5)
-                                            'crashed))
+                           (if (equal? (list-ref dead-succ-result 5)
+                                       'crashed)
                                "Likely due to a buggy contract
    on the region blamed by the predecessor (see below) that crashed"
                                "Something has gone very wrong")
@@ -531,14 +529,6 @@ Predecessor (id [~a]) blamed ~a and had config:
         ;; but it found blame, so it is the start of a fresh blame trail
         id
         orig-blame-trail))
-  (unless (and (list? result)
-               (>= (length result) 6))
-    (log-factory fatal
-                 (failure-msg
-                  "Result of mutant [~a] not a list of expected size: ~v")
-                 id
-                 result)
-    (abort "Mutant result not a list."))
   (log-factory info
                "      Dead mutant [~a] result: ~v"
                id
@@ -611,18 +601,35 @@ Predecessor (id [~a]) blamed ~a and had config:
     #:mode 'text
     (λ _ (writeln (cons blame-trail-id result)))))
 
+(define (check-mutant-result result)
+  (match result
+    [(or (list _ _ _ _ _ (or 'crashed 'completed) #f _ _)
+         (list _ _ _ _ _ 'blamed (vector _ _) _ _))
+     result]
+    [other
+     (log-factory fatal
+                  (failure-msg
+                   "Result read from mutant output not of the expected shape.
+Expected: (or (list _ _ _ _ _ (or 'crashed 'completed) #f _ _)
+              (list _ _ _ _ _ 'blamed (vector _ _) _ _))
+Found: ~v
+")
+                  other)
+     (abort "Invalid mutant output")]))
+
 (define (get-mutant-result mutant-proc)
   (define path (mutant-process-file mutant-proc))
-  (with-handlers ([exn:fail:read?
-                   (λ _
-                     (log-factory
-                      fatal
-                      (failure-msg
-                       "Found un-readable item in mutant output fil. Contents:
+  (check-mutant-result
+   (with-handlers ([exn:fail:read?
+                    (λ _
+                      (log-factory
+                       fatal
+                       (failure-msg
+                        "Found unreadable item in mutant output file. Contents:
 ~v")
-                      (file->string path))
-                     (abort "Unreadable mutant output"))])
-    (with-input-from-file path read)))
+                       (file->string path))
+                      (abort "Unreadable mutant output"))])
+     (with-input-from-file path read))))
 
 ;; dead-mutant-process? -> boolean?
 (define (blame-outcome? dead-proc)
@@ -630,20 +637,12 @@ Predecessor (id [~a]) blamed ~a and had config:
 
 (define natural? exact-nonnegative-integer?)
 
-;; result? -> (vector (or/c symbol? path-string?))
+;; result? -> (vector/c (or/c symbol? path-string?) path-string?)
 (define/match (try-get-blamed/from-result result)
   [{(list _ _ _ _ _ 'blamed blamed _ _)}
    blamed]
   [{(list _ _ _ _ _ (not 'blamed) _ _ _)}
-   #f]
-  [{other}
-   (log-factory fatal
-                (failure-msg
-                 "Result read from mutant output was not of the expected shape.
-Found: ~v
-")
-                other)
-   (abort "Invalid mutant output")])
+   #f])
 
 ;; dead-mutant-process? -> (vector (or/c symbol? path-string?))
 (define/match (try-get-blamed dead-proc)
