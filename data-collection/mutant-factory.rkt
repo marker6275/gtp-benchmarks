@@ -32,6 +32,7 @@
            data-output-dir
            benchmarks-dir-path
            factory-logger
+           abort-on-failure?
 
            run-all-mutants*configs
            spawn-mutants/of-module
@@ -45,8 +46,7 @@
            add-mutant-result
            max-mutation-index-exceeded?
            append-mutant-result!
-           parse-mutant-result
-           try-read-mutant-result
+           read-mutant-result
            blame-outcome?
            try-get-blamed
            config-at-max-precision-for?
@@ -68,6 +68,7 @@
 (define data-output-dir (make-parameter "./mutant-data"))
 (define mutant-error-log (make-parameter "./mutant-errors.txt"))
 (define sample-size (make-parameter 96))
+(define abort-on-failure? (make-parameter #t))
 
 (define-logger factory)
 (define-syntax-rule (log-factory level msg v ...)
@@ -359,7 +360,7 @@
            (increment-config-precision-for blamed config))
          (define will:keep-following-blame
            (make-blame-following-will/with-fallback
-            (λ (_ dead-successor)
+            (λ (current-factory dead-successor)
               ;; The blame suddenly disappeared?
               (match-define
                 (dead-mutant-process _
@@ -389,7 +390,7 @@ Predecessor (id [~a]) blamed ~a and had config:
                                "Something has gone very wrong")
                            id blamed
                            (make-safe-for-reading config))
-              (abort "Blame disappeared"))))
+              (maybe-abort "Blame disappeared" current-factory))))
          (spawn-mutant the-factory
                        mod
                        index
@@ -517,9 +518,10 @@ Predecessor (id [~a]) blamed ~a and had config:
   (match-define (factory _ results active-mutants active-count _ _) the-factory)
 
   ;; Read the result of the mutant before possible consolidation
-  (define maybe-result (try-read-mutant-result mutant-proc))
+  (define maybe-result (read-mutant-result mutant-proc))
   (match (cons (ctl 'status) maybe-result)
-    [(cons 'done-error _)
+    [(or (cons 'done-error _)
+         (cons 'done-ok (? eof-object?)))
      #:when (>= revival-count MAX-REVIVALS)
      (log-factory fatal
                   "Runner errored all ~a / ~a tries on mutant:
@@ -528,12 +530,16 @@ Predecessor (id [~a]) blamed ~a and had config:
                   revival-count MAX-REVIVALS
                   id mod index
                   (make-safe-for-reading config))
-     (abort "Revival failed to resolve mutant errors")]
+     (maybe-abort "Revival failed to resolve mutant errors"
+                  (copy-factory the-factory
+                                [active-mutants (set-remove active-mutants
+                                                            mutant-proc)]
+                                [active-mutant-count (sub1 active-count)]))]
     [(or (cons 'done-error _)
          (cons 'done-ok (? eof-object?)))
      (log-factory warning
-                  "*** WARNING: Runner errored on mutant ***
- [~a] ~a @ ~a with config
+                  "*** WARNING ***
+Runner errored on mutant [~a] ~a @ ~a with config
 ~v
 
 Exited with ~a and produced result: ~v
@@ -558,8 +564,7 @@ Attempting revival ~a / ~a
                    will
                    orig-blame-trail
                    (add1 revival-count))]
-    [(cons 'done-ok result/unparsed)
-     (define result (parse-mutant-result mutant-proc result/unparsed))
+    [(cons 'done-ok result)
      (log-factory info
                   "      Sweeping up dead mutant [~a]: ~a @ ~a, config ~a."
                   id mod index config)
@@ -650,42 +655,35 @@ Attempting revival ~a / ~a
     #:mode 'text
     (λ _ (writeln (serialize (cons blame-trail-id result))))))
 
-;; mutant-process (or/c serialized-list? eof?) -> mutant-result?
-(define (parse-mutant-result mutant-proc result)
-  (match (deserialize result)
-    [(and (or (list _ _ _ _ _ (or 'crashed 'completed 'timeout) #f _ _)
-              (list _ _ _ _ _ 'blamed (vector _ _) _ _))
-          result/well-formed)
-     result/well-formed]
-    [other/malformed
-     (match-define (mutant-process (mutant mod index) config _ _ _ id _ _)
-       mutant-proc)
-     (log-factory fatal
-                  "Result read from mutant output not of the expected shape.
+;; mutant-process? -> (or/c serialized-list? eof?)
+(define (read-mutant-result mutant-proc)
+  (define path (mutant-process-file mutant-proc))
+  (define (report-malformed-output . _)
+    (match-define (mutant-process (mutant mod index) config _ _ _ id _ _)
+      mutant-proc)
+    (log-factory error
+                 "Result read from mutant output not of the expected shape.
 Expected: (or (list _ _ _ _ _ (or 'crashed 'completed 'timeout) #f _ _)
               (list _ _ _ _ _ 'blamed (vector _ _) _ _))
 Found: ~v
+If this has the right shape, it may contain an unreadable value.
 
 Mutant: [~a] ~a @ ~a with config:
 ~v
 "
-                  other/malformed
-                  id mod index
-                  config)
-     (abort "Invalid mutant output")]))
-
-;; mutant-process? -> (or/c serialized-list? eof?)
-(define (try-read-mutant-result mutant-proc)
-  (define path (mutant-process-file mutant-proc))
-  (with-handlers ([exn:fail:read?
-                   (λ _
-                     (log-factory
-                      fatal
-                      "Found unreadable item in mutant output file. Contents:
-~v"
-                      (file->string path))
-                     (abort "Unreadable mutant output"))])
-    (with-input-from-file path read)))
+                 (file->string path)
+                 id mod index
+                 config)
+    eof)
+  ;; Unfortunately, `deserialize` doesn't check the validity of its
+  ;; input before doing its thing, so the exceptions that might come
+  ;; from deserializing the wrong value are arbitrary.
+  (with-handlers ([exn? report-malformed-output])
+    (match (deserialize (with-input-from-file path read))
+      [(and (or (list _ _ _ _ _ (or 'crashed 'completed 'timeout) #f _ _)
+                (list _ _ _ _ _ 'blamed (vector _ _) _ _))
+            result/well-formed)
+       result/well-formed])))
 
 ;; dead-mutant-process? -> boolean?
 (define (blame-outcome? dead-proc)
@@ -705,7 +703,8 @@ Mutant: [~a] ~a @ ~a with config:
   [{(dead-mutant-process _ _ result _ _)}
    (try-get-blamed/from-result result)])
 
-;; blame-info?: symbol?
+;; blame-info?: (vector/c (or/c symbol? path-string?)
+;;                        (or/c symbol? path-string?))
 
 ;; config? blame-info? [any/c]
 ;; ->
@@ -719,7 +718,10 @@ Blamed: ~v
 Config: ~v"
                  blamed
                  config-hash)
-    (abort "Missing blame"))
+    ;; ll: there aren't really any reasonable defaults for this.
+    ;; `MAX-CONFIG` for refs at least prevents infinitely incrementing
+    ;; a region that doesn't exist
+    (maybe-abort "Missing blame" (if set-value config-hash MAX-CONFIG)))
   (define mod-ids-hash (hash-ref config-hash mod missing-blame))
   (cond [set-value
          (define new-mod-ids-hash (hash-set mod-ids-hash id set-value))
@@ -790,14 +792,16 @@ Benchmark must be one of: ~v"
      #t]
     [_ #f]))
 
-(define (abort reason)
+(define (maybe-abort reason continue-val #:force [force? #f])
   ;; Mark the mutant error file before it gets garbled with error
   ;; messages from killing the current active mutants
-  (call-with-output-file (mutant-error-log)
-    #:exists 'append #:mode 'text
-    (λ (out)
-      (fprintf out
-               "
+  (log-factory fatal "Received abort signal with reason: ~a" reason)
+  (cond [(or (abort-on-failure?) force?)
+         (call-with-output-file (mutant-error-log)
+           #:exists 'append #:mode 'text
+           (λ (out)
+             (fprintf out
+                      "
 ~n~n~n~n~n~n~n~n~n~n
 ================================================================================
                               Factory aborting
@@ -805,8 +809,12 @@ Benchmark must be one of: ~v"
 ================================================================================
 ~n~n~n~n~n~n~n~n~n~n
 "
-              reason)))
-  (exit 1))
+                      reason)))
+         (exit 1)]
+        [else
+         (log-factory warning
+                      "WARNING: Continuing execution despite abort signal...")
+         continue-val]))
 
 (module+ main
   (require racket/cmdline)
@@ -828,7 +836,10 @@ Benchmark must be one of: ~v"
    [("-e" "--error-log")
     path
     "File to which to append mutant errors. Default: ./mutant-errors.txt"
-    (mutant-error-log path)])
+    (mutant-error-log path)]
+   [("-k" "--keep-going")
+    "Continue despite encountering failure conditions. Default: #f"
+    (abort-on-failure? #f)])
   (unless (bench-to-run)
     (error 'mutant-factory "Must provide benchmark to run."))
   (when (directory-exists? (data-output-dir))

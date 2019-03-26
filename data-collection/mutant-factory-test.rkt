@@ -291,7 +291,7 @@ HERE
 (test-begin/with-env
  #:name mutant-results
  (ignore (define mutant1-proc/1-result (deserialize (call-with-input-file mutant1-path/1 read))))
- (test-equal? (parse-mutant-result mutant1-proc/1 (try-read-mutant-result mutant1-proc/1))
+ (test-equal? (read-mutant-result mutant1-proc/1)
               mutant1-proc/1-result)
 
  (ignore
@@ -402,7 +402,11 @@ HERE
    ;; and the will of mutant2 was executed
    (mutant2-called?)))
 
-(define-test (test-revival mutant-proc mutant-status-param mutant-status)
+(define-test (test-revival mutant-proc
+                           mutant-status-param
+                           mutant-status
+                           expected-warnings
+                           expect-exit?)
   (define warning-count (box 0))
   (define fatal-msg? (box #f))
   (define exit-called? (box #f))
@@ -431,18 +435,20 @@ HERE
                      [data-output-dir test-mutant-dir])
         (for/fold ([current-factory the-factory])
                   ([i (in-naturals)]
-                   #:break (or (> i 10)
+                   #:break (or (> i 5)
                                (unbox exit-called?)))
           (sleep 2)
           (sweep-dead-mutants current-factory))))
     'warning)
 
-  (test/and/message [(test-= (unbox warning-count) 3) "Not all warnings logged"]
+  (test/and/message [(test-= (unbox warning-count) expected-warnings) "Not all warnings logged"]
                     [(unbox fatal-msg?) "Fatal message not logged"]
-                    [(unbox exit-called?) "Exit not called"]))
+                    [(test-equal? expect-exit?
+                                  (unbox exit-called?))
+                     "Abort call recorded does not match expected"]))
 (test-begin/with-env
   #:name process-dead-mutant/revival/on-error
-  (test-revival mutant0-proc mutant0-status 'done-error))
+  (test-revival mutant0-proc mutant0-status 'done-error 3 #t))
 (test-begin/with-env
  #:name process-dead-mutant/revival/no-output
  (test-revival (mutant-process mutant0
@@ -455,7 +461,26 @@ HERE
                                'no-blame
                                0)
                mutant0-status
-               'done-ok))
+               'done-ok
+               3
+               #t))
+
+(test-begin/with-env
+ #:name process-dead-mutant/revival/suppress-abort
+ (parameterize ([abort-on-failure? #f])
+   (test-revival (mutant-process mutant0
+                                 (hash 'm1 'types
+                                       'm2 'none)
+                                 empty-file-path
+                                 (λ _ (mutant0-status))
+                                 empty-will
+                                 0
+                                 'no-blame
+                                 0)
+                 mutant0-status
+                 'done-ok
+                 4 ;; 3 revival attempts + 1 ignored abort
+                 #f)))
 
 
 (parameterize ([data-output-dir test-mutant-dir])
