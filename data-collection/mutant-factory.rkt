@@ -77,13 +77,13 @@
                  'level
                  (format
                   (string-append "[~a] "
-                                 (if (member 'level '(fatal error))
-                                     (failure-msg msg)
+                                 (if (member 'level '(fatal error warning))
+                                     (failure-msg 'level msg)
                                      msg))
                   (date->string (current-date) #t)
                   v ...))))
-(define (failure-msg m)
-  (string-append "***** ERROR *****\n" m "\n**********"))
+(define (failure-msg failure-type m)
+  (string-append "***** " (~a failure-type) " *****\n" m "\n**********"))
 
 (define (spawn-mutant-runner benchmark-name
                              module-to-mutate
@@ -538,15 +538,12 @@ Predecessor (id [~a]) blamed ~a and had config:
     [(or (cons 'done-error _)
          (cons 'done-ok (? eof-object?)))
      (log-factory warning
-                  "*** WARNING ***
-Runner errored on mutant [~a] ~a @ ~a with config
+                  "Runner errored on mutant [~a] ~a @ ~a with config
 ~v
 
 Exited with ~a and produced result: ~v
 
 Attempting revival ~a / ~a
-**********
-
 "
                   id mod index
                   (make-safe-for-reading config)
@@ -661,7 +658,7 @@ Attempting revival ~a / ~a
   (define (report-malformed-output . _)
     (match-define (mutant-process (mutant mod index) config _ _ _ id _ _)
       mutant-proc)
-    (log-factory error
+    (log-factory warning
                  "Result read from mutant output not of the expected shape.
 Expected: (or (list _ _ _ _ _ (or 'crashed 'completed 'timeout) #f _ _)
               (list _ _ _ _ _ 'blamed (vector _ _) _ _))
@@ -813,7 +810,7 @@ Benchmark must be one of: ~v"
          (exit 1)]
         [else
          (log-factory warning
-                      "WARNING: Continuing execution despite abort signal...")
+                      "Continuing execution despite abort signal...")
          continue-val]))
 
 (module+ main
