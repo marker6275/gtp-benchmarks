@@ -45,7 +45,8 @@
            add-mutant-result
            max-mutation-index-exceeded?
            append-mutant-result!
-           get-mutant-result
+           parse-mutant-result
+           try-read-mutant-result
            blame-outcome?
            try-get-blamed
            config-at-max-precision-for?
@@ -515,8 +516,10 @@ Predecessor (id [~a]) blamed ~a and had config:
     mutant-proc)
   (match-define (factory _ results active-mutants active-count _ _) the-factory)
 
-  (match (ctl 'status)
-    ['done-error
+  ;; Read the result of the mutant before possible consolidation
+  (define maybe-result (try-read-mutant-result mutant-proc))
+  (match (cons (ctl 'status) maybe-result)
+    [(cons 'done-error _)
      #:when (>= revival-count MAX-REVIVALS)
      (log-factory fatal
                   "Runner errored all ~a / ~a tries on mutant:
@@ -526,11 +529,14 @@ Predecessor (id [~a]) blamed ~a and had config:
                   id mod index
                   (make-safe-for-reading config))
      (abort "Revival failed to resolve mutant errors")]
-    ['done-error
+    [(or (cons 'done-error _)
+         (cons 'done-ok (? eof-object?)))
      (log-factory warning
                   "*** WARNING: Runner errored on mutant ***
  [~a] ~a @ ~a with config
 ~v
+
+Exited with ~a and produced result: ~v
 
 Attempting revival ~a / ~a
 **********
@@ -538,6 +544,7 @@ Attempting revival ~a / ~a
 "
                   id mod index
                   (make-safe-for-reading config)
+                  (ctl 'status) maybe-result
                   (add1 revival-count) MAX-REVIVALS)
      (define new-factory
        (copy-factory the-factory
@@ -551,13 +558,12 @@ Attempting revival ~a / ~a
                    will
                    orig-blame-trail
                    (add1 revival-count))]
-    ['done-ok
+    [(cons 'done-ok result/unparsed)
+     (define result (parse-mutant-result mutant-proc result/unparsed))
      (log-factory info
                   "      Sweeping up dead mutant [~a]: ~a @ ~a, config ~a."
                   id mod index config)
 
-     ;; Read the result of the mutant before possible consolidation
-     (define result (get-mutant-result mutant-proc))
      (define blame-trail-id
        (if (and (equal? orig-blame-trail 'no-blame)
                 (try-get-blamed/from-result result))
@@ -644,12 +650,14 @@ Attempting revival ~a / ~a
     #:mode 'text
     (λ _ (writeln (serialize (cons blame-trail-id result))))))
 
-(define (check-mutant-result mutant-proc result)
-  (match result
-    [(or (list _ _ _ _ _ (or 'crashed 'completed 'timeout) #f _ _)
-         (list _ _ _ _ _ 'blamed (vector _ _) _ _))
-     result]
-    [other
+;; mutant-process (or/c serialized-list? eof?) -> mutant-result?
+(define (parse-mutant-result mutant-proc result)
+  (match (deserialize result)
+    [(and (or (list _ _ _ _ _ (or 'crashed 'completed 'timeout) #f _ _)
+              (list _ _ _ _ _ 'blamed (vector _ _) _ _))
+          result/well-formed)
+     result/well-formed]
+    [other/malformed
      (match-define (mutant-process (mutant mod index) config _ _ _ id _ _)
        mutant-proc)
      (log-factory fatal
@@ -661,24 +669,23 @@ Found: ~v
 Mutant: [~a] ~a @ ~a with config:
 ~v
 "
-                  other
+                  other/malformed
                   id mod index
                   config)
      (abort "Invalid mutant output")]))
 
-(define (get-mutant-result mutant-proc)
+;; mutant-process? -> (or/c serialized-list? eof?)
+(define (try-read-mutant-result mutant-proc)
   (define path (mutant-process-file mutant-proc))
-  (define read-result
-    (with-handlers ([exn:fail:read?
-                     (λ _
-                       (log-factory
-                        fatal
-                        "Found unreadable item in mutant output file. Contents:
+  (with-handlers ([exn:fail:read?
+                   (λ _
+                     (log-factory
+                      fatal
+                      "Found unreadable item in mutant output file. Contents:
 ~v"
-                        (file->string path))
-                       (abort "Unreadable mutant output"))])
-      (deserialize (with-input-from-file path read))))
-  (check-mutant-result mutant-proc read-result))
+                      (file->string path))
+                     (abort "Unreadable mutant output"))])
+    (with-input-from-file path read)))
 
 ;; dead-mutant-process? -> boolean?
 (define (blame-outcome? dead-proc)

@@ -60,7 +60,9 @@ HERE
               (let ([path (string->path "m2.rkt")])
                   (format "~s\n" (serialize (list "test" 102 path 'foo 0 'crashed #f
                                                   (hash path (hash 'foo 'max 'bar 'none path 'none))
-                                                  #f))))])
+                                                  #f))))]
+[empty-file-path "empty-file.rktd"
+                 ""])
 
 #:provide)
 
@@ -289,7 +291,7 @@ HERE
 (test-begin/with-env
  #:name mutant-results
  (ignore (define mutant1-proc/1-result (deserialize (call-with-input-file mutant1-path/1 read))))
- (test-equal? (get-mutant-result mutant1-proc/1)
+ (test-equal? (parse-mutant-result mutant1-proc/1 (try-read-mutant-result mutant1-proc/1))
               mutant1-proc/1-result)
 
  (ignore
@@ -400,44 +402,60 @@ HERE
    ;; and the will of mutant2 was executed
    (mutant2-called?)))
 
-(test-begin/with-env
-  #:name process-dead-mutant/revival
-  (ignore (define warning-count (box 0))
-          (define fatal-msg? (box #f))
-          (define exit-called? (box #f))
+(define-test (test-revival mutant-proc mutant-status-param mutant-status)
+  (define warning-count (box 0))
+  (define fatal-msg? (box #f))
+  (define exit-called? (box #f))
 
-          (define the-factory
-            (factory (bench-info "test" #f)
-                     (hash)
-                     (set mutant0-proc)
-                     0
-                     (hash)
-                     0)))
-  (ignore
-   (with-intercepted-logging
-     #:logger factory-logger
-     (match-lambda [(vector 'warning _ _ _)
-                    (set-box! warning-count (add1 (unbox warning-count)))]
-                   [(vector 'fatal _ _ _)
-                    (set-box! fatal-msg? #t)]
-                   [_
-                    #f])
-     (λ _
-       (parameterize ([exit-handler (λ _
-                                      (set-box! exit-called? #t))]
-                      [mutant0-status 'done-error]
-                      [process-limit 5]
-                      [data-output-dir test-mutant-dir])
-         (for/fold ([current-factory the-factory])
-                   ([i (in-naturals)]
-                    #:break (or (> i 10)
-                                (unbox exit-called?)))
-           (sleep 2)
-           (sweep-dead-mutants current-factory))))
-     'warning))
-  (test-= (unbox warning-count) 3)
-  (unbox fatal-msg?)
-  (unbox exit-called?))
+  (define the-factory
+    (factory (bench-info "test" #f)
+             (hash)
+             (set mutant-proc)
+             0
+             (hash)
+             0))
+
+  (with-intercepted-logging
+    #:logger factory-logger
+    (match-lambda [(vector 'warning _ _ _)
+                   (set-box! warning-count (add1 (unbox warning-count)))]
+                  [(vector 'fatal _ _ _)
+                   (set-box! fatal-msg? #t)]
+                  [_
+                   #f])
+    (λ _
+      (parameterize ([exit-handler (λ _
+                                     (set-box! exit-called? #t))]
+                     [mutant-status-param mutant-status]
+                     [process-limit 5]
+                     [data-output-dir test-mutant-dir])
+        (for/fold ([current-factory the-factory])
+                  ([i (in-naturals)]
+                   #:break (or (> i 10)
+                               (unbox exit-called?)))
+          (sleep 2)
+          (sweep-dead-mutants current-factory))))
+    'warning)
+
+  (test/and/message [(test-= (unbox warning-count) 3) "Not all warnings logged"]
+                    [(unbox fatal-msg?) "Fatal message not logged"]
+                    [(unbox exit-called?) "Exit not called"]))
+(test-begin/with-env
+  #:name process-dead-mutant/revival/on-error
+  (test-revival mutant0-proc mutant0-status 'done-error))
+(test-begin/with-env
+ #:name process-dead-mutant/revival/no-output
+ (test-revival (mutant-process mutant0
+                               (hash 'm1 'types
+                                     'm2 'none)
+                               empty-file-path
+                               (λ _ (mutant0-status))
+                               empty-will
+                               0
+                               'no-blame
+                               0)
+               mutant0-status
+               'done-ok))
 
 
 (parameterize ([data-output-dir test-mutant-dir])
