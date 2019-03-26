@@ -48,12 +48,12 @@ HERE
                                                 #f))))]
 [mutant1-path/1 "m11.rktd"
                 (let ([path (string->path "m1.rkt")])
-                  (format "~s\n" (serialize (list "test" 102 path 'foo 0 'blamed 'foo
+                  (format "~s\n" (serialize (list "test" 102 path 'foo 0 'blamed '#(foo "./mutant-factory-test.rkt")
                                                   (hash path (hash 'foo 'max path 'none))
                                                   #f))))]
 [mutant1-path/2 "m12.rktd"
                 (let ([path (string->path "m1.rkt")])
-                  (format "~s\n" (serialize (list "test" 102 path 'foo 0 'blamed 'foo
+                  (format "~s\n" (serialize (list "test" 102 path 'foo 0 'blamed '#(foo "./mutant-factory-test.rkt")
                                                   (hash path (hash 'foo 'types path 'none))
                                                   #f))))]
 [mutant2-path "m2.rktd"
@@ -77,6 +77,7 @@ HERE
 
 
 (require racket/serialize
+         racket/logging
          'test-helper
          ruinit
          (submod "mutant-factory.rkt" test)
@@ -247,7 +248,8 @@ HERE
                                      (λ _ (mutant0-status))
                                      empty-will
                                      0
-                                     'no-blame))
+                                     'no-blame
+                                     0))
 (define mutant1 (mutant mutant1-mod 1))
 (define mutant1-proc/1 (mutant-process mutant1
                                        (hash 'm1 'max
@@ -256,7 +258,8 @@ HERE
                                        (λ _ (mutant1-status))
                                        empty-will
                                        1
-                                       2))
+                                       2
+                                       0))
 (define mutant1-proc/2 (mutant-process mutant1
                                        (hash 'm1 'types
                                              'm2 'max)
@@ -264,7 +267,8 @@ HERE
                                        (λ _ (mutant1-status))
                                        empty-will
                                        2
-                                       'no-blame))
+                                       'no-blame
+                                       0))
 
 (define mutant2 (mutant mutant2-mod 2))
 (define mutant2-called? (make-parameter #f))
@@ -278,7 +282,8 @@ HERE
                                      (λ _ (mutant2-status))
                                      mutant2-will
                                      3
-                                     'no-blame))
+                                     'no-blame
+                                     0))
 
 
 (test-begin/with-env
@@ -353,9 +358,11 @@ HERE
                                   5))
 
     (define new-factory/processed-mutant1-proc/1
-      (process-dead-mutant orig-factory mutant1-proc/1))
+      (parameterize ([mutant1-status 'done-ok])
+        (process-dead-mutant orig-factory mutant1-proc/1)))
     (define new-factory/processed-mutant2
-      (process-dead-mutant orig-factory mutant2-proc))
+      (parameterize ([mutant2-status 'done-ok])
+        (process-dead-mutant orig-factory mutant2-proc)))
 
     (define new-aggregate-file-contents
       (call-with-input-file aggregate-file
@@ -375,8 +382,9 @@ HERE
                 (hash mutant2
                       ;; The first proc for a mutant to die becomes the
                       ;; aggregate file
-                      (aggregate-mutant-result mutant2
-                                               (mutant-process-file mutant2-proc))
+                      (aggregate-mutant-result
+                       mutant2
+                       (mutant-process-file mutant2-proc))
 
                       mutant1
                       mutant1-aggregate
@@ -391,6 +399,45 @@ HERE
                 (cons 'no-blame mutant2-proc-file-contents))
    ;; and the will of mutant2 was executed
    (mutant2-called?)))
+
+(test-begin/with-env
+  #:name process-dead-mutant/revival
+  (ignore (define warning-count (box 0))
+          (define fatal-msg? (box #f))
+          (define exit-called? (box #f))
+
+          (define the-factory
+            (factory (bench-info "test" #f)
+                     (hash)
+                     (set mutant0-proc)
+                     0
+                     (hash)
+                     0)))
+  (ignore
+   (with-intercepted-logging
+     #:logger factory-logger
+     (match-lambda [(vector 'warning _ _ _)
+                    (set-box! warning-count (add1 (unbox warning-count)))]
+                   [(vector 'fatal _ _ _)
+                    (set-box! fatal-msg? #t)]
+                   [_
+                    #f])
+     (λ _
+       (parameterize ([exit-handler (λ _
+                                      (set-box! exit-called? #t))]
+                      [mutant0-status 'done-error]
+                      [process-limit 5]
+                      [data-output-dir test-mutant-dir])
+         (for/fold ([current-factory the-factory])
+                   ([i (in-naturals)]
+                    #:break (or (> i 10)
+                                (unbox exit-called?)))
+           (sleep 2)
+           (sweep-dead-mutants current-factory))))
+     'warning))
+  (test-= (unbox warning-count) 3)
+  (unbox fatal-msg?)
+  (unbox exit-called?))
 
 
 (parameterize ([data-output-dir test-mutant-dir])
@@ -437,7 +484,8 @@ HERE
                                _
                                (== empty-will)
                                _
-                               'no-blame))))
+                               'no-blame
+                               0))))
 
 
 

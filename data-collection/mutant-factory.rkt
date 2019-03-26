@@ -31,6 +31,7 @@
            process-limit
            data-output-dir
            benchmarks-dir-path
+           factory-logger
 
            run-all-mutants*configs
            spawn-mutants/of-module
@@ -54,6 +55,7 @@
 
 
 (define MAX-CONFIG 'max)
+(define MAX-REVIVALS 3)
 
 
 
@@ -122,7 +124,13 @@
 ;;     A transformation of the factory to be performed upon death of the mutant
 ;; id:             natural?
 ;; blame-trail-id: blame-trail-id?
-(struct mutant-process (mutant config file ctl will id blame-trail-id)
+;; revival-count:  natural?
+(struct mutant-process (mutant
+                        config
+                        file   ctl
+                        will
+                        id     blame-trail-id
+                        revival-count)
   #:transparent)
 ;; result: result?
 (struct dead-mutant-process (mutant config result id blame-trail-id)
@@ -415,7 +423,8 @@ Predecessor (id [~a]) blamed ~a and had config:
                       mutation-index
                       precision-config
                       mutant-will
-                      [blame-trail-id 'no-blame])
+                      [blame-trail-id 'no-blame]
+                      [revival-count 0])
   (let try-again ([current-factory the-factory])
     (define active-mutant-count (factory-active-mutant-count current-factory))
     (cond [(>= active-mutant-count (process-limit))
@@ -450,7 +459,8 @@ Predecessor (id [~a]) blamed ~a and had config:
                              mutant-ctl
                              mutant-will
                              mutants-spawned
-                             blame-trail-id))
+                             blame-trail-id
+                             revival-count))
 
            (log-factory
             info
@@ -488,65 +498,96 @@ Predecessor (id [~a]) blamed ~a and had config:
                 #:unless (equal? ((mutant-process-ctl mutant-proc) 'status)
                                  'running))
       mutant-proc))
-  (cond [a-freshly-dead-mutant
-         (define mutant (mutant-process-mutant a-freshly-dead-mutant))
-         (if (equal? ((mutant-process-ctl a-freshly-dead-mutant) 'status)
-                     'done-ok)
-             (log-factory
-              info
-              "      Sweeping up dead mutant [~a]: ~a @ ~a, config ~a."
-              (mutant-process-id a-freshly-dead-mutant)
-              (mutant-module mutant)
-              (mutant-index mutant)
-              (mutant-process-config a-freshly-dead-mutant))
-             (log-factory
-              warning
-              "*** WARNING: Runner errored on mutant ***
-[~a] ~a @ ~a with config ~v
-**********\n\n"
-                (mutant-process-id a-freshly-dead-mutant)
-                (mutant-module mutant)
-                (mutant-index mutant)
-                (make-safe-for-reading (mutant-process-config a-freshly-dead-mutant))))
-           (process-dead-mutant the-factory a-freshly-dead-mutant)]
-        [else
-         the-factory]))
+  (if a-freshly-dead-mutant
+      (process-dead-mutant the-factory a-freshly-dead-mutant)
+      the-factory))
 
 ;; factory? mutant-process? -> factory?
 ;; Note that processing a dead mutant may cause new mutants to be spawned,
 ;; since it executes the will of the dead mutant.,
 ;; which, in turn, may cause more dead mutants to be processed!
 (define (process-dead-mutant the-factory mutant-proc)
-  (match-define (mutant-process mutant config file _ will id orig-blame-trail)
+  (match-define (mutant-process (mutant mod index)
+                                config
+                                file ctl will
+                                id orig-blame-trail
+                                revival-count)
     mutant-proc)
   (match-define (factory _ results active-mutants active-count _ _) the-factory)
 
+  (match (ctl 'status)
+    ['done-error
+     #:when (>= revival-count MAX-REVIVALS)
+     (log-factory fatal
+                  "Runner errored all ~a / ~a tries on mutant:
+ [~a] ~a @ ~a with config
+~v"
+                  revival-count MAX-REVIVALS
+                  id mod index
+                  (make-safe-for-reading config))
+     (abort "Revival failed to resolve mutant errors")]
+    ['done-error
+     (log-factory warning
+                  "*** WARNING: Runner errored on mutant ***
+ [~a] ~a @ ~a with config
+~v
 
-  ;; Read the result of the mutant before possible consolidation
-  (define result (get-mutant-result mutant-proc))
-  (define blame-trail-id
-    (if (and (equal? orig-blame-trail 'no-blame)
-             (try-get-blamed/from-result result))
-        ;; This mutant wasn't following a pre-existing blame trail,
-        ;; but it found blame, so it is the start of a fresh blame trail
-        id
-        orig-blame-trail))
-  (log-factory info
-               "      Dead mutant [~a] result: ~v"
-               id
-               (list-ref result 5))
-  (define dead-mutant-proc
-    (dead-mutant-process mutant config result id blame-trail-id))
-  ;; Do the consolidation
-  (define results+dead-mutant (add-mutant-result results dead-mutant-proc file))
+Attempting revival ~a / ~a
+**********
 
-  (define new-factory
-    (copy-factory the-factory
-                  [results results+dead-mutant]
-                  [active-mutants (set-remove active-mutants mutant-proc)]
-                  [active-mutant-count (sub1 active-count)]))
+"
+                  id mod index
+                  (make-safe-for-reading config)
+                  (add1 revival-count) MAX-REVIVALS)
+     (define new-factory
+       (copy-factory the-factory
+                     [active-mutants (set-remove active-mutants
+                                                 mutant-proc)]
+                     [active-mutant-count (sub1 active-count)]))
+     (spawn-mutant new-factory
+                   mod
+                   index
+                   config
+                   will
+                   orig-blame-trail
+                   (add1 revival-count))]
+    ['done-ok
+     (log-factory info
+                  "      Sweeping up dead mutant [~a]: ~a @ ~a, config ~a."
+                  id mod index config)
 
-  (will new-factory dead-mutant-proc))
+     ;; Read the result of the mutant before possible consolidation
+     (define result (get-mutant-result mutant-proc))
+     (define blame-trail-id
+       (if (and (equal? orig-blame-trail 'no-blame)
+                (try-get-blamed/from-result result))
+           ;; This mutant wasn't following a pre-existing blame trail,
+           ;; but it found blame, so it is the start of a fresh blame trail
+           id
+           orig-blame-trail))
+     (log-factory info
+                  "      Dead mutant [~a] result: ~v"
+                  id
+                  (list-ref result 5))
+     (define dead-mutant-proc
+       (dead-mutant-process (mutant mod index)
+                            config
+                            result
+                            id
+                            blame-trail-id))
+     ;; Do the consolidation
+     (define results+dead-mutant (add-mutant-result results
+                                                    dead-mutant-proc
+                                                    file))
+
+     (define new-factory
+       (copy-factory the-factory
+                     [results results+dead-mutant]
+                     [active-mutants (set-remove active-mutants
+                                                 mutant-proc)]
+                     [active-mutant-count (sub1 active-count)]))
+
+     (will new-factory dead-mutant-proc)]))
 
 ;; mutant-results? dead-mutant-process? path-string? -> mutant-results?
 (define (add-mutant-result mutant-results dead-mutant-proc mutant-proc-file)
@@ -609,7 +650,7 @@ Predecessor (id [~a]) blamed ~a and had config:
          (list _ _ _ _ _ 'blamed (vector _ _) _ _))
      result]
     [other
-     (match-define (mutant-process (mutant mod index) config _ _ _ id _)
+     (match-define (mutant-process (mutant mod index) config _ _ _ id _ _)
        mutant-proc)
      (log-factory fatal
                   "Result read from mutant output not of the expected shape.
