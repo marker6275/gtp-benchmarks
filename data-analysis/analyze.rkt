@@ -1,8 +1,9 @@
 #lang racket
 
-(require racket/serialize)
-
-(struct mutant (mod index) #:transparent)
+(require racket/serialize
+         (only-in (submod "../data-collection/mutant-factory.rkt" test)
+                  mutant
+                  sample-size))
 
 ;; data-list? := (list/c blame-trail-id?
 ;;                       string?
@@ -188,22 +189,7 @@
                                        'mod-b (hash 'baz 'none)))))))
 
 
-(module+ main
-  (define data-dir (make-parameter #f))
-  (command-line
-   #:once-each
-   [("-d" "--data-directory")
-    path
-    "Directory containing the data."
-    (data-dir path)])
-  (unless (data-dir)
-    (eprintf "Error: data-directory argument is mandatory.~n")
-    (exit 1))
-
-  (displayln "Reading and organizing data...")
-  (define data (read-data (data-dir)))
-  (define data/by-mutant (organize-by-mutant data))
-  (displayln "Analyzing for distance increases...")
+(define (report-distance-increases data/by-mutant)
   (define increasing-distance-pairs/by-mutant
     (analyze-for-increasing-distance data/by-mutant))
   (define increasing-distance-pairs
@@ -216,8 +202,95 @@
          (for ([samples (in-list increasing-distance-pairs)])
            (eprintf "========== Increasing distance pair ==========~n")
            (for ([sample (in-set samples)]) (displayln sample))
-           (eprintf "~n===============~n"))
-         (exit 1)]))
+           (eprintf "~n===============~n"))]))
+
+
+
+(define (report-mutant&sample-info data/by-mutant)
+  (define total-mutant-count (hash-count data/by-mutant))
+  (define-values (relevant-mutant-count sample-counts/by-mutant)
+    (for/fold ([relevant-mutant-count 0]
+               [sample-counts/by-mutant (hash)])
+              ([(mutant samples) (in-hash data/by-mutant)])
+      (define mutant-relevant?
+        (for/first ([sample (in-set samples)]
+                    #:when (match sample
+                             [(list _ _ _ _ _ _ 'blamed _ _ _) #t]
+                             [_ #f]))
+          #t))
+      (values (if mutant-relevant?
+                  (add1 relevant-mutant-count)
+                  relevant-mutant-count)
+              (hash-set sample-counts/by-mutant
+                        mutant
+                        (set-count samples)))))
+  (define total-sample-count (apply + (hash-values sample-counts/by-mutant)))
+  (define sample-count/less-irrelevant-mutants
+    (- total-sample-count (- total-mutant-count relevant-mutant-count)))
+  (define sample-count/avg (/ sample-count/less-irrelevant-mutants
+                              relevant-mutant-count))
+  (define sample-count/avg/hit-blame (/ (sample-size) sample-count/avg))
+
+  ;; lltodo: should report:
+  ;; - Total number of roots
+  ;; - Total number of configs we explored
+  ;; "samples" probably not the right word here, since the total count
+  ;; also includes the runs we did while following a blame trail
+  ;;
+  ;; No need to calculate the number of roots, it is the target sample size
+
+  (printf "Created ~a mutants, of which ~a were relevant.
+Total samples collected: ~a
+Target sample size (of precisions with blame) per relevant mutant: ~a
+Average attempted sample count per relevant mutant: ~a = ~a
+Average proportion of samples that hit blame: ~a = ~a
+"
+          total-mutant-count relevant-mutant-count
+          total-sample-count
+          (sample-size)
+          sample-count/avg (exact->inexact sample-count/avg)
+          sample-count/avg/hit-blame (exact->inexact
+                                      sample-count/avg/hit-blame)))
+
+(define (report-lattice-size bench-name)
+  (define total-region-count (count-top-level-defs bench-name))
+  (define lattice-size (expt 3 total-region-count))
+  (printf "Total lattice size for benchmark: ~a~n"
+          lattice-size))
+
+(define (count-top-level-defs bench-name)
+  0)
+
+
+(module+ main
+  (define data-dir (make-parameter #f))
+  (define bench-name (make-parameter #f))
+  (command-line
+   #:once-each
+   [("-d" "--data-directory")
+    path
+    "Directory containing the data."
+    (data-dir path)]
+   [("-b" "--benchmark-name")
+    name
+    "Benchmark for which the data was collected."
+    (bench-name name)])
+  (unless (and (data-dir) (bench-name))
+    (eprintf "Error: arguments -d, -b are mandatory.~n")
+    (exit 1))
+
+  (printf "========== Analysis of data for benchmark ~a ==========~n"
+          (bench-name))
+  (displayln "Reading and organizing data...")
+  (define data (read-data (data-dir)))
+  (define data/by-mutant (organize-by-mutant data))
+
+  (report-mutant&sample-info data/by-mutant)
+
+  (report-lattice-size (bench-name))
+
+  (displayln "Analyzing for distance increases...")
+  (report-distance-increases data/by-mutant))
 
 
 (module+ test
