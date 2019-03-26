@@ -65,7 +65,7 @@
     "Continue checking progress even when there are errors."
     (force-check-progress #t)])
   (unless (and (bench-name) (log-path))
-    (eprintf "Error: Both arguments are mandatory.~n")
+    (eprintf "Error: Both -b and -l arguments are mandatory.~n")
     (exit 1))
   (define bench (hash-ref benchmarks (bench-name)))
   (define bench-mods (cons (benchmark-main bench)
