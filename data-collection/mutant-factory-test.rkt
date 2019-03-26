@@ -501,8 +501,33 @@ HERE
    (test-= (length (directory-list test-mutant-dir)) d&e-mutant-total)
    (test/for/and ([f (in-directory test-mutant-dir)])
                  (test/not (test-= (file-size f)
-                                   0)))))
+                                   0)))
 
+   (ignore
+    (define data
+      (for/fold ([data empty])
+                ([f (in-directory test-mutant-dir)])
+        (append data
+                (for/list ([line (file->lines f)])
+                  (deserialize (call-with-input-string line read)))))))
+
+   ;; 3 for the 3 mutations of e.rkt, none of which cause blame
+   ;; 1*(sample-size) for the 1 mutation of d.rkt that causes blame
+   (test->= (length data) (+ 3 (sample-size)))
+   (test-match data
+               (list (list (or (? natural?) 'no-blame)
+                           "mutant-test"
+                           (or (? natural?) 'N/A)
+                           (or (== d-path) (== e-path))
+                           (? symbol?)
+                           (? natural?)
+                           (or 'blamed 'completed 'crashed 'timeout 'oom)
+                           (or (vector (or (? symbol?) (? path-string?))
+                                       (or (? symbol?) (? path-string?)))
+                               #f)
+                           (? hash?)
+                           (or #f (? string?)))
+                     ___))))
 
 
 (display-test-results)
