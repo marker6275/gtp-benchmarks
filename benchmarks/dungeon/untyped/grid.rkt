@@ -52,9 +52,6 @@
 
 (define/ctc-helper ((array-size=/c dims) array)
   (match-define (vector x y) dims)
-  (displayln `(checking array size is (,x ,y)
-                        actual: ,(vector-length array)
-                        ,(vector-length (vector-ref array 0))))
   (and (= (vector-length array) x)
        (if (not (zero? x))
            (= (vector-length (vector-ref array 0)) y)
