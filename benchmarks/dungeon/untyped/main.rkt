@@ -333,7 +333,8 @@
 (define/contract (new-room grid pos dir)
   (configurable-ctc
    [max (->i ([grid grid?]
-              [pos array-coord?]
+              [pos (grid) (and/c array-coord?
+                                 (within-grid/c grid))]
               [dir direction?])
              [result (pos dir)
                      (or-#f/c

@@ -50,17 +50,29 @@
 
   (vector-set! (vector-ref g (vector-ref p 0)) (vector-ref p 1) v))
 
+(define/ctc-helper ((array-size=/c dims) array)
+  (match-define (vector x y) dims)
+  (displayln `(checking array size is (,x ,y)
+                        actual: ,(vector-length array)
+                        ,(vector-length (vector-ref array 0))))
+  (and (= (vector-length array) x)
+       (if (not (zero? x))
+           (= (vector-length (vector-ref array 0)) y)
+           #t)))
+
 (define/contract (build-array p f)
   (configurable-ctc
    [max (->i ([p array-coord?]
               [f (array-coord? . -> . cell%?)])
-             [result (arrayof cell%?)]
+             [result (p)
+                     (and/c (arrayof cell%?)
+                            (array-size=/c p))]
              #:post (p f result)
-             (for/and ([x (in-range (vector-ref p 0))])
-               (for/and ([y (in-range (vector-ref p 1))])
-                 (define xy (vector x y))
-                 (equal? (f xy)
-                         (grid-ref result xy)))))]
+             (for*/and ([x (in-range (vector-ref p 0))]
+                        [y (in-range (vector-ref p 1))])
+               (define xy (vector x y))
+               (equal? (f xy)
+                       (grid-ref result xy))))]
    [types (array-coord? (array-coord? . -> . cell%?) . -> . (arrayof cell%?))])
 
   (for/vector ([x (in-range (vector-ref p 0))])
