@@ -6,9 +6,7 @@
          "../ctcs/current-precision-setting.rkt"
          racket/serialize
          racket/cmdline
-         racket/match
-         racket/path
-         racket/runtime-path)
+         racket/match)
 
 (for ([(bench precision) current-precision-config])
     (unless (equal? precision 'none)
@@ -16,10 +14,6 @@
        "Warning: default precision config has non-none precision ~a for ~a"
        precision
        bench)))
-
-(define-runtime-path benchmarks-dir-path "../benchmarks/")
-(define (resolve-bench-path p)
-  (simple-form-path (build-path benchmarks-dir-path p)))
 
 (module+ main
   (define benchmark-name (make-parameter #f))

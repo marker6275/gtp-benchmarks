@@ -1,7 +1,11 @@
 #lang racket/base
 
 (provide benchmarks
-         (struct-out benchmark))
+         (struct-out benchmark)
+         resolve-bench-path)
+
+(require racket/runtime-path
+         racket/path)
 
 (struct benchmark (main others))
 
@@ -34,3 +38,7 @@
               '("forth/untyped/command.rkt"
                 "forth/untyped/eval.rkt"
                 "forth/untyped/stack.rkt"))))
+
+(define-runtime-path benchmarks-dir-path "../benchmarks/")
+(define (resolve-bench-path p)
+  (simple-form-path (build-path benchmarks-dir-path p)))
