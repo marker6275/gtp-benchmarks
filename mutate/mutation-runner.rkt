@@ -386,7 +386,8 @@ HERE
 ;; for debugging
 (module+ debug
   (provide diff-mutation
-           mutant-count)
+           mutant-count
+           format-raw-config-for-runner)
 
   (require syntax/modread
            ruinit/diff)
@@ -413,4 +414,14 @@ HERE
           #f))
       (if index-exceeded?
           index
-          (next-mutant (add1 index))))))
+          (next-mutant (add1 index)))))
+  (define (maybe-make-path x)
+    (if (string? x)
+        (simple-form-path x)
+        x))
+  (define (format-raw-config-for-runner config)
+    (for/hash ([(mod mod-ids) (in-hash config)])
+      (values (maybe-make-path mod)
+              (for/hash ([(id level) (in-hash mod-ids)])
+                (values (maybe-make-path id)
+                        level))))))
