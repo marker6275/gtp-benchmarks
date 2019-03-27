@@ -46,7 +46,9 @@
 ;; Non-specific ctc because this random stuff is rigged to be deterministic
 (define/contract (random n)
   (configurable-ctc
-   [max (any/c . -> . exact-nonnegative-integer?)]
+   [max (->i ([n exact-nonnegative-integer?])
+             [result (n) (and/c exact-nonnegative-integer?
+                                (</c n))])]
    [types (any/c . -> . exact-nonnegative-integer?)])
 
   (begin0 (car (unbox r*)) (set-box! r* (cdr (unbox r*)))))
