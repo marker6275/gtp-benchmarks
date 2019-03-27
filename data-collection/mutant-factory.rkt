@@ -518,8 +518,15 @@ Predecessor (id [~a]) blamed ~a and had config:
   (match-define (factory _ results active-mutants active-count _ _) the-factory)
 
   ;; Read the result of the mutant before possible consolidation
-  (define maybe-result (read-mutant-result mutant-proc))
-  (match (cons (ctl 'status) maybe-result)
+  (define status (ctl 'status))
+  (define maybe-result
+    ;; ll: Check before reading to reduce the number of warnings
+    ;; emitted for an errored mutant, otherwise would warn wrong
+    ;; output as well as error
+    (if (equal? status 'done-ok)
+        (read-mutant-result mutant-proc)
+        'didnt-check-due-to-error))
+  (match (cons status maybe-result)
     [(or (cons 'done-error _)
          (cons 'done-ok (? eof-object?)))
      #:when (>= revival-count MAX-REVIVALS)

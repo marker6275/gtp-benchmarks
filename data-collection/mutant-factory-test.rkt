@@ -462,7 +462,7 @@ HERE
                                0)
                mutant0-status
                'done-ok
-               3
+               4 ;; 3 revivals + final failure
                #t))
 
 (test-begin/with-env
@@ -479,7 +479,7 @@ HERE
                                  0)
                  mutant0-status
                  'done-ok
-                 4 ;; 3 revival attempts + 1 ignored abort
+                 5 ;; 3 revival attempts + final failure + 1 ignored abort
                  #f)))
 
 
