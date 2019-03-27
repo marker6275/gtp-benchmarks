@@ -49,25 +49,32 @@
                 precision)}
    ;; having the exn in the output is useful for debugging, but the
    ;; distance we should use for crashes is the max
+   (define (fail msg . vs)
+     (error 'make-trace-distance-results
+               "~a
+Mutant: ~v @ ~a (~~ ~v) with config
+~v
+"
+               (apply format msg vs)
+               mutated-module index mutated-id
+               precision))
    (define crashed? (equal? outcome 'crashed))
    (define blamed-id
      (match* {outcome blame}
        [{'blamed (vector id mod)} id]
-       [{'blamed other} (error 'make-trace-distance-results
-                               "Got blame that's not a vector: ~v"
-                               other)]
+       [{'blamed other}
+        (fail "Got blame that's not a vector: ~v" other)]
        [{_ _} #f]))
    (define message
      (if (equal? outcome 'crashed)
          (try-get-exn-message blame)
          #f))
    (when (and blamed-id (trace-empty? trace))
-     (error 'make-trace-distance-results
-            "Got a blamed id (~a) but empty trace"
-            blamed-id))
+     (fail "Got a blamed id (~v) but empty trace." blamed-id))
    (define distance (trace-distance-between mutated-id
                                             blamed-id
-                                            (raw-trace trace)))
+                                            (raw-trace trace)
+                                            fail))
    (mutant-outcome bench
                    mutated-module
                    precision
@@ -82,7 +89,13 @@
 (struct distance (value) #:transparent)
 (struct no-blame () #:transparent)
 (struct label-missing (label) #:transparent)
-(define (trace-distance-between mutated-label blamed-label trace)
+(define (trace-distance-between mutated-label
+                                blamed-label
+                                trace
+                                [report-error (λ args
+                                                (apply error
+                                                       'trace-distance-between
+                                                       args))])
   (cond [(false? blamed-label)
          (no-blame)]
         [(and (hash-has-key? trace mutated-label)
@@ -90,14 +103,12 @@
          (distance (- (label-bounds-upper (hash-ref trace blamed-label))
                       (label-bounds-lower (hash-ref trace mutated-label))))]
         [(hash-has-key? trace mutated-label)
-         (error 'trace-distance-between
-                "Blamed label ~a not found in trace"
-                blamed-label)
+         (report-error "Blamed label ~v not found in trace"
+                       blamed-label)
          (label-missing blamed-label)]
         [else
-         (error 'trace-distance-between
-                "Mutated label (bug) ~a not found in trace"
-                mutated-label)
+         (report-error "Mutated label (bug) ~v not found in trace"
+                       mutated-label)
          (label-missing mutated-label)]))
 
 
