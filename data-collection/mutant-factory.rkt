@@ -429,14 +429,25 @@ Predecessor (id [~a]) blamed ~a and had config:
                       mutant-will
                       [blame-trail-id 'no-blame]
                       [revival-count 0])
-  (let try-again ([current-factory the-factory])
+  (let try-again ([current-factory the-factory]
+                  [retry-count 0])
     (define active-mutant-count (factory-active-mutant-count current-factory))
     (cond [(>= active-mutant-count (process-limit))
            (log-factory debug "    Mutants (~a) at process limit (~a)."
                         active-mutant-count
                         (process-limit))
+           (when (> retry-count (/ (* 15 60) 2))
+             (log-factory
+              error
+              "Mutants at limit but unable to sweep any after 15 minutes.
+There are likely zombie mutants about.
+Active mutant set:
+~v
+"
+              (factory-active-mutants current-factory)))
            (sleep 2)
-           (try-again (sweep-dead-mutants current-factory))]
+           (try-again (sweep-dead-mutants current-factory)
+                      (add1 retry-count))]
           [else
            (match-define (factory (bench-info bench-name _)
                                   _
