@@ -22,13 +22,6 @@
   (define write-modules-to (make-parameter #f))
   (define on-module-exists (make-parameter 'error))
 
-  ;; lltodo: this doesn't work actually: basically the job queue
-  ;; manager is going to have to specify everything
-  ;; - benchmark-name
-  ;; - module to mutate
-  ;; - mutation index
-  ;; - {module -> precision}
-  ;; - file to dump the mutant's data
   (command-line
    #:once-each
    [("-b" "--benchmark")

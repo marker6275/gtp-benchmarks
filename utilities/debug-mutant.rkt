@@ -3,12 +3,16 @@
 (require "../data-collection/benchmarks.rkt"
          "../mutate/mutation-runner.rkt"
          (submod "../mutate/mutation-runner.rkt" debug)
-         racket/serialize)
+         racket/serialize
+         racket/runtime-path)
+
+(define-runtime-path gtp-benchmarks "../../gtp-benchmarks")
 
 (define (fixup-paths raw-config-string)
-  (regexp-replace* "(/projects/p30818|/home/llx9037/proj)([^ ]+)"
-                   raw-config-string
-                   "\"/home/lukas/github_sync/grad/projects/blame-utility\\2\""))
+  (regexp-replace*
+   "(/projects/p30818|/home/llx9037/proj)/src/gtp-benchmarks([^ ]+)"
+   raw-config-string
+   (format "\"~a\\2\"" (path->string (simple-form-path gtp-benchmarks)))))
 
 (define (setup-dump-copy-dir! bench-name dump-copy-dir-name)
   (cond [(hash-has-key? benchmarks dump-copy-dir-name)
