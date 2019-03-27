@@ -350,8 +350,10 @@
          (unless (blamed-is-bug? blamed result)
            (log-factory
             error
-            "Found mutant with blamed region at max ctcs that is not bug: ~v
+            "Found mutant with blamed region (~v) at max ctcs that is not bug:
+~v
 "
+            blamed
             dead-proc))
          ;; Blamed region is at max ctcs, so the path ends here
          the-factory]
