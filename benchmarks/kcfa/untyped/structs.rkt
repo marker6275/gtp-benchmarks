@@ -17,48 +17,16 @@
          exp/c
          Ref/c
          Lam/c
-         Call/c)
+         Call/c
+         Var?)
 
 (require "../../../ctcs/precision-config.rkt"
-         racket/contract)
+         racket/contract
+         racket/match)
 
 ;; =============================================================================
 
-(define/ctc-helper (Stx/c label/c)
-  (struct/c Stx label/c))
-(define/ctc-helper (exp/c label/c)
-  (struct/c exp label/c))
-(define/ctc-helper (Ref/c label/c var/c)
-  (struct/c Ref label/c
-            var/c))
-(define/ctc-helper (Lam/c label/c formals/c call/c)
-  (struct/c Lam label/c
-            formals/c
-            call/c))
-(define/ctc-helper (Call/c label/c fun/c args/c)
-  (struct/c Call label/c
-            fun/c
-            args/c))
-(define/ctc-helper Stx-type? (Stx/c symbol?))
-(define/ctc-helper exp-type? (exp/c symbol?))
-(define/ctc-helper Ref-type? (Ref/c symbol? symbol?))
-(define/ctc-helper Lam-type? (Lam/c symbol?
-                                    (listof symbol?)
-                                    (or/c exp-type?
-                                          Ref-type?
-                                          (recursive-contract Lam-type?)
-                                          Call-type?)))
-(define/ctc-helper Call-type?
-  (Call/c symbol?
-          (or/c exp-type?
-                Ref-type?
-                Lam-type?
-                (recursive-contract Call-type?))
-          (listof (or/c exp-type?
-                        Ref-type?
-                        Lam-type?
-                        (recursive-contract Call-type?)))))
-
+(define/ctc-helper Var? symbol?)
 
 (struct Stx
  (label ;: Symbol]))
@@ -77,3 +45,34 @@
  (fun ;: (U exp Ref Lam Call)]
   args ;: (Listof (U exp Ref Lam Call))]))
 ))
+
+
+(define/ctc-helper (Stx/c label/c)
+  (struct/c Stx label/c))
+(define/ctc-helper (exp/c label/c)
+  (struct/c exp label/c))
+(define/ctc-helper (Ref/c label/c var/c)
+  (struct/c Ref label/c
+            var/c))
+(define/ctc-helper (Lam/c label/c formals/c call/c)
+  (struct/c Lam label/c
+            formals/c
+            call/c))
+(define/ctc-helper (Call/c label/c fun/c args/c)
+  (struct/c Call label/c
+            fun/c
+            args/c))
+(define/ctc-helper Stx-type? (Stx/c symbol?))
+(define/ctc-helper exp-type? (exp/c symbol?))
+(define/ctc-helper Ref-type? (Ref/c symbol? Var?))
+(define/ctc-helper exp/Ref/Lam/Call-type?
+  (or/c exp-type?
+        Ref-type?
+        (recursive-contract Lam-type? #:chaperone)
+        (recursive-contract Call-type? #:chaperone)))
+(define/ctc-helper Lam-type? (struct/c Lam symbol?
+                                       (listof Var?)
+                                       exp/Ref/Lam/Call-type?))
+(define/ctc-helper Call-type? (struct/c Call symbol?
+                                        exp/Ref/Lam/Call-type?
+                                        (listof exp/Ref/Lam/Call-type?)))
