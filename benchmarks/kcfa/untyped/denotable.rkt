@@ -10,6 +10,8 @@
   "structs.rkt"
   "benv.rkt"
   "time.rkt"
+  "../../../ctcs/precision-config.rkt"
+  "../../../ctcs/common.rkt"
 )
 
 ;; -----------------------------------------------------------------------------
@@ -31,6 +33,9 @@
 ;(define-type Denotable (Setof Value))
 ;(define-type Store (HashTable Addr Denotable))
 
+(define/ctc-helper Denotable? (set/c Closure-type?))
+(define/ctc-helper Store? (hash/c Addr? Denotable?))
+
 ;; -- structs
 
 (struct State
@@ -39,36 +44,101 @@
   store ;: Store]
   time ;: Time]))
 ))
+
+(define/ctc-helper (State/c call/c benv/c store/c time/c)
+  (struct/c State call/c benv/c store/c time/c))
+(define/ctc-helper State-type? (State/c Stx-type? BEnv? Store? Time?))
+
 ;; -- public
 
 ;(: d-bot Denotable)
-(define d-bot (set))
+(define/contract d-bot
+  Denotable?
+  (set))
 
 ;(: d-join (-> Denotable Denotable Denotable))
-(define d-join set-union)
+(define/contract d-join
+  (configurable-ctc
+   [max (->i ([a Denotable?]
+              [b Denotable?])
+             [result Denotable?]
+             #:post (a b result)
+             (for/and ([el (in-sequences (in-set a) (in-set b))])
+               (set-member? result el)))]
+   [types (Denotable? Denotable? . -> . Denotable?)])
+  set-union)
 
 ;(: empty-store Store)
-(define empty-store (make-immutable-hasheq '()))
+(define/contract empty-store
+  Store?
+  (make-immutable-hasheq '()))
 
 ;(: store-lookup (-> Store Addr Denotable))
-(define (store-lookup s a)
+(define/contract (store-lookup s a)
+  (configurable-ctc
+   [max (->i ([s Store?]
+              [a Addr?])
+             [result (s a)
+                     (equal?/c (if (hash-has-key? s a)
+                                   (hash-ref s a)
+                                   d-bot))])]
+   [types (Store? Addr? . -> . Denotable?)])
   (hash-ref s a (lambda () d-bot)))
 
+;; any/c flat-contract? (hash/c any/c any/c) -> flat-contract?
+(define/ctc-helper ((hash-with/c key val-ok?) h)
+  (and (hash? h)
+       (hash-has-key? h key)
+       (val-ok? (hash-ref h key))))
+
 ;(: store-update (-> Store Addr Denotable Store))
-(define (store-update store addr value)
+(define/contract (store-update store addr value)
+  (configurable-ctc
+   [max (->i ([s Store?]
+              [addr Addr?]
+              [value Denotable?])
+             [result
+              (and/c
+               Store?
+               (hash-with/c addr
+                            (equal?/c
+                             (set-union value
+                                        (hash-ref s addr (λ _ (set)))))))])]
+   [types (Store? Addr? Denotable? . -> . Store?)])
   ;(: update-lam (-> Denotable Denotable))
   (define (update-lam d) (d-join d value))
   (hash-update store addr update-lam (lambda () d-bot)))
 
 ;(: store-update* (-> Store (Listof Addr) (Listof Denotable) Store))
-(define (store-update* s as vs)
+(define/contract (store-update* s as vs)
+  (configurable-ctc
+   [max (->i ([s Store?]
+              [as (listof Addr?)]
+              [vs (listof Denotable?)])
+             [result Store?]
+             #:post (s as vs result)
+             (for/and ([a (in-list (remove-duplicates as))])
+               (define vs<-a (indexes-where as (equal?/c a)))
+               (define vs/unioned (apply set-union vs<-a))
+               (define v/expected (hash-ref s a (λ _ (set))))
+               (and (hash-has-key? result a)
+                    (equal? (hash-ref result a) v/expected))))]
+   [types (Store? (listof Addr?) (listof Denotable?) . -> . Store?)])
   (for/fold ([store s])
     ([a (in-list as)]
      [v (in-list vs)])
     (store-update store a v)))
 
 ;(: store-join (-> Store Store Store))
-(define (store-join s1 s2)
+(define/contract (store-join s1 s2)
+  (configurable-ctc
+   [max (->i ([s1 Store?]
+              [s2 Store?])
+             [result Store?]
+             #:post (s1 s2 result)
+             (for/and ([(k v) (in-hash result)])
+               (equal? v (set-union (hash-ref s1 k (λ _ (set)))
+                                    (hash-ref s2 k (λ _ (set)))))))])
   (for/fold ([new-store s1])
     ([(k v) (in-hash s2)])
     (store-update new-store k v)))
