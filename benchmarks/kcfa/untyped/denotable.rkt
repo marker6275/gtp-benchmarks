@@ -7,6 +7,8 @@
 (require
   require-typed-check
   racket/set
+  racket/contract
+  racket/list
   "structs.rkt"
   "benv.rkt"
   "time.rkt"
@@ -33,8 +35,8 @@
 ;(define-type Denotable (Setof Value))
 ;(define-type Store (HashTable Addr Denotable))
 
-(define/ctc-helper Denotable? (set/c Closure-type?))
-(define/ctc-helper Store? (hash/c Addr? Denotable?))
+(define/ctc-helper Denotable? (set/c Closure-type? #:kind 'immutable))
+(define/ctc-helper Store? (hash/c Addr? Denotable? #:immutable #t))
 
 ;; -- structs
 
@@ -43,7 +45,8 @@
   benv ;: BEnv]
   store ;: Store]
   time ;: Time]))
-))
+  )
+  #:mutable)
 
 (define/ctc-helper (State/c call/c benv/c store/c time/c)
   (struct/c State call/c benv/c store/c time/c))
@@ -97,13 +100,14 @@
    [max (->i ([s Store?]
               [addr Addr?]
               [value Denotable?])
-             [result
-              (and/c
-               Store?
-               (hash-with/c addr
-                            (equal?/c
-                             (set-union value
-                                        (hash-ref s addr (λ _ (set)))))))])]
+             [result (s addr value)
+                     (and/c
+                      Store?
+                      (hash-with/c addr
+                                   (equal?/c
+                                    (set-union value
+                                               (hash-ref s addr
+                                                         (λ _ (set)))))))])]
    [types (Store? Addr? Denotable? . -> . Store?)])
   ;(: update-lam (-> Denotable Denotable))
   (define (update-lam d) (d-join d value))
