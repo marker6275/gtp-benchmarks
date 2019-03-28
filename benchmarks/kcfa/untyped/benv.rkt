@@ -41,11 +41,13 @@
 (struct Closure
  (lam ;: Lam]
   benv ;: BEnv]))
-))
+)
+  #:mutable)
 (struct Binding
  (var ;: Var]
   time ;: Time]))
-))
+)
+  #:mutable)
 
 ;; lltodo: check contracts actually work
 

@@ -30,21 +30,26 @@
 
 (struct Stx
  (label ;: Symbol]))
-))
-(struct exp Stx ())
+  )
+  #:mutable)
+(struct exp Stx ()
+  #:mutable)
 
 (struct Ref exp
  (var ;: Symbol]))
-))
+)
+  #:mutable)
 (struct Lam exp
  (formals ;: (Listof Symbol)]
   call ;: (U exp Ref Lam Call)]))
-))
+)
+  #:mutable)
 
 (struct Call Stx
  (fun ;: (U exp Ref Lam Call)]
   args ;: (Listof (U exp Ref Lam Call))]))
-))
+)
+  #:mutable)
 
 
 (define/ctc-helper (Stx/c label/c)
