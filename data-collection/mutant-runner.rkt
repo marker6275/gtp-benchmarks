@@ -63,7 +63,7 @@
                                 (map resolve-bench-path others)
                                 (mutation-index)
                                 module-to-precision-map
-                                #:timeout/s (* 5 60)
+                                #:timeout/s (* 10 60)
                                 #:modules-base-path (resolve-bench-path (benchmark-name))
                                 #:write-modules-to (write-modules-to)
                                 #:on-module-exists (on-module-exists))]
