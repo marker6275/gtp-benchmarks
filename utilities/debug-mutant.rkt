@@ -1,5 +1,7 @@
 #lang racket
 
+(provide debug-mutant)
+
 (require "../data-collection/benchmarks.rkt"
          "../mutate/mutation-runner.rkt"
          (submod "../mutate/mutation-runner.rkt" debug)
@@ -36,7 +38,8 @@
                       #:print-configs? [print-configs? #t]
                       #:diff-mutant? [diff-mutant? #t]
                       #:run? [run? #f]
-                      #:write-modules-to [dump-copy-dir-name #f])
+                      #:write-modules-to [dump-copy-dir-name #f]
+                      #:print-trace? [print-trace? #f])
   (match-define (benchmark main others) (hash-ref benchmarks bench-name))
   (define config-string (fixup-paths raw-config-string))
   (define config (call-with-input-string config-string read))
@@ -64,17 +67,17 @@
            (setup-dump-copy-dir! bench-name dump-copy-dir-name)))
     (displayln "Running mutant...")
     (match-define
-      (run-status _ outcome blamed _ mutated-id _ _)
+      (run-status trace outcome blamed _ mutated-id _ _)
       (run-with-mutated-module (resolve-bench-path main)
-                             (resolve-bench-path mutated-module)
-                             (map resolve-bench-path
-                                  (set-remove others mutated-module))
-                             index
-                             config/formatted-for-runner
-                             #:timeout/s (* 5 60)
-                             #:modules-base-path (resolve-bench-path bench-name)
-                             #:write-modules-to dump-path
-                             #:on-module-exists 'replace))
+                               (resolve-bench-path mutated-module)
+                               (map resolve-bench-path
+                                    (set-remove others mutated-module))
+                               index
+                               config/formatted-for-runner
+                               #:timeout/s (* 5 60)
+                               #:modules-base-path (resolve-bench-path bench-name)
+                               #:write-modules-to dump-path
+                               #:on-module-exists 'replace))
     (define blamed-level
       (match blamed
         [(vector id path)
@@ -90,4 +93,7 @@ Blamed (~a) is at ~a
 "
             outcome blamed
             mutated-id mutated-id-level
-            blamed blamed-level)))
+            blamed blamed-level)
+
+    (when print-trace?
+      (printf "~n~nTrace:~n~v" trace))))
