@@ -29,4 +29,12 @@
         "snake/untyped/data.rkt" 'none
         "snake/untyped/handlers.rkt" 'none
         "snake/untyped/motion-help.rkt" 'none
-        "snake/untyped/motion.rkt" 'none))
+        "snake/untyped/motion.rkt" 'none
+
+        "kcfa/untyped/ai.rkt" 'max
+        "kcfa/untyped/benv.rkt" 'max
+        "kcfa/untyped/denotable.rkt" 'max
+        "kcfa/untyped/main.rkt" 'max
+        "kcfa/untyped/structs.rkt" 'max
+        "kcfa/untyped/time.rkt" 'max
+        "kcfa/untyped/ui.rkt" 'max))
