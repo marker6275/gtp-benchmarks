@@ -25,8 +25,11 @@
 ;; ---
 ;(define-type Value Closure)
 
-(define/ctc-helper ((length<=/c n) l)
-  (<= (length l) n))
+(define/ctc-helper ((length-is/c compare) n)
+  ;; ll: we only implemented up to one level of currying :(
+  (λ (l) (compare (length l) n)))
+(define/ctc-helper length<=/c (length-is/c <=))
+(define/ctc-helper length=/c (length-is/c =))
 (define/ctc-helper ((prefix-of/c l) pref)
   (list-prefix? pref l))
 
@@ -65,7 +68,7 @@
    [max (->i ([call Stx-type?]
               [time Time?])
              [result (call time)
-                     (and/c (listof Time?)
+                     (and/c Time?
                             (length=/c (k))
                             (prefix-of/c (cons (Stx-label call) time)))])]
    [types (Stx-type? Time? . -> . Time?)])

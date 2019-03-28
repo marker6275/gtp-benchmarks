@@ -49,7 +49,7 @@
 
 ;; lltodo: check contracts actually work
 
-(define/ctc-helper Time? symbol?)
+(define/ctc-helper Time? (listof symbol?))
 (define/ctc-helper Addr? any/c)
 
 (define/ctc-helper BEnv? (hash/c Var? Addr? #:immutable #t))
