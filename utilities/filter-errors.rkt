@@ -32,8 +32,6 @@
     path
     "Path to log file to filter."
     (log-path path)])
-  (unless (log-path)
-    (eprintf "Error: arguments -f are mandatory.~n")
-    (exit 1))
-
-  (call-with-input-file (log-path) filter-errors))
+  (if (log-path)
+      (call-with-input-file (log-path) filter-errors)
+      (filter-errors (current-input-port))))
