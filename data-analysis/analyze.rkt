@@ -200,8 +200,8 @@
         [else
          (displayln "Increasing distance pairs found:")
          (for ([samples (in-list increasing-distance-pairs)])
-           (eprintf "========== Increasing distance pair ==========~n")
-           (for ([sample (in-set samples)]) (displayln sample))
+           (eprintf "========== Increasing distance pairs ==========~n")
+           (for ([sample (in-set samples)]) (printf "~s~n" sample))
            (eprintf "~n===============~n"))]))
 
 
