@@ -80,12 +80,21 @@
     (if write-to-dir
         (for/fold ([config ctc-precision-config]
                    [new-paths #hash()])
-                  ([old-path (in-list (list* main-module
-                                             module-to-mutate
-                                             other-modules))])
+                  ([old-path (in-list
+                              (if (equal? main-module module-to-mutate)
+                                  (list* module-to-mutate
+                                         other-modules)
+                                  (list* main-module
+                                         module-to-mutate
+                                         other-modules)))])
           (define rel-path (find-relative-path base-path old-path))
           (define new-path (simple-form-path (build-path write-to-dir rel-path)))
-          (define old-mod-config (hash-ref config old-path))
+          (define old-mod-config
+            (hash-ref config old-path
+                      (λ _
+                        (error 'write-modules-to
+                               "Couldn't find ~v in config ~v"
+                               old-path config))))
           (define new-mod-config (hash-rename-key old-mod-config old-path new-path))
           (values (hash-set (hash-remove config old-path) new-path new-mod-config)
                   (hash-set new-paths old-path new-path)))
@@ -95,7 +104,7 @@
     (when write-to-dir
       (define new-path (hash-ref mod-paths/write-to mod-path
                                  (λ _
-                                   (error 'make-mutated-module-runner
+                                   (error 'write-modules-to
                                           "~v not found in ~v"
                                           mod-path
                                           mod-paths/write-to))))
