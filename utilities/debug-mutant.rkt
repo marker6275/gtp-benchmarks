@@ -29,6 +29,10 @@
            (delete-directory/files dump-dir-path))
          (copy-directory/files (resolve-bench-path bench-name)
                                dump-dir-path)
+         (define compiled-dir-path (build-path dump-dir-path
+                                               "untyped/compiled"))
+         (when (directory-exists? compiled-dir-path)
+           (delete-directory/files compiled-dir-path))
          dump-dir-path]))
 
 (define (debug-mutant bench-name
