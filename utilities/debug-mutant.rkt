@@ -8,7 +8,7 @@
          racket/serialize
          racket/runtime-path)
 
-(define-runtime-path gtp-benchmarks "../../gtp-benchmarks")
+(define-runtime-path gtp-benchmarks "..")
 
 (define (fixup-paths raw-config-string)
   (define path-replacement
