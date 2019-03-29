@@ -88,29 +88,41 @@
                                #:modules-base-path (resolve-bench-path bench-name)
                                #:write-modules-to dump-path
                                #:on-module-exists 'replace))
-    (define blamed-level
+    (define maybe-blamed-vec
       (match blamed
-        [(vector id path)
-         (hash-ref (hash-ref config/formatted-for-runner path) id)]
         [(or #f (? exn?)) 'no-blamed]
         [(? cons? mod-path)
          (printf
           "Blamed is module path: ~v, likely a ctc violation in flow-trace~n"
           mod-path)
-         'no-blamed]))
+         'no-blamed]
+        [(? vector? vec) vec]))
+    (define blamed-level
+      (match maybe-blamed-vec
+        [(vector id path)
+         (hash-ref (hash-ref config/formatted-for-runner path) id)]
+        [_ 'no-blame]))
     (define mutated-id-level
       (hash-ref (hash-ref config/formatted-for-runner
                           (resolve-bench-path mutated-module))
                 mutated-id))
-    (printf "Run result: ~a ~a
+    (printf "
+Run result: ~a ~a
+
 Mutated (~a) is at ~a
+
 Blamed (~a) is at ~a
 Trace length: ~v
 "
-            outcome blamed
+            outcome maybe-blamed-vec
             mutated-id mutated-id-level
-            blamed blamed-level
+            maybe-blamed-vec blamed-level
             (trace-length trace))
+
+    (when (exn? blamed)
+      (displayln ",-------------------- Exn message --------------------")
+      ((error-display-handler) (exn-message blamed) blamed)
+      (displayln "`--------------------------------------------------"))
 
     (when print-trace?
       (printf "~n~nTrace:~n~v" trace))))
