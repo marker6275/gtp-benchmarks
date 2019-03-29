@@ -146,7 +146,7 @@
                               compressed
                               trace-api))
           ns)
-    (eval '(current-trace-reset!) ns))
+    (eval '(tracing-reset!) ns))
 
   (define other-modules-to-mutate
     (if (equal? main-module module-to-mutate)
