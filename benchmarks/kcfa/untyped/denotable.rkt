@@ -27,6 +27,11 @@
   store-update
   store-update*
   store-join
+
+  Denotable/c
+  Store/c
+  State/c
+  State-type?
 )
 
 ;; =============================================================================
@@ -35,8 +40,8 @@
 ;(define-type Denotable (Setof Value))
 ;(define-type Store (HashTable Addr Denotable))
 
-(define/ctc-helper Denotable? (set/c Closure-type/c #:kind 'immutable))
-(define/ctc-helper Store? (hash/c Addr? Denotable? #:immutable #t))
+(define/ctc-helper Denotable/c (set/c Closure-type/c #:kind 'immutable))
+(define/ctc-helper Store/c (hash/c Addr? Denotable/c #:immutable #t))
 
 ;; -- structs
 
@@ -50,42 +55,42 @@
 
 (define/ctc-helper (State/c call/c benv/c store/c time/c)
   (struct/c State call/c benv/c store/c time/c))
-(define/ctc-helper State-type? (State/c Stx-type/c BEnv? Store? Time?))
+(define/ctc-helper State-type? (State/c Stx-type/c BEnv? Store/c Time?))
 
 ;; -- public
 
 ;(: d-bot Denotable)
 (define/contract d-bot
-  Denotable?
+  Denotable/c
   (set))
 
 ;(: d-join (-> Denotable Denotable Denotable))
 (define/contract d-join
   (configurable-ctc
-   [max (->i ([a Denotable?]
-              [b Denotable?])
-             [result Denotable?]
+   [max (->i ([a Denotable/c]
+              [b Denotable/c])
+             [result Denotable/c]
              #:post (a b result)
              (for/and ([el (in-sequences (in-set a) (in-set b))])
                (set-member? result el)))]
-   [types (Denotable? Denotable? . -> . Denotable?)])
+   [types (Denotable/c Denotable/c . -> . Denotable/c)])
   set-union)
 
 ;(: empty-store Store)
 (define/contract empty-store
-  Store?
+  Store/c
   (make-immutable-hasheq '()))
 
 ;(: store-lookup (-> Store Addr Denotable))
 (define/contract (store-lookup s a)
   (configurable-ctc
-   [max (->i ([s Store?]
+   [max (->i ([s Store/c]
               [a Addr?])
              [result (s a)
                      (equal?/c (if (hash-has-key? s a)
                                    (hash-ref s a)
                                    d-bot))])]
-   [types (Store? Addr? . -> . Denotable?)])
+   [types (Store/c Addr? . -> . Denotable/c)])
   (hash-ref s a (lambda () d-bot)))
 
 ;; any/c flat-contract? (hash/c any/c any/c) -> flat-contract?
@@ -97,18 +102,18 @@
 ;(: store-update (-> Store Addr Denotable Store))
 (define/contract (store-update store addr value)
   (configurable-ctc
-   [max (->i ([s Store?]
+   [max (->i ([s Store/c]
               [addr Addr?]
-              [value Denotable?])
+              [value Denotable/c])
              [result (s addr value)
                      (and/c
-                      Store?
+                      Store/c
                       (hash-with/c addr
                                    (equal?/c
                                     (set-union value
                                                (hash-ref s addr
                                                          (λ _ (set)))))))])]
-   [types (Store? Addr? Denotable? . -> . Store?)])
+   [types (Store/c Addr? Denotable/c . -> . Store/c)])
   ;(: update-lam (-> Denotable Denotable))
   (define (update-lam d) (d-join d value))
   (hash-update store addr update-lam (lambda () d-bot)))
@@ -116,10 +121,10 @@
 ;(: store-update* (-> Store (Listof Addr) (Listof Denotable) Store))
 (define/contract (store-update* s as vs)
   (configurable-ctc
-   [max (->i ([s Store?]
+   [max (->i ([s Store/c]
               [as (listof Addr?)]
-              [vs (listof Denotable?)])
-             [result Store?]
+              [vs (listof Denotable/c)])
+             [result Store/c]
              #:post (s as vs result)
              (for/and ([a (in-list (remove-duplicates as))])
                (define vs<-a (indexes-where as (equal?/c a)))
@@ -127,7 +132,7 @@
                (define v/expected (hash-ref s a (λ _ (set))))
                (and (hash-has-key? result a)
                     (equal? (hash-ref result a) v/expected))))]
-   [types (Store? (listof Addr?) (listof Denotable?) . -> . Store?)])
+   [types (Store/c (listof Addr?) (listof Denotable/c) . -> . Store/c)])
   (for/fold ([store s])
     ([a (in-list as)]
      [v (in-list vs)])
@@ -136,9 +141,9 @@
 ;(: store-join (-> Store Store Store))
 (define/contract (store-join s1 s2)
   (configurable-ctc
-   [max (->i ([s1 Store?]
-              [s2 Store?])
-             [result Store?]
+   [max (->i ([s1 Store/c]
+              [s2 Store/c])
+             [result Store/c]
              #:post (s1 s2 result)
              (for/and ([(k v) (in-hash result)])
                (equal? v (set-union (hash-ref s1 k (λ _ (set)))

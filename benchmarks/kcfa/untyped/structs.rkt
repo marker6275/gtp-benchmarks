@@ -9,7 +9,7 @@
 )
 
 (provide Stx-type/c
-         exp-type/c
+         Exp-type/c
          Ref-type/c
          Lam-type/c
          Call-type/c
@@ -70,14 +70,14 @@
 (define/ctc-helper Stx-type/c (Stx/c symbol?))
 (define/ctc-helper exp-type/c (exp/c symbol?))
 (define/ctc-helper Ref-type/c (Ref/c symbol? Var?))
-(define/ctc-helper exp/Ref/Lam/Call-type/c
-  (or/c exp-type/c
+(define/ctc-helper Exp-type/c
+  (or/c #;exp-type/c
         Ref-type/c
         (recursive-contract Lam-type/c #:chaperone)
         (recursive-contract Call-type/c #:chaperone)))
 (define/ctc-helper Lam-type/c (struct/c Lam symbol?
                                         (listof Var?)
-                                        exp/Ref/Lam/Call-type/c))
+                                        Exp-type/c))
 (define/ctc-helper Call-type/c (struct/c Call symbol?
-                                         exp/Ref/Lam/Call-type/c
-                                         (listof exp/Ref/Lam/Call-type/c)))
+                                         Exp-type/c
+                                         (listof Exp-type/c)))
