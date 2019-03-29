@@ -11,10 +11,15 @@
 (define-runtime-path gtp-benchmarks "../../gtp-benchmarks")
 
 (define (fixup-paths raw-config-string)
+  (define path-replacement
+    (format "~a\\2" (path->string (simple-form-path gtp-benchmarks))))
   (regexp-replace*
    "(/projects/p30818|/home/llx9037/proj)/src/gtp-benchmarks([^ ]+)"
    raw-config-string
-   (format "\"~a\\2\"" (path->string (simple-form-path gtp-benchmarks)))))
+   ;; wrap paths in quotes if they don't already have them
+   (if (string-contains? raw-config-string "\"/")
+       path-replacement
+       (string-append "\"" path-replacement "\""))))
 
 (define (setup-dump-copy-dir! bench-name dump-copy-dir-name)
   (cond [(hash-has-key? benchmarks dump-copy-dir-name)
