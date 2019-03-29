@@ -8,11 +8,11 @@
   (struct-out Call)
 )
 
-(provide Stx-type?
-         exp-type?
-         Ref-type?
-         Lam-type?
-         Call-type?
+(provide Stx-type/c
+         exp-type/c
+         Ref-type/c
+         Lam-type/c
+         Call-type/c
          Stx/c
          exp/c
          Ref/c
@@ -67,17 +67,17 @@
   (struct/c Call label/c
             fun/c
             args/c))
-(define/ctc-helper Stx-type? (Stx/c symbol?))
-(define/ctc-helper exp-type? (exp/c symbol?))
-(define/ctc-helper Ref-type? (Ref/c symbol? Var?))
-(define/ctc-helper exp/Ref/Lam/Call-type?
-  (or/c exp-type?
-        Ref-type?
-        (recursive-contract Lam-type? #:chaperone)
-        (recursive-contract Call-type? #:chaperone)))
-(define/ctc-helper Lam-type? (struct/c Lam symbol?
-                                       (listof Var?)
-                                       exp/Ref/Lam/Call-type?))
-(define/ctc-helper Call-type? (struct/c Call symbol?
-                                        exp/Ref/Lam/Call-type?
-                                        (listof exp/Ref/Lam/Call-type?)))
+(define/ctc-helper Stx-type/c (Stx/c symbol?))
+(define/ctc-helper exp-type/c (exp/c symbol?))
+(define/ctc-helper Ref-type/c (Ref/c symbol? Var?))
+(define/ctc-helper exp/Ref/Lam/Call-type/c
+  (or/c exp-type/c
+        Ref-type/c
+        (recursive-contract Lam-type/c #:chaperone)
+        (recursive-contract Call-type/c #:chaperone)))
+(define/ctc-helper Lam-type/c (struct/c Lam symbol?
+                                        (listof Var?)
+                                        exp/Ref/Lam/Call-type/c))
+(define/ctc-helper Call-type/c (struct/c Call symbol?
+                                         exp/Ref/Lam/Call-type/c
+                                         (listof exp/Ref/Lam/Call-type/c)))

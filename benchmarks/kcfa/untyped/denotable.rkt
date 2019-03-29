@@ -35,7 +35,7 @@
 ;(define-type Denotable (Setof Value))
 ;(define-type Store (HashTable Addr Denotable))
 
-(define/ctc-helper Denotable? (set/c Closure-type? #:kind 'immutable))
+(define/ctc-helper Denotable? (set/c Closure-type/c #:kind 'immutable))
 (define/ctc-helper Store? (hash/c Addr? Denotable? #:immutable #t))
 
 ;; -- structs
@@ -50,7 +50,7 @@
 
 (define/ctc-helper (State/c call/c benv/c store/c time/c)
   (struct/c State call/c benv/c store/c time/c))
-(define/ctc-helper State-type? (State/c Stx-type? BEnv? Store? Time?))
+(define/ctc-helper State-type? (State/c Stx-type/c BEnv? Store? Time?))
 
 ;; -- public
 

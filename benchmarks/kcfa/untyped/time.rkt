@@ -65,13 +65,13 @@
 ;(: tick (-> Stx Time Time))
 (define/contract (tick call time)
   (configurable-ctc
-   [max (->i ([call Stx-type?]
+   [max (->i ([call Stx-type/c]
               [time Time?])
              [result (call time)
                      (and/c Time?
                             (length=/c (k))
                             (prefix-of/c (cons (Stx-label call) time)))])]
-   [types (Stx-type? Time? . -> . Time?)])
+   [types (Stx-type/c Time? . -> . Time?)])
 
   (define label (Stx-label call))
   (take* (cons label time) (k)))
@@ -83,9 +83,9 @@
              [result (time)
                      (->i ([var Var?])
                           [result (var)
-                                  (and/c Binding-type?
+                                  (and/c Binding-type/c
                                          (Binding/c (equal?/c var)
                                                     (equal?/c time)))])])]
-   [types (Time? . -> . (Var? . -> . Binding-type?))])
+   [types (Time? . -> . (Var? . -> . Binding-type/c))])
   (Binding var time))
 

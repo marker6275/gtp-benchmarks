@@ -21,8 +21,8 @@
   BEnv?
   Closure/c
   Binding/c
-  Closure-type?
-  Binding-type?
+  Closure-type/c
+  Binding-type/c
 
   Time?
   Addr?
@@ -61,8 +61,8 @@
 (define/ctc-helper (Binding/c var/c time/c)
   (struct/c Binding var/c time/c))
 
-(define/ctc-helper Closure-type? (Closure/c Lam-type? BEnv?))
-(define/ctc-helper Binding-type? (Binding/c Var? Time?))
+(define/ctc-helper Closure-type/c (Closure/c Lam-type/c BEnv?))
+(define/ctc-helper Binding-type/c (Binding/c Var? Time?))
 
 ;; -- public
 
