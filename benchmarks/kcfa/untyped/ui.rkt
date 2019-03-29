@@ -10,6 +10,9 @@
   "denotable.rkt"
   "time.rkt"
   (only-in racket/string string-join)
+  "../../../ctcs/precision-config.rkt"
+  "../../../ctcs/common.rkt"
+  racket/contract
 )
 
 (require "ai.rkt")
@@ -33,6 +36,7 @@
 
 ;; -- ui.rkt
 ;(define-type MonoStore (HashTable Var (Setof Exp)))
+(define/ctc-helper MonoStore/c (hash/c Var? (set/c exp-type/c)))
 
 ;(: summarize (-> (Setof State) Store))
 (define (summarize states)
