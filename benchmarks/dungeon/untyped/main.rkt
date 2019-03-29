@@ -128,24 +128,19 @@
 
 ;; -----------------------------------------------------------------------------
 
-(define/ctc-helper (room-bounds x y height width direction
-                     [dimension-randomizer identity])
-  (define min-x (match direction
-                  [(== down) x]
-                  ;; expanding north, we have to move the top of the room
-                  ;; up so the bottom reaches the starting point
-                  [(== up) (+ (- x height) 1)]
-                  ;; have the entrance be at a random position on the
-                  ;; entrance-side wall
-                  [else    (sub1 (- x (dimension-randomizer (- height 2))))]))
-  (define min-y (match direction
-                  ;; same idea as for x
-                  [(== right) y]
-                  [(== left)  (+ (- y width) 1)]
-                  [else       (sub1 (- y (dimension-randomizer (- width 2))))]))
-  (define max-x (+ min-x height))
-  (define max-y (+ min-y width))
-
+(define/ctc-helper (room-bounds x y height width direction)
+  (define-values (min-x max-x)
+    (match direction
+      [(== down) (values x (+ x (sub1 height)))]
+      [(== up) (values (add1 (- x height)) x)]
+      ;; Could be any window between down and up, allow them all
+      [else    (values (add1 (- x height)) (+ x (sub1 height)))]))
+  (define-values (min-y max-y)
+    (match direction
+      [(== right) (values y (+ y width))]
+      [(== left)  (values (add1 (- y width)) y)]
+      ;; Could be any window between left and right, allow them all
+      [else       (values (add1 (- y width)) (+ y width))]))
   (values min-x max-x
           min-y max-y))
 
