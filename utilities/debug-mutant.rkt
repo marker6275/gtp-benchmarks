@@ -6,7 +6,8 @@
          "../mutate/mutation-runner.rkt"
          (submod "../mutate/mutation-runner.rkt" debug)
          racket/serialize
-         racket/runtime-path)
+         racket/runtime-path
+         (submod flow-trace/collapsing compressed trace-api))
 
 (define-runtime-path gtp-benchmarks "..")
 
@@ -99,10 +100,12 @@
     (printf "Run result: ~a ~a
 Mutated (~a) is at ~a
 Blamed (~a) is at ~a
+Trace length: ~v
 "
             outcome blamed
             mutated-id mutated-id-level
-            blamed blamed-level)
+            blamed blamed-level
+            (trace-length trace))
 
     (when print-trace?
       (printf "~n~nTrace:~n~v" trace))))
