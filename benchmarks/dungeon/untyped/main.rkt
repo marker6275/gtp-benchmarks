@@ -363,8 +363,8 @@
                             [w (if h? 10 3)])
                        (or-#f/c
                         (room-with/c
-                         (random-result-between/c 7 11)
-                         (random-result-between/c 7 11)
+                         (random-result-between/c 3 8)
+                         (random-result-between/c 3 10)
                          (alistof (and/c array-coord?
                                          ;; ll: Just make sure it's within
                                          ;; the max
@@ -372,7 +372,7 @@
                                                              h
                                                              w
                                                              dir))
-                                  cell%?)
+                                  cell%/c)
                          any/c
                          any/c)))])]
    [types (grid? array-coord? direction? . -> . (or-#f/c any-room?))])
