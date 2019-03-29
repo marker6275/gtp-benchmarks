@@ -92,7 +92,12 @@
       (match blamed
         [(vector id path)
          (hash-ref (hash-ref config/formatted-for-runner path) id)]
-        [#f 'no-blamed]))
+        [(or #f (? exn?)) 'no-blamed]
+        [(? cons? mod-path)
+         (printf
+          "Blamed is module path: ~v, likely a ctc violation in flow-trace~n"
+          mod-path)
+         'no-blamed]))
     (define mutated-id-level
       (hash-ref (hash-ref config/formatted-for-runner
                           (resolve-bench-path mutated-module))
