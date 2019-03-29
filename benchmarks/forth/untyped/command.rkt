@@ -72,11 +72,10 @@
 ;; True if the argument is a list with one element
 (define/contract (singleton-list? x)
   (configurable-ctc
-   [max (->i ([x list?])
-             [result (x) (if (empty? x)
-                             #f
-                             (empty? (rest x)))])]
-   [types (list? . -> . boolean?)])
+   [max (->i ([x any/c])
+             [result (x)
+                     (and (list? x) (not (empty? x)) (empty? (rest x)))])]
+   [types (any/c . -> . boolean?)])
 
   (and (list? x)
        (not (null? x))
@@ -184,24 +183,21 @@
                 ;; drop
                 (command%?-with-exec
                  (args E S v)
-                 [result (if (and (is-or-starts-with? (curry equal? 'drop)
-                                                      v)
+                 [result (if (and (is-or-starts-with? (curry equal? 'drop) v)
                                   ((list-with-min-size/c 1) S))
                              (equal?/c (cons E (rest S)))
                              #f)])
                 ;; dup
                 (command%?-with-exec
                  (args E S v)
-                 [result (if (and (is-or-starts-with? (curry equal? 'dup)
-                                                      v)
+                 [result (if (and (is-or-starts-with? (curry equal? 'dup) v)
                                   ((list-with-min-size/c 1) S))
                              (equal?/c (cons E (cons (first S) S)))
                              #f)])
                 ;; over
                 (command%?-with-exec
                  (args E S v)
-                 [result (if (and (is-or-starts-with? (curry equal? 'over)
-                                                      v)
+                 [result (if (and (is-or-starts-with? (curry equal? 'over) v)
                                   ((list-with-min-size/c 2) S))
                              (equal?/c
                               (cons E (cons (first S)
@@ -212,8 +208,7 @@
                 ;; swap
                 (command%?-with-exec
                  (args E S v)
-                 [result (if (and (is-or-starts-with? (curry equal? 'swap)
-                                                      v)
+                 [result (if (and (is-or-starts-with? (curry equal? 'swap) v)
                                   ((list-with-min-size/c 2) S))
                              (equal?/c
                               (cons E
@@ -242,7 +237,7 @@
                 ;; lltemporal: prints
                 (command%?-with-exec
                  (args E S v)
-                 [result (if (is-or-starts-with? (curry equal? 'show))
+                 [result (if (is-or-starts-with? (curry equal? 'show) v)
                              (equal?/c (cons E S))
                              #f)])))]
    [types env?])
@@ -312,10 +307,10 @@
 
 (define/contract (exit? sym)
   (configurable-ctc
-   [max (->i ([sym symbol?])
+   [max (->i ([sym any/c])
              [result (sym)
                      (memq sym '(exit quit q leave bye))])]
-   [types (symbol? . -> . boolean?)])
+   [types (any/c . -> . boolean?)])
 
   (and (memq sym '(exit quit q leave bye)) #t))
 
@@ -335,19 +330,19 @@
 
 (define/contract (help? sym)
   (configurable-ctc
-   [max (->i ([sym symbol?])
+   [max (->i ([sym any/c])
              [result (sym)
                      (memq sym '(help ? ??? -help --help h))])]
-   [types (symbol? . -> . boolean?)])
+   [types (any/c . -> . boolean?)])
 
   (and (memq sym '(help ? ??? -help --help h)) #t))
 
 (define/contract (show? sym)
   (configurable-ctc
-   [max (->i ([sym symbol?])
+   [max (->i ([sym any/c])
              [result (sym)
                      (memq sym '(show print pp ls stack))])]
-   [types (symbol? . -> . boolean?)])
+   [types (any/c . -> . boolean?)])
 
   (and (memq sym '(show print pp ls stack)) #t))
 
