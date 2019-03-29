@@ -12,11 +12,13 @@
 (define-runtime-path gtp-benchmarks "..")
 
 (define (fixup-paths raw-config-string)
+  (define raw-config-string/no-paths
+    (regexp-replace* "#<path:([^>]+)>" raw-config-string "\\1"))
   (define path-replacement
     (format "~a\\2" (path->string (simple-form-path gtp-benchmarks))))
   (regexp-replace*
    "(/projects/p30818|/home/llx9037/proj)/src/gtp-benchmarks([^ ]+)"
-   raw-config-string
+   raw-config-string/no-paths
    ;; wrap paths in quotes if they don't already have them
    (if (string-contains? raw-config-string "\"/")
        path-replacement
