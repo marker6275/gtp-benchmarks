@@ -42,12 +42,14 @@
  (lam ;: Lam]
   benv ;: BEnv]))
 )
-  #:mutable)
+  #:mutable
+  #:transparent)
 (struct Binding
  (var ;: Var]
   time ;: Time]))
 )
-  #:mutable)
+  #:mutable
+  #:transparent)
 
 ;; lltodo: check contracts actually work
 
