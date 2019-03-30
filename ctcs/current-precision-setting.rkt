@@ -37,4 +37,7 @@
         "kcfa/untyped/main.rkt" 'max
         "kcfa/untyped/structs.rkt" 'max
         "kcfa/untyped/time.rkt" 'max
-        "kcfa/untyped/ui.rkt" 'max))
+        "kcfa/untyped/ui.rkt" 'max
+
+        "sieve/untyped/main.rkt" 'max
+        "sieve/untyped/streams.rkt" 'max))
