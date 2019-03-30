@@ -11,18 +11,25 @@
 
 (define-runtime-path gtp-benchmarks "..")
 
+;; Note: assumes paths have *no* spaces in them
 (define (fixup-paths raw-config-string)
   (define raw-config-string/no-paths
     (regexp-replace* "#<path:([^>]+)>" raw-config-string "\\1"))
   (define path-replacement
     (format "~a\\2" (path->string (simple-form-path gtp-benchmarks))))
-  (regexp-replace*
-   "(/projects/p30818|/home/llx9037/proj)/src/gtp-benchmarks([^ ]+)"
-   raw-config-string/no-paths
-   ;; wrap paths in quotes if they don't already have them
-   (if (string-contains? raw-config-string "\"/")
-       path-replacement
-       (string-append "\"" path-replacement "\""))))
+  (define config-string/local-paths
+    (regexp-replace*
+     "(/projects/p30818|/home/llx9037/proj)/src/gtp-benchmarks([^ ]+)"
+     raw-config-string/no-paths
+     path-replacement))
+  ;; wrap paths in quotes if they don't already have them
+  (define config-string/local-paths/quoted
+    (if (string-contains? raw-config-string "\"/")
+         config-string/local-paths
+         (regexp-replace* "(/[^ ]+)"
+                          config-string/local-paths
+                          "\"\\1\"")))
+  config-string/local-paths/quoted)
 
 (define (setup-dump-copy-dir! bench-name dump-copy-dir-name)
   (cond [(hash-has-key? benchmarks dump-copy-dir-name)
@@ -51,7 +58,8 @@
                       #:diff-mutant? [diff-mutant? #t]
                       #:run? [run? #f]
                       #:write-modules-to [dump-copy-dir-name #f]
-                      #:print-trace? [print-trace? #f])
+                      #:print-trace? [print-trace? #f]
+                      #:suppress-output? [suppress-output? #t])
   (match-define (benchmark main others) (hash-ref benchmarks bench-name))
   (define config-string (fixup-paths raw-config-string))
   (define config (call-with-input-string config-string read))
@@ -89,7 +97,8 @@
                                #:timeout/s (* 5 60)
                                #:modules-base-path (resolve-bench-path bench-name)
                                #:write-modules-to dump-path
-                               #:on-module-exists 'replace))
+                               #:on-module-exists 'replace
+                               #:suppress-output? suppress-output?))
     (define maybe-blamed-vec
       (match blamed
         [(or #f (? exn?)) 'no-blamed]
@@ -114,6 +123,7 @@ Run result: ~a ~a
 Mutated (~a) is at ~a
 
 Blamed (~a) is at ~a
+
 Trace length: ~v
 "
             outcome maybe-blamed-vec
