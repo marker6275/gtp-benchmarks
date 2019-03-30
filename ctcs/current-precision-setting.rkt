@@ -31,13 +31,13 @@
         "snake/untyped/motion-help.rkt" 'none
         "snake/untyped/motion.rkt" 'none
 
-        "kcfa/untyped/ai.rkt" 'max
-        "kcfa/untyped/benv.rkt" 'max
-        "kcfa/untyped/denotable.rkt" 'max
-        "kcfa/untyped/main.rkt" 'max
-        "kcfa/untyped/structs.rkt" 'max
-        "kcfa/untyped/time.rkt" 'max
-        "kcfa/untyped/ui.rkt" 'max
+        "kcfa/untyped/ai.rkt" 'none
+        "kcfa/untyped/benv.rkt" 'none
+        "kcfa/untyped/denotable.rkt" 'none
+        "kcfa/untyped/main.rkt" 'none
+        "kcfa/untyped/structs.rkt" 'none
+        "kcfa/untyped/time.rkt" 'none
+        "kcfa/untyped/ui.rkt" 'none
 
-        "sieve/untyped/main.rkt" 'max
-        "sieve/untyped/streams.rkt" 'max))
+        "sieve/untyped/main.rkt" 'none
+        "sieve/untyped/streams.rkt" 'none))
