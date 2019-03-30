@@ -21,14 +21,14 @@
          stream/dc*)
 
 ;; A stream is a cons of a value and a thunk that computes the next value when applied
-(struct stream (first rest) #:transparent)
+(struct stream (first rest) #:mutable #:transparent)
 
 
 (define/ctc-helper (stream/c first/c rest/c)
   (struct/c stream first/c rest/c))
 
 (define/ctc-helper (streamof el/c)
-  (stream/c el/c (-> (recursive-contract (streamof el/c) #:chaperone))))
+  (stream/c el/c (-> (recursive-contract (streamof el/c)))))
 
 ;; elem-contract? (elem -> elem-contract?) -> stream-contract?
 (define/ctc-helper (stream/dc* first/c next/c-maker)
