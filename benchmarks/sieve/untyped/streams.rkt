@@ -1,6 +1,6 @@
 #lang flow-trace
 
-(require racket/contract
+(require #;racket/contract
          "../../../ctcs/precision-config-dummy.rkt"
          "../../../ctcs/common.rkt")
 

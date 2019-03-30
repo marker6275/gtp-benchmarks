@@ -1,6 +1,6 @@
 #lang flow-trace
 
-(require racket/contract
+(require #;racket/contract
          "../../../ctcs/precision-config-dummy.rkt"
          "../../../ctcs/common.rkt"
          "streams.rkt")
@@ -44,11 +44,20 @@
   (make-simple-stream hd (lambda () (sieve (sift hd tl)))))
 
 ;; simple-stream of prime numbers
-(define primes (sieve (count-from 2)))
+(define/contract primes
+  (configurable-ctc
+   [max (simple-streamof (and/c integer? prime?))]
+   [types (simple-streamof integer?)])
+  (sieve (count-from 2)))
 
-(define N-1 20)
+(define/contract N-1
+  (configurable-ctc
+   [max (and/c natural? (=/c 20))]
+   [types natural?])
+  20)
 
-(define (main)
+(define/contract (main)
+  (-> void?)
   (void (simple-stream-get primes N-1)))
 
 (time (main))
