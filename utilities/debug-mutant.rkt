@@ -54,8 +54,8 @@
                       mutated-module
                       index
                       raw-config-string
-                      #:print-configs? [print-configs? #t]
-                      #:diff-mutant? [diff-mutant? #t]
+                      #:print-configs? [print-configs? #f]
+                      #:diff-mutant? [diff-mutant? #f]
                       #:run? [run? #f]
                       #:write-modules-to [dump-copy-dir-name #f]
                       #:print-trace? [print-trace? #f]
