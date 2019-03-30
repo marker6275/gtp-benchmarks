@@ -17,18 +17,25 @@
 
          stream/c
          streamof
-         stream/dc)
+         stream/dc
+         stream/dc*)
 
 ;; A stream is a cons of a value and a thunk that computes the next value when applied
-(struct stream (first rest))
+(struct stream (first rest) #:transparent)
 
 
-(define (stream/c first/c rest/c)
+(define/ctc-helper (stream/c first/c rest/c)
   (struct/c stream first/c rest/c))
-(define (streamof el/c)
+
+(define/ctc-helper (streamof el/c)
   (stream/c el/c (-> (recursive-contract (streamof el/c) #:chaperone))))
 
-;; contract? (any/c -> contract?) -> contract?
+;; elem-contract? (elem -> elem-contract?) -> stream-contract?
+(define/ctc-helper (stream/dc* first/c next/c-maker)
+  (stream/dc first/c
+             (λ (first) (-> (stream/dc* (next/c-maker first) next/c-maker)))))
+
+;; elem-contract? (elem -> stream-contract?) -> stream-contract?
 (define/ctc-helper (stream/dc first/c make-rest/c)
   (define first/c-proj (get/build-late-neg-projection first/c))
   (make-contract
@@ -43,9 +50,10 @@
             '(expected "a stream" given: "~e")
             val))
 
-       (define rest/c (make-rest/c (stream-first val)))
+       (define first/checked ((first/c-proj blame) (stream-first val) neg-party))
+       (define rest/c (make-rest/c first/checked))
        (define rest/c-proj (get/build-late-neg-projection rest/c))
-       (stream ((first/c-proj blame) (stream-first val) neg-party)
+       (stream first/checked
                ((rest/c-proj blame) (stream-rest val) neg-party))))))
 
 ;;--------------------------------------------------------------------------------------------------
@@ -64,7 +72,7 @@
   (configurable-ctc
    [max (->i ([st stream?])
              (values [r1 (st) (equal?/c (stream-first st))]
-                     [r2 (st) (equal?/c ((stream-rest st)))]))]
+                     [r2 stream?]))]
    [types (-> stream? (values any/c stream?))])
   (values (stream-first st) ((stream-rest st))))
 
