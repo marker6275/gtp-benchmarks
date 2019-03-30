@@ -4,22 +4,15 @@
 
 
 (require custom-load
-         syntax/modread
          syntax/to-string
-         (only-in syntax/modresolve [resolve-module-path module-path->path]))
+         (only-in syntax/modresolve [resolve-module-path module-path->path])
+         "../utilities/read-module.rkt")
 
 (module+ test
   (require ruinit))
 
 (define (module-path-resolve mod-path [load? #f])
   ((current-module-name-resolver) mod-path #f #f load?))
-
-(define (read-module path)
-  (check-module-form
-   (with-module-reading-parameterization
-     (λ () (with-input-from-file path
-             (λ () (port-count-lines! (current-input-port)) (read-syntax)))))
-   'ignored path))
 
 
 (struct instrumented-module

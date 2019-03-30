@@ -405,14 +405,8 @@ HERE
            mutant-count
            format-raw-config-for-runner)
 
-  (require syntax/modread
+  (require "../utilities/read-module.rkt"
            ruinit/diff)
-  (define (read-module path)
-    (check-module-form
-     (with-module-reading-parameterization
-       (λ () (with-input-from-file path
-               (λ () (port-count-lines! (current-input-port)) (read-syntax)))))
-     'ignored path))
   (define (diff-mutation module-to-mutate mutation-index)
     (define orig-module-stx (read-module module-to-mutate))
     (define-values (mutated-program-stx mutated-id)
