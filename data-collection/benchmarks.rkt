@@ -37,7 +37,21 @@
    (benchmark "forth/untyped/main.rkt"
               '("forth/untyped/command.rkt"
                 "forth/untyped/eval.rkt"
-                "forth/untyped/stack.rkt"))))
+                "forth/untyped/stack.rkt"))
+
+   "sieve"
+   (benchmark "sieve/untyped/main.rkt"
+              '("sieve/untyped/streams.rkt"))
+
+   "kcfa"
+   (benchmark "kcfa/untyped/main.rkt"
+              '("kcfa/untyped/ai.rkt"
+                "kcfa/untyped/benv.rkt"
+                "kcfa/untyped/denotable.rkt"
+                "kcfa/untyped/main.rkt"
+                "kcfa/untyped/structs.rkt"
+                "kcfa/untyped/time.rkt"
+                "kcfa/untyped/ui.rkt"))))
 
 (define-runtime-path benchmarks-dir-path "../benchmarks/")
 (define (resolve-bench-path p)
