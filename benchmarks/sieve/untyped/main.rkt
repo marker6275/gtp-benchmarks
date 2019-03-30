@@ -1,10 +1,9 @@
-#lang racket/base
+#lang flow-trace
 
 (require racket/contract
          "../../../ctcs/precision-config-dummy.rkt"
          "../../../ctcs/common.rkt"
-         "streams.rkt"
-         math/number-theory)
+         "streams.rkt")
 
 ;;--------------------------------------------------------------------------------------------------
 
@@ -13,41 +12,43 @@
   (configurable-ctc
    [max (->i ([n number?])
              [result (n)
-                     (stream/dc* (and/c number? (=/c n))
-                                 (λ (last)
-                                   (and/c number? (=/c (add1 last)))))])]
-   [types (-> number? (streamof number?))])
-  (make-stream n (lambda () (count-from (add1 n)))))
+                     (simple-stream/dc* (and/c number? (=/c n))
+                                        (λ (last)
+                                          (and/c number? (=/c (add1 last)))))])]
+   [types (-> number? (simple-streamof number?))])
+  (make-simple-stream n (lambda () (count-from (add1 n)))))
 
 ;; `sift n st` Filter all elements in `st` that are equal to `n`.
-;; Return a new stream.
+;; Return a new simple-stream.
 (define/contract (sift n st)
   (configurable-ctc
    [max (->i ([n integer?]
-              [st (streamof number?)])
+              [st (simple-streamof number?)])
              [result (n)
-                     (streamof (and/c number?
-                                      (not/c (=/c n))))])]
-   [types (-> integer? (streamof number?) (streamof number?))])
-  (define-values (hd tl) (stream-unfold st))
+                     (simple-streamof (and/c number?
+                                             (not/c (=/c n))))])]
+   [types (-> integer? (simple-streamof number?) (simple-streamof number?))])
+  (define-values (hd tl) (simple-stream-unfold st))
   (cond [(= 0 (modulo hd n)) (sift n tl)]
-        [else (make-stream hd (lambda () (sift n tl)))]))
+        [else (make-simple-stream hd (lambda () (sift n tl)))]))
+
+(define/ctc-helper prime? (let () (local-require math/number-theory) prime?))
 
 ;; `sieve st` Sieve of Eratosthenes
 (define/contract (sieve st)
   (configurable-ctc
-   [max (->i ([st (streamof integer?)])
-             [result (streamof (and/c integer? prime?))])]
-   [types (-> (streamof integer?) (streamof integer?))])
-  (define-values (hd tl) (stream-unfold st))
-  (make-stream hd (lambda () (sieve (sift hd tl)))))
+   [max (->i ([st (simple-streamof integer?)])
+             [result (simple-streamof (and/c integer? prime?))])]
+   [types (-> (simple-streamof integer?) (simple-streamof integer?))])
+  (define-values (hd tl) (simple-stream-unfold st))
+  (make-simple-stream hd (lambda () (sieve (sift hd tl)))))
 
-;; stream of prime numbers
+;; simple-stream of prime numbers
 (define primes (sieve (count-from 2)))
 
-(define N-1 100)
+(define N-1 20)
 
 (define (main)
-  (void (stream-get primes N-1)))
+  (void (simple-stream-get primes N-1)))
 
 (time (main))
