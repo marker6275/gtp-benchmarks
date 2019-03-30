@@ -1,9 +1,12 @@
 #lang racket
 
 (require racket/serialize
+         syntax/parse
          (only-in (submod "../data-collection/mutant-factory.rkt" test)
                   mutant
-                  sample-size))
+                  sample-size)
+         "../data-collection/benchmarks.rkt"
+         "../utilities/read-module.rkt")
 
 ;; data-list? := (list/c blame-trail-id?
 ;;                       string?
@@ -250,16 +253,40 @@ Average proportion of samples that hit blame: ~a = ~a
           (sample-size)
           sample-count/avg (exact->inexact sample-count/avg)
           sample-count/avg/hit-blame (exact->inexact
-                                      sample-count/avg/hit-blame)))
+                                      sample-count/avg/hit-blame))
 
-(define (report-lattice-size bench-name)
+  sample-count/avg)
+
+(define (report-lattice-size bench-name avg-samples-per-mutant)
   (define total-region-count (count-top-level-defs bench-name))
   (define lattice-size (expt 3 total-region-count))
-  (printf "Total lattice size for benchmark: ~a~n"
-          lattice-size))
+  (printf "Total lattice size for benchmark: ~a
+Average proportion of lattice explored for each relevant mutant: ~a
+"
+          lattice-size
+          (exact->inexact (/ avg-samples-per-mutant lattice-size))))
 
 (define (count-top-level-defs bench-name)
-  0)
+  (define bench (hash-ref benchmarks bench-name
+                          (λ _ (error 'analyze
+                                      "Benchmark ~a not one of known: ~a"
+                                      bench-name
+                                      (hash-keys benchmarks)))))
+  (define mods (map resolve-bench-path
+                    (cons (benchmark-main bench)
+                          (benchmark-others bench))))
+  (apply + (map top-level-defs/in-module mods)))
+
+(define (top-level-defs/in-module path)
+  (define mod-stx (read-module path))
+  (syntax-parse mod-stx
+    #:datum-literals [module define/contract]
+    [(module name lang
+       (mod-begin
+        {~alt {~and def
+                    (define/contract _ ...)}
+              _:expr} ...))
+     (length (syntax-e #'(def ...)))]))
 
 
 (module+ main
@@ -285,9 +312,10 @@ Average proportion of samples that hit blame: ~a = ~a
   (define data (read-data (data-dir)))
   (define data/by-mutant (organize-by-mutant data))
 
-  (report-mutant&sample-info data/by-mutant)
+  (define avg-samples-per-mutant
+    (report-mutant&sample-info data/by-mutant))
 
-  (report-lattice-size (bench-name))
+  (report-lattice-size (bench-name) avg-samples-per-mutant)
 
   (displayln "Analyzing for distance increases...")
   (report-distance-increases data/by-mutant))
