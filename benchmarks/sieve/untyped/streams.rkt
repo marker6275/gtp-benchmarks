@@ -91,7 +91,6 @@
                                  ((simple-stream-rest current-st))))])]
    [types (-> simple-stream? exact-nonnegative-integer? any/c)])
   (define-values (hd tl) (simple-stream-unfold st))
-  (printf "Get: ~v~n" hd)
   (cond [(= i 0) hd]
         [else    (simple-stream-get tl (sub1 i))]))
 
