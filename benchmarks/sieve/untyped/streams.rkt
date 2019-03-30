@@ -85,7 +85,7 @@
                      (equal?/c (for/fold ([current-st st]
                                           #:result (stream-first current-st))
                                          ([_ (in-range i)])
-                                 ((stream-rest st))))])]
+                                 ((stream-rest current-st))))])]
    [types (-> stream? exact-nonnegative-integer? any/c)])
   (define-values (hd tl) (stream-unfold st))
   (cond [(= i 0) hd]

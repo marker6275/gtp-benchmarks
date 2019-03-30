@@ -13,9 +13,9 @@
   (configurable-ctc
    [max (->i ([n number?])
              [result (n)
-                     (and/c (streamof number?)
-                            (stream/dc* (=/c n)
-                                        (λ (last) (=/c (add1 last)))))])]
+                     (stream/dc* (and/c number? (=/c n))
+                                 (λ (last)
+                                   (and/c number? (=/c (add1 last)))))])]
    [types (-> number? (streamof number?))])
   (make-stream n (lambda () (count-from (add1 n)))))
 
@@ -45,7 +45,7 @@
 ;; stream of prime numbers
 (define primes (sieve (count-from 2)))
 
-(define N-1 6666)
+(define N-1 100)
 
 (define (main)
   (void (stream-get primes N-1)))
