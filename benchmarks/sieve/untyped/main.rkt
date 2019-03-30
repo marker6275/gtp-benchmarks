@@ -18,6 +18,9 @@
    [types (-> number? (simple-streamof number?))])
   (make-simple-stream n (lambda () (count-from (add1 n)))))
 
+(define/ctc-helper ((divisible-by/c divisor) x)
+  (zero? (modulo x divisor)))
+
 ;; `sift n st` Filter all elements in `st` that are equal to `n`.
 ;; Return a new simple-stream.
 (define/contract (sift n st)
@@ -26,7 +29,7 @@
               [st (simple-streamof number?)])
              [result (n)
                      (simple-streamof (and/c number?
-                                             (not/c (=/c n))))])]
+                                             (not/c (divisible-by/c n))))])]
    [types (-> integer? (simple-streamof number?) (simple-streamof number?))])
   (define-values (hd tl) (simple-stream-unfold st))
   (cond [(= 0 (modulo hd n)) (sift n tl)]
