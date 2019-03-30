@@ -127,12 +127,10 @@
               [vs (listof Denotable/c)])
              [result Store/c]
              #:post (s as vs result)
-             (for/and ([a (in-list (remove-duplicates as))])
-               (define vs<-a (indexes-where as (equal?/c a)))
-               (define vs/unioned (apply set-union vs<-a))
-               (define v/expected (hash-ref s a (λ _ (set))))
+             (for/and ([a (in-list as)]
+                       [v (in-list vs)])
                (and (hash-has-key? result a)
-                    (equal? (hash-ref result a) v/expected))))]
+                    (subset? v (hash-ref result a)))))]
    [types (Store/c (listof Addr?) (listof Denotable/c) . -> . Store/c)])
   (for/fold ([store s])
     ([a (in-list as)]
