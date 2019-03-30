@@ -51,7 +51,8 @@
   store ;: Store]
   time ;: Time]))
   )
-  #:mutable)
+  #:mutable
+  #:transparent)
 
 (define/ctc-helper (State/c call/c benv/c store/c time/c)
   (struct/c State call/c benv/c store/c time/c))
