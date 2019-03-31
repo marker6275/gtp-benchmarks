@@ -58,15 +58,16 @@
     (match bench
       [(or (benchmark (and main (== (module-to-mutate))) others)
            (benchmark main (list-no-order (== (module-to-mutate)) others ...)))
-       (run-with-mutated-module (resolve-bench-path main)
-                                (resolve-bench-path (module-to-mutate))
-                                (map resolve-bench-path others)
-                                (mutation-index)
-                                module-to-precision-map
-                                #:timeout/s (* 10 60)
-                                #:modules-base-path (resolve-bench-path (benchmark-name))
-                                #:write-modules-to (write-modules-to)
-                                #:on-module-exists (on-module-exists))]
+       (run-with-mutated-module
+        (resolve-bench-path main)
+        (resolve-bench-path (module-to-mutate))
+        (map resolve-bench-path others)
+        (mutation-index)
+        module-to-precision-map
+        #:timeout/s (* 60 (if (equal? (benchmark-name) "dungeon") 10 5))
+        #:modules-base-path (resolve-bench-path (benchmark-name))
+        #:write-modules-to (write-modules-to)
+        #:on-module-exists (on-module-exists))]
       [_ ((invalid-arg "module-to-mutate ~a is not a module in benchmark ~a"
                        (module-to-mutate)
                        (benchmark-name)))]))
