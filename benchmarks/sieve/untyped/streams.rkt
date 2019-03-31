@@ -29,7 +29,8 @@
   (struct/c simple-stream first/c rest/c))
 
 (define/ctc-helper (simple-streamof el/c)
-  (simple-stream/c el/c (-> (recursive-contract (simple-streamof el/c)))))
+  (letrec ([this-ctc (simple-stream/c el/c (-> (recursive-contract this-ctc)))])
+    this-ctc))
 
 ;; elem-contract? (elem -> elem-contract?) -> simple-stream-contract?
 (define/ctc-helper (simple-stream/dc* first/c next/c-maker)
