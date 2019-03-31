@@ -37,11 +37,20 @@
 
 (define/ctc-helper prime? (let () (local-require math/number-theory) prime?))
 
+(define/ctc-helper (sieved-simple-stream-following/c sieved-n)
+  (and/c (simple-streamof (and/c integer? (not/c (divisible-by/c sieved-n))))
+         (simple-stream/dc any/c
+                           (λ (first)
+                             (-> (sieved-simple-stream-following/c first))))))
+
 ;; `sieve st` Sieve of Eratosthenes
 (define/contract (sieve st)
   (configurable-ctc
    [max (->i ([st (simple-streamof integer?)])
-             [result (simple-streamof (and/c integer? prime?))])]
+             [result (st)
+                     (let ([first (simple-stream-first st)])
+                       (simple-stream/c (and/c integer? (=/c first))
+                                        (-> (sieved-simple-stream-following/c first))))])]
    [types (-> (simple-streamof integer?) (simple-streamof integer?))])
   (define-values (hd tl) (simple-stream-unfold st))
   (make-simple-stream hd (lambda () (sieve (sift hd tl)))))

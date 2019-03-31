@@ -18,7 +18,8 @@
          simple-stream/c
          simple-streamof
          simple-stream/dc
-         simple-stream/dc*)
+         simple-stream/dc*
+         simple-stream-first)
 
 ;; A simple-stream is a cons of a value and a thunk that computes the next value when applied
 (struct simple-stream (first rest) #:mutable #:transparent)
@@ -37,7 +38,7 @@
                       (-> (simple-stream/dc* (next/c-maker first)
                                              next/c-maker)))))
 
-;; elem-contract? (elem -> simple-stream-contract?) -> simple-stream-contract?
+;; elem-contract? (elem -> (-> simple-stream-contract?)) -> simple-stream-contract?
 (define/ctc-helper (simple-stream/dc first/c make-rest/c)
   (define first/c-proj (get/build-late-neg-projection first/c))
   (make-contract
