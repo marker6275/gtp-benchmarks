@@ -1,4 +1,4 @@
-#lang racket/base
+#lang flow-trace
 
 ;; User Interface to `ai.rkt`
 
@@ -12,7 +12,6 @@
   (only-in racket/string string-join)
   "../../../ctcs/precision-config.rkt"
   "../../../ctcs/common.rkt"
-  racket/contract
 )
 
 (require "ai.rkt")
@@ -37,18 +36,19 @@
 
 ;; -- ui.rkt
 ;(define-type MonoStore (HashTable Var (Setof Exp)))
-(define/ctc-helper MonoStore/c (hash/c Var? (set/c Exp-type/c)))
+(define/ctc-helper MonoStore/c (hash/c Var?
+                                       (set/c Exp-type/c #:kind 'immutable)))
 
 ;(: summarize (-> (Setof State) Store))
 (define/contract (summarize states)
   (configurable-ctc
-   [max (->i ([states (set/c State-type?)])
+   [max (->i ([states (set/c State-type? #:kind 'immutable)])
              [result (states)
                      (equal?/c
                       (foldl store-join
                              empty-store
-                             (map State-store states)))])]
-   [types ((set/c State-type?) . -> . Store/c)])
+                             (set-map states State-store)))])]
+   [types ((set/c State-type? #:kind 'immutable) . -> . Store/c)])
   (for/fold ([store empty-store])
     ([state (in-set states)])
     (store-join (State-store state) store)))
@@ -56,14 +56,14 @@
 ;(: empty-mono-store MonoStore)
 (define/contract empty-mono-store
   MonoStore/c
-  (make-immutable-hasheq '()))
+  (hash))
 
 ;(: monovariant-value (-> Value Lam))
 (define/contract (monovariant-value v)
   (configurable-ctc
    [max (->i ([v Closure-type/c])
              [result (v) (equal?/c (Closure-lam v))])]
-   [types (Closue-type/c . -> . Lam-type/c)])
+   [types (Closure-type/c . -> . Lam-type/c)])
   (Closure-lam v))
 
 ;(: monovariant-store (-> Store MonoStore))
@@ -75,14 +75,15 @@
              (for/and ([(b vs) (in-hash store)])
                (define result-vs (hash-ref result (Binding-var b)
                                            (λ _ (set))))
-               (define mono-vs (list->set (map monovariant-value result-vs)))
+               (define mono-vs (list->set (set-map vs monovariant-value)))
                (subset? mono-vs result-vs)))]
    [types (Store/c . -> . MonoStore/c)])
   ;(: update-lam (-> (Setof Value) (-> (Setof Exp) (Setof Exp))))
-  (define ((update-lam vs) b-vs)
+  (define (update-lam vs)
     ;(: v-vs (Setof Lam))
-    (define v-vs (list->set (set-map vs monovariant-value)))
-    (set-union b-vs v-vs))
+    (λ (b-vs)
+      (define v-vs (list->set (set-map vs monovariant-value)))
+      (set-union b-vs v-vs)))
   ;(: default-lam (-> (Setof Exp)))
   (define (default-lam) (set))
   (for/fold ([mono-store empty-mono-store])

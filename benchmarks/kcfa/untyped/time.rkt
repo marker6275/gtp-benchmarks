@@ -1,8 +1,7 @@
-#lang racket/base
+#lang flow-trace
 
 (require
  racket/list
- racket/contract
   "structs.rkt"
   "benv.rkt"
   "../../../ctcs/precision-config.rkt"
@@ -13,7 +12,7 @@
 
 (provide
   time-zero
-  k
+  ;; k
   tick
   alloc
 )
@@ -55,7 +54,7 @@
   '())
 
 ;(: k (Parameterof Natural))
-(define/contract k
+#;(define/contract k
   (configurable-ctc
    [max (parameter/c (and/c natural?
                             (=/c 1)))]
@@ -69,15 +68,15 @@
               [time Time?])
              [result (call time)
                      (and/c Time?
-                            (length=/c (k))
+                            (length=/c 1 #;(k))
                             (prefix-of/c (cons (Stx-label call) time)))])]
    [types (Stx-type/c Time? . -> . Time?)])
 
   (define label (Stx-label call))
-  (take* (cons label time) (k)))
+  (take* (cons label time) 1 #;(k)))
 
 ;(: alloc (-> Time (-> Var Addr)))
-(define/contract ((alloc time) var)
+(define/contract (alloc time)
   (configurable-ctc
    [max (->i ([time Time?])
              [result (time)
@@ -87,5 +86,6 @@
                                          (Binding/c (equal?/c var)
                                                     (equal?/c time)))])])]
    [types (Time? . -> . (Var? . -> . Binding-type/c))])
-  (Binding var time))
+  (λ (var)
+    (Binding var time)))
 

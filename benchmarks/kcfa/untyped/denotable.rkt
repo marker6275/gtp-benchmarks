@@ -1,4 +1,4 @@
-#lang racket/base
+#lang flow-trace
 
 ;; Denotable values and stores to hold them.
 ;; A denotable is a set of values
@@ -7,7 +7,6 @@
 (require
   require-typed-check
   racket/set
-  racket/contract
   racket/list
   "structs.rkt"
   "benv.rkt"
@@ -32,6 +31,10 @@
   Store/c
   State/c
   State-type?
+  State-call
+  State-benv
+  State-store
+  State-time
 )
 
 ;; =============================================================================
@@ -80,7 +83,7 @@
 ;(: empty-store Store)
 (define/contract empty-store
   Store/c
-  (make-immutable-hasheq '()))
+  (hash))
 
 ;(: store-lookup (-> Store Addr Denotable))
 (define/contract (store-lookup s a)

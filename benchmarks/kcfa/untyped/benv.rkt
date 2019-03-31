@@ -1,4 +1,4 @@
-#lang racket/base
+#lang flow-trace
 
 ;; Binding environment,
 ;; helper functions
@@ -7,7 +7,6 @@
   "structs.rkt"
   "../../../ctcs/precision-config.rkt"
   "../../../ctcs/common.rkt"
-  racket/contract
 )
 
 (provide
@@ -26,6 +25,11 @@
 
   Time?
   Addr?
+
+  Closure-lam
+  Closure-benv
+  Binding-var
+  Binding-time
 )
 
 ;; =============================================================================
@@ -70,7 +74,7 @@
 
 
 ;(: empty-benv BEnv)
-(define/contract empty-benv BEnv? (make-immutable-hasheq '()))
+(define/contract empty-benv BEnv? (hash))
 
 (define/ctc-helper ((key-of/c a-hash) k)
   (hash-has-key? a-hash k))

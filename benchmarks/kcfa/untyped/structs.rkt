@@ -1,8 +1,8 @@
-#lang racket/base
+#lang flow-trace
 
 (provide
   (struct-out Stx)
-  (struct-out exp)
+  (struct-out useless-exp)
   (struct-out Ref)
   (struct-out Lam)
   (struct-out Call)
@@ -18,11 +18,15 @@
          Ref/c
          Lam/c
          Call/c
-         Var?)
+         Var?
 
-(require "../../../ctcs/precision-config.rkt"
-         racket/contract
-         racket/match)
+         Stx-label
+         Ref?
+         Ref-var
+         Lam?
+         Call?)
+
+(require "../../../ctcs/precision-config.rkt")
 
 ;; =============================================================================
 
@@ -33,16 +37,16 @@
   )
   #:mutable
   #:transparent)
-(struct exp Stx ()
+(struct useless-exp Stx ()
   #:mutable
   #:transparent)
 
-(struct Ref exp
+(struct Ref useless-exp
  (var ;: Symbol]))
 )
   #:mutable
   #:transparent)
-(struct Lam exp
+(struct Lam useless-exp
  (formals ;: (Listof Symbol)]
   call ;: (U exp Ref Lam Call)]))
 )
@@ -60,7 +64,7 @@
 (define/ctc-helper (Stx/c label/c)
   (struct/c Stx label/c))
 (define/ctc-helper (exp/c label/c)
-  (struct/c exp label/c))
+  (struct/c useless-exp label/c))
 (define/ctc-helper (Ref/c label/c var/c)
   (struct/c Ref label/c
             var/c))
