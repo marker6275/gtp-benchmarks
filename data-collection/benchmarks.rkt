@@ -48,7 +48,6 @@
               '("kcfa/untyped/ai.rkt"
                 "kcfa/untyped/benv.rkt"
                 "kcfa/untyped/denotable.rkt"
-                "kcfa/untyped/main.rkt"
                 "kcfa/untyped/structs.rkt"
                 "kcfa/untyped/time.rkt"
                 "kcfa/untyped/ui.rkt"))))
