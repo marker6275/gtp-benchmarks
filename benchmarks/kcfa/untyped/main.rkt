@@ -74,19 +74,7 @@
 
 (define/contract standard-example
   (configurable-ctc
-   [max (and/c
-         Call-type/c
-         (equal?/c
-          (make-let
-           'id
-           (make-lambda '(x k) (make-call (make-ref 'k) (make-ref 'x)))
-           (make-call (make-ref 'id)
-                      (make-lambda '(z) (make-ref 'z))
-                      (make-lambda '(a) 
-                                   (make-call (make-ref 'id)
-                                              (make-lambda '(y) (make-ref 'y))
-                                              (make-lambda '(b)
-                                                           (make-ref 'b))))))))]
+   [max Call-type/c]
    [types Call-type/c])
  (make-let
   'id
@@ -100,7 +88,7 @@
       (make-ref 'b)))))))
 
 (define/contract (main #;N e)
-  any/c
+  (-> Call-type/c any)
   ;; ll: no looping
   #;(for ([a-k (in-range N)])
       (analyze e))
