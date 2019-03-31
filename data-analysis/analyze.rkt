@@ -211,59 +211,67 @@
 
 (define (report-mutant&sample-info data/by-mutant)
   (define total-mutant-count (hash-count data/by-mutant))
-  (define-values (relevant-mutant-count sample-counts/by-mutant)
+  (define-values (relevant-mutant-count
+                  config-visit-counts/by-mutant
+                  root-sample-counts/by-mutant)
     (for/fold ([relevant-mutant-count 0]
-               [sample-counts/by-mutant (hash)])
-              ([(mutant samples) (in-hash data/by-mutant)])
+               [config-visit-counts/by-mutant (hash)]
+               [root-sample-counts/by-mutant (hash)])
+              ([(mutant runs) (in-hash data/by-mutant)])
       (define mutant-relevant?
-        (for/first ([sample (in-set samples)]
-                    #:when (match sample
+        (for/first ([run (in-set runs)]
+                    #:when (match run
                              [(list _ _ _ _ _ _ 'blamed _ _ _) #t]
                              [_ #f]))
           #t))
+      (define root-sample-count
+        (length (remove-duplicates (set-map runs run-result->blame-trail-id))))
       (values (if mutant-relevant?
                   (add1 relevant-mutant-count)
                   relevant-mutant-count)
-              (hash-set sample-counts/by-mutant
+              (hash-set config-visit-counts/by-mutant
                         mutant
-                        (set-count samples)))))
-  (define total-sample-count (apply + (hash-values sample-counts/by-mutant)))
-  (define sample-count/less-irrelevant-mutants
-    (- total-sample-count (- total-mutant-count relevant-mutant-count)))
-  (define sample-count/avg (/ sample-count/less-irrelevant-mutants
+                        (set-count runs))
+              (hash-set root-sample-counts/by-mutant
+                        mutant
+                        root-sample-count))))
+  (define total-visit-count
+    (apply + (hash-values config-visit-counts/by-mutant)))
+  (define total-root-sample-count
+    (apply + (hash-values root-sample-counts/by-mutant)))
+  (define root-sample-count/less-irrelevant-mutants
+    (- total-root-sample-count (- total-mutant-count relevant-mutant-count)))
+  (define root-sample-count/avg (/ root-sample-count/less-irrelevant-mutants
                               relevant-mutant-count))
-  (define sample-count/avg/hit-blame (/ (sample-size) sample-count/avg))
+  (define root-sample-count/avg/hit-blame
+    (/ (sample-size) root-sample-count/avg))
 
-  ;; lltodo: should report:
-  ;; - Total number of roots
-  ;; - Total number of configs we explored
-  ;; "samples" probably not the right word here, since the total count
-  ;; also includes the runs we did while following a blame trail
-  ;;
-  ;; No need to calculate the number of roots, it is the target sample size
-
-  (printf "Created ~a mutants, of which ~a were relevant.
-Total samples collected: ~a
-Target sample size (of precisions with blame) per relevant mutant: ~a
-Average attempted sample count per relevant mutant: ~a = ~a
-Average proportion of samples that hit blame: ~a = ~a
+  (printf "
+Created ~a mutants, of which ~a were relevant.
+Total configurations visited:                            ~a
+Blame-trail root count per relevant mutant:              ~a
+Average attempted root sample count per relevant mutant: ~a = ~a
+Average proportion of root samples that hit blame:       ~a = ~a
 "
           total-mutant-count relevant-mutant-count
-          total-sample-count
+          total-visit-count
           (sample-size)
-          sample-count/avg (exact->inexact sample-count/avg)
-          sample-count/avg/hit-blame (exact->inexact
-                                      sample-count/avg/hit-blame))
+          root-sample-count/avg (exact->inexact root-sample-count/avg)
+          root-sample-count/avg/hit-blame (exact->inexact
+                                           root-sample-count/avg/hit-blame))
 
-  sample-count/avg)
+  root-sample-count/avg)
+
+(define run-result->blame-trail-id first)
 
 (define (report-lattice-size bench-name avg-samples-per-mutant)
   (define total-region-count (count-top-level-defs bench-name))
   (define lattice-size (expt 3 total-region-count))
-  (printf "Total lattice size for benchmark: ~a
+  (printf "
+Total lattice size for benchmark:                                ~a
 Average proportion of lattice explored for each relevant mutant: ~a
 "
-          lattice-size
+          (format-big-number lattice-size)
           (exact->inexact (/ avg-samples-per-mutant lattice-size))))
 
 (define (count-top-level-defs bench-name)
@@ -287,6 +295,17 @@ Average proportion of lattice explored for each relevant mutant: ~a
                     (define/contract _ ...)}
               _:expr} ...))
      (length (syntax-e #'(def ...)))]))
+
+(define (format-big-number big-number)
+  (define number-string (number->string big-number))
+  (list->string
+   (flatten
+    (for/list ([digit (in-string number-string)]
+               [i (in-naturals)])
+      (if (and (not (zero? i))
+               (zero? (modulo i 3)))
+          (list #\, digit)
+          digit)))))
 
 
 (module+ main
@@ -312,11 +331,12 @@ Average proportion of lattice explored for each relevant mutant: ~a
   (define data (read-data (data-dir)))
   (define data/by-mutant (organize-by-mutant data))
 
-  (define avg-samples-per-mutant
+  (define avg-root-samples-per-mutant
     (report-mutant&sample-info data/by-mutant))
 
-  (report-lattice-size (bench-name) avg-samples-per-mutant)
+  (report-lattice-size (bench-name) avg-root-samples-per-mutant)
 
+  (newline)
   (displayln "Analyzing for distance increases...")
   (report-distance-increases data/by-mutant))
 
