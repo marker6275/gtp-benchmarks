@@ -1,4 +1,4 @@
-#lang racket/base
+#lang flow-trace
 
 ;; Create a few examples and run abstract interpretation
 
@@ -7,7 +7,6 @@
   "ui.rkt"
   "../../../ctcs/precision-config.rkt"
   "../../../ctcs/common.rkt"
-  racket/contract
 )
 
 ;; =============================================================================
@@ -59,10 +58,11 @@
               [call Call-type/c])
              [result (var exp call)
                      (and/c Call-type/c
-                            (Call/c symbol? (Lam/c symbol?
+                            (Call/c symbol?
+                                    (Lam/c symbol?
                                            (list/c (equal?/c var))
                                            (equal?/c call))
-                                    (equal?/c exp)))])]
+                                    (list/c (equal?/c exp))))])]
    [types (Var? Exp-type/c Call-type/c . -> . Call-type/c)])
   (make-call (make-lambda (list var) call) exp))
 
@@ -89,4 +89,4 @@
   (for ([a-k (in-range N)])
     (analyze e)))
 
-(time (main 2 mid-test))
+(time (main 2 standard-example #;mid-test))

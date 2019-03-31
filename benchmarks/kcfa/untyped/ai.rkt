@@ -1,4 +1,4 @@
-#lang racket/base
+#lang flow-trace
 
 ;; Abstract Interpretation
 
@@ -11,7 +11,6 @@
   racket/match
   "../../../ctcs/precision-config.rkt"
   "../../../ctcs/common.rkt"
-  racket/contract
 )
 
 ;; ---
@@ -25,7 +24,7 @@
 ;; =============================================================================
 
 ;(: atom-eval (-> BEnv Store (-> Exp Denotable)))
-(define/contract ((atom-eval benv store) id)
+(define/contract (atom-eval benv store)
   (configurable-ctc
    [max (->i ([benv BEnv?]
               [store Store/c])
@@ -51,19 +50,20 @@
                              (equal? result (set (Closure id benv)))]
                             [_ #f]))])]
    [types (BEnv? Store/c . -> . (Exp-type/c . -> . Denotable/c))])
-  (cond
-    [(Ref? id)
-     (store-lookup store (benv-lookup benv (Ref-var id)))]
-    [(Lam? id)
-     (set (Closure id benv))]
-    [else
-     (error "atom-eval got a plain Exp")]))
+  (λ (id)
+    (cond
+      [(Ref? id)
+       (store-lookup store (benv-lookup benv (Ref-var id)))]
+      [(Lam? id)
+       (set (Closure id benv))]
+      [else
+       (error "atom-eval got a plain Exp")])))
 
 ;(: next (-> State (Setof State)))
 (define/contract (next st)
   ;; lltodo: I don't think there's any reason to be more specific
   ;; here. It just calls other functions.
-  (State-type? . -> . (set/c State-type?))
+  (State-type? . -> . (set/c State-type? #:kind 'immutable))
   (match-define (State c benv store time) st)
   (cond
     [(Call? c)
@@ -93,16 +93,16 @@
 ;(: explore (-> (Setof State) (Listof State) (Setof State)))
 (define/contract (explore seen todo)
   (configurable-ctc
-   [max (->i ([seen (set/c State-type?)]
+   [max (->i ([seen (set/c State-type? #:kind 'immutable)]
               [todo (listof State-type?)])
              [result (seen todo)
-                     (and/c (set/c State-type?)
+                     (and/c (set/c State-type? #:kind 'immutable)
                             (subset?/c seen)
-                            (subset?/c todo))])]
-   [types ((set/c State-type?)
+                            (subset?/c (list->set todo)))])]
+   [types ((set/c State-type? #:kind 'immutable)
            (listof State-type?)
            . -> .
-           (set/c State-type?))])
+           (set/c State-type? #:kind 'immutable))])
   (cond
     [(eq? '() todo)
      ;; Nothing left to do
