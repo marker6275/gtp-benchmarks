@@ -21,6 +21,8 @@
   (define mutation-index (make-parameter #f))
   (define write-modules-to (make-parameter #f))
   (define on-module-exists (make-parameter 'error))
+  (define timeout/s (make-parameter #f))
+  (define memory/gb (make-parameter #f))
 
   (command-line
    #:once-each
@@ -42,7 +44,15 @@
     (write-modules-to output-path)]
    [("-f" "--overwrite-modules")
     "When writing modules, overwrite files that already exist"
-    (on-module-exists 'replace)])
+    (on-module-exists 'replace)]
+   [("-t" "--timeout")
+    seconds
+    "Timeout limit (seconds)"
+    (timeout/s (string->number seconds))]
+   [("-g" "--memory-limit")
+    gb
+    "Memory limit (GB)"
+    (memory/gb (string->number gb))])
 
   (define ((invalid-arg fmt-str . fmt-args))
     (eprintf "Invalid argument: ~a\n" (apply format fmt-str fmt-args))
@@ -64,7 +74,8 @@
         (map resolve-bench-path others)
         (mutation-index)
         module-to-precision-map
-        #:timeout/s (* 60 (if (equal? (benchmark-name) "dungeon") 10 5))
+        #:timeout/s (timeout/s)
+        #:memory/gb (memory/gb)
         #:modules-base-path (resolve-bench-path (benchmark-name))
         #:write-modules-to (write-modules-to)
         #:on-module-exists (on-module-exists))]
