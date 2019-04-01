@@ -7,6 +7,7 @@
   "ui.rkt"
   "../../../ctcs/precision-config.rkt"
   "../../../ctcs/common.rkt"
+  (only-in "ai.rkt" closed-term?)
 )
 
 ;; =============================================================================
@@ -74,7 +75,7 @@
 
 (define/contract standard-example
   (configurable-ctc
-   [max Call-type/c]
+   [max (and/c Call-type/c closed-term?)]
    [types Call-type/c])
  (make-let
   'id
@@ -88,7 +89,7 @@
       (make-ref 'b)))))))
 
 (define/contract (main #;N e)
-  (-> Call-type/c any)
+  (-> (and/c Call-type/c closed-term?) any)
   ;; ll: no looping
   #;(for ([a-k (in-range N)])
       (analyze e))

@@ -96,7 +96,7 @@
 ;(: analyze (-> Exp MonoStore))
 (define/contract (analyze exp)
   (configurable-ctc
-   [max (->i ([exp Exp-type/c])
+   [max (->i ([exp (and/c Exp-type/c closed-term?)])
              ;; lltodo: can be stronger?
              [result MonoStore/c])]
    [types (Exp-type/c . -> . MonoStore/c)])

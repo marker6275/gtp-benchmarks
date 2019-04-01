@@ -19,6 +19,7 @@
   atom-eval
   next
   explore
+  closed-term?
 )
 
 ;; =============================================================================
@@ -30,6 +31,10 @@
               [store Store/c])
              [result (benv store)
                      (->i ([id Exp-type/c])
+                          #:pre (id) (match id
+                                       [(Ref _ var)
+                                        (hash-has-key? benv var)]
+                                       [_ #t])
                           [result Denotable/c]
                           #:post (id result)
                           (match id
@@ -37,7 +42,6 @@
                              (=> fail)
                              (match benv
                                [(hash-table ((== var) benv-var) _ ...)
-                                (=> fail)
                                 (match store
                                   [(hash-table ((== benv-var) res) _ ...)
                                    (equal? result res)]
@@ -59,11 +63,38 @@
       [else
        (error "atom-eval got a plain Exp")])))
 
+
+(define/ctc-helper (closed-State? st)
+  (match-define (State e benv _ _) st)
+  (closed-term?/with-env e benv))
+
+(define/ctc-helper (closed-term? e)
+  (closed-term?/with-env e empty-benv))
+
+(define/ctc-helper (closed-term?/with-env e benv)
+  (match e
+    [(Ref _ var) (hash-has-key? benv var)]
+    [(Lam _ formals body)
+     (closed-term?/with-env body
+                            (for/fold ([extended-benv benv])
+                                      ([id (in-list formals)])
+                              ;; #f: dummy value, just matters that
+                              ;; its in there at all
+                              (hash-set extended-benv id #f)))]
+    [(Call _ f args)
+     (andmap (curryr closed-term?/with-env benv)
+             (cons f args))]
+    [_ #t]))
+
 ;(: next (-> State (Setof State)))
 (define/contract (next st)
   ;; lltodo: I don't think there's any reason to be more specific
   ;; here. It just calls other functions.
-  (State-type? . -> . (set/c State-type? #:kind 'immutable))
+  (configurable-ctc
+   [max ((and/c State-type? closed-State?) . -> . (set/c (and/c State-type?
+                                                               closed-State?)
+                                                        #:kind 'immutable))]
+   [types (State-type? . -> . (set/c State-type? #:kind 'immutable))])
   (match-define (State c benv store time) st)
   (cond
     [(Call? c)
@@ -93,10 +124,12 @@
 ;(: explore (-> (Setof State) (Listof State) (Setof State)))
 (define/contract (explore seen todo)
   (configurable-ctc
-   [max (->i ([seen (set/c State-type? #:kind 'immutable)]
-              [todo (listof State-type?)])
+   [max (->i ([seen (set/c (and/c State-type? closed-State?)
+                           #:kind 'immutable)]
+              [todo (listof (and/c State-type? closed-State?))])
              [result (seen todo)
-                     (and/c (set/c State-type? #:kind 'immutable)
+                     (and/c (set/c (and/c State-type? closed-State?)
+                                   #:kind 'immutable)
                             (subset?/c seen)
                             (subset?/c (list->set todo)))])]
    [types ((set/c State-type? #:kind 'immutable)
