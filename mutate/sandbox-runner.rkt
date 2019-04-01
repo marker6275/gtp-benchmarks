@@ -20,7 +20,7 @@
     (make-custodian-box run-custodian 'available))
   (when memory-limit-gb
     (custodian-limit-memory run-custodian
-                            (* memory-limit-gb (expt 10 9))))
+                            (exact-floor (* memory-limit-gb (expt 10 9)))))
   (define run
     (λ _
       (parameterize ([current-output-port (if suppress-output?
