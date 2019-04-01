@@ -299,13 +299,12 @@ Average proportion of lattice explored for each relevant mutant: ~a
 (define (format-big-number big-number)
   (define number-string (number->string big-number))
   (list->string
-   (flatten
-    (for/list ([digit (in-string number-string)]
-               [i (in-naturals)])
-      (if (and (not (zero? i))
-               (zero? (modulo i 3)))
-          (list #\, digit)
-          digit)))))
+   (for/fold ([fancy-digits empty])
+             ([digit (in-list (reverse (string->list number-string)))]
+              [i (in-naturals)])
+     (if (and (not (zero? i)) (zero? (modulo i 3)))
+         (list* digit #\, fancy-digits)
+         (cons digit fancy-digits)))))
 
 
 (module+ main
