@@ -55,13 +55,6 @@
   #:mutable
   #:transparent)
 
-;; lltodo: check contracts actually work
-
-(define/ctc-helper Time? (listof symbol?))
-(define/ctc-helper Addr? any/c)
-
-(define/ctc-helper BEnv? (hash/c Var? Addr? #:immutable #t))
-
 (define/ctc-helper (Closure/c lam/c benv/c)
   (struct/c Closure lam/c benv/c))
 (define/ctc-helper (Binding/c var/c time/c)
@@ -69,6 +62,12 @@
 
 (define/ctc-helper Closure-type/c (Closure/c Lam-type/c BEnv?))
 (define/ctc-helper Binding-type/c (Binding/c Var? Time?))
+
+(define/ctc-helper Time? (listof symbol?))
+(define/ctc-helper Addr? Binding-type/c)
+
+(define/ctc-helper BEnv? (hash/c Var? Addr? #:immutable #t))
+
 
 ;; -- public
 
