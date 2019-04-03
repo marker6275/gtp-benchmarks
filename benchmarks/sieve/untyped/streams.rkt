@@ -39,8 +39,8 @@
                       (-> (simple-stream/dc* (next/c-maker first)
                                              next/c-maker)))))
 
-;; elem-contract? (elem -> (-> simple-stream-contract?)) -> simple-stream-contract?
-(define/ctc-helper (simple-stream/dc first/c make-rest/c)
+;; Custom projections aren't supported
+#;(define/ctc-helper (simple-stream/dc first/c make-rest/c)
   (define first/c-proj (get/build-late-neg-projection first/c))
   (make-contract
    #:name 'simple-stream/dc
@@ -60,6 +60,12 @@
        (simple-stream first/checked
                       ((rest/c-proj blame) (simple-stream-rest val)
                                            neg-party))))))
+
+;; elem-contract? (elem -> (-> simple-stream-contract?)) -> simple-stream-contract?
+(define/ctc-helper (simple-stream/dc first/c make-rest/c)
+  (struct/dc simple-stream
+             [first first/c]
+             [rest (first) (make-rest/c first)]))
 
 ;;--------------------------------------------------------------------------------------------------
 
