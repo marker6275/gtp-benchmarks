@@ -26,10 +26,12 @@
       (define chunk-remainder-handler
         (cond [line-is-err?
                (define next-line (next-line!))
+               (define next-next-line (next-line!))
                (define is-blamed@max-not-bug-err/blamed-random?
                  (regexp-match? to-ignore-rx next-line))
                (define extra-filter-matches?
-                 (ormap (curryr regexp-match? next-line) extra-filters))
+                 (or (ormap (curryr regexp-match? next-line) extra-filters)
+                     (ormap (curryr regexp-match? next-next-line) extra-filters)))
                (cond [is-blamed@max-not-bug-err/blamed-random?
                       (printf "--- skipping irrelevant blame: ~a ---~n"
                               (get-blamed next-line))
@@ -40,6 +42,7 @@
                      [else
                       (displayln line)
                       (displayln next-line)
+                      (displayln next-next-line)
                       displayln])]
               [else
                (displayln line)
