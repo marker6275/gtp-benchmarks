@@ -2,7 +2,11 @@
 
 (module test-helper racket
   (require racket/serialize
-           ruinit
+           (rename-in ruinit
+                      [for/and/test test/for/and]
+                      [and/test/message test/and/message]
+                      [and/test test/and]
+                      [not/test test/not])
            "../utilities/test-env.rkt"
            syntax/parse/define)
   (provide test-begin/with-env)
@@ -81,7 +85,11 @@ HERE
 (require racket/serialize
          racket/logging
          'test-helper
-         ruinit
+         (rename-in ruinit
+                      [for/and/test test/for/and]
+                      [and/test/message test/and/message]
+                      [and/test test/and]
+                      [not/test test/not])
          (submod "mutant-factory.rkt" test)
          "benchmarks.rkt"
          "../mutate/trace-collect.rkt")
