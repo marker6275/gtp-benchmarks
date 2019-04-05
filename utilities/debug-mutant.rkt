@@ -1,6 +1,7 @@
 #lang racket
 
-(provide debug-mutant)
+(provide debug-mutant
+         read/fixup-config)
 
 (require "../data-collection/benchmarks.rkt"
          "../mutate/mutation-runner.rkt"
@@ -50,6 +51,10 @@
            (delete-directory/files compiled-dir-path))
          dump-dir-path]))
 
+(define (read/fixup-config raw-config-string)
+  (define config-string (fixup-paths raw-config-string))
+  (call-with-input-string config-string read))
+
 (define (debug-mutant bench-name
                       mutated-module
                       index
@@ -61,8 +66,7 @@
                       #:print-trace? [print-trace? #f]
                       #:suppress-output? [suppress-output? #t])
   (match-define (benchmark main others) (hash-ref benchmarks bench-name))
-  (define config-string (fixup-paths raw-config-string))
-  (define config (call-with-input-string config-string read))
+  (define config (read/fixup-config raw-config-string))
   (define config/formatted-for-runner (format-raw-config-for-runner config))
 
   (when print-configs?
