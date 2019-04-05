@@ -6,7 +6,7 @@
                   mutant
                   sample-size)
          "../data-collection/benchmarks.rkt"
-         "../utilities/read-module.rkt")
+         "../utilities/read-definitions.rkt")
 
 ;; data-list? := (list/c blame-trail-id?
 ;;                       string?
@@ -275,26 +275,7 @@ Average proportion of lattice explored for each relevant mutant: ~a
           (exact->inexact (/ avg-samples-per-mutant lattice-size))))
 
 (define (count-top-level-defs bench-name)
-  (define bench (hash-ref benchmarks bench-name
-                          (λ _ (error 'analyze
-                                      "Benchmark ~a not one of known: ~a"
-                                      bench-name
-                                      (hash-keys benchmarks)))))
-  (define mods (map resolve-bench-path
-                    (cons (benchmark-main bench)
-                          (benchmark-others bench))))
-  (apply + (map top-level-defs/in-module mods)))
-
-(define (top-level-defs/in-module path)
-  (define mod-stx (read-module path))
-  (syntax-parse mod-stx
-    #:datum-literals [module define/contract]
-    [(module name lang
-       (mod-begin
-        {~alt {~and def
-                    (define/contract _ ...)}
-              _:expr} ...))
-     (length (syntax-e #'(def ...)))]))
+  (length (append* (hash-values (top-level-defs/by-module bench-name)))))
 
 (define (format-big-number big-number)
   (define number-string (number->string big-number))
