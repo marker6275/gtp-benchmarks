@@ -29,13 +29,18 @@
 (define (organize-by-mutant data)
   (for/fold ([data/by-mutant (hash)])
             ([data-list (in-list data)])
-    (match-define (list _ _ _ mod _ index _ _ _ _) data-list)
-    (define this-mutant (mutant mod index))
-    (define data-for-mutant (hash-ref data/by-mutant this-mutant
-                                      (λ _ (set))))
-    (hash-set data/by-mutant
-              this-mutant
-              (set-add data-for-mutant data-list))))
+    (with-handlers ([exn:misc:match?
+                     (λ (e)
+                       (error 'organize-by-mutant
+                              "Found data missing blame trail id~n~a~n"
+                              e))])
+      (match-define (list _ _ _ mod _ index _ _ _ _) data-list)
+      (define this-mutant (mutant mod index))
+      (define data-for-mutant (hash-ref data/by-mutant this-mutant
+                                        (λ _ (set))))
+      (hash-set data/by-mutant
+                this-mutant
+                (set-add data-for-mutant data-list)))))
 
 (define (find-increasing-distances sample-set)
   (for/fold ([results (set)])
