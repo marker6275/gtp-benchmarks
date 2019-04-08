@@ -48,6 +48,8 @@
     (define increasing-pairs/sample1
       (for/set ([sample2 (in-set sample-set)]
                 #:when (and (config-stronger? sample2 sample1)
+                            (number? (blame-distance sample2))
+                            (number? (blame-distance sample1))
                             (> (blame-distance sample2)
                                (blame-distance sample1))))
         (cons sample1 sample2)))
@@ -143,10 +145,8 @@
             (find-increasing-distances samples))))
 
 (define/match (blame-distance data-list)
-  [{(list-rest _ _ (? number? distance) _)}
-   distance]
-  [{(list-rest _ _ not-a-distance _)}
-   +inf.0])
+  [{(list-rest _ _ distance _)}
+   distance])
 
 (define CONFIG-LEVELS '(none types max))
 
