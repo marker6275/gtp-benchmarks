@@ -51,7 +51,8 @@
                                              ctc-precision-config
                                              #:modules-base-path [base-path #f]
                                              #:write-modules-to [write-to-dir #f]
-                                             #:on-module-exists [on-module-exists 'error])
+                                             #:on-module-exists [on-module-exists 'error]
+                                             #:mutator [mutate mutate-module])
   (->i ([main-module simple-form-path?]
         [module-to-mutate simple-form-path?]
         [other-modules (listof simple-form-path?)]
@@ -61,7 +62,8 @@
                                               symbol?))])
        (#:modules-base-path [base-path (or/c simple-form-path? #f)]
         #:write-modules-to [write-to-dir (or/c path-string? #f)]
-        #:on-module-exists [on-module-exists (or/c 'error 'replace)])
+        #:on-module-exists [on-module-exists (or/c 'error 'replace)]
+        #:mutator [mutate (syntax? natural? . -> . (values syntax? symbol?))])
        #:pre (main-module module-to-mutate other-modules)
        (and (not (member main-module other-modules))
             (not (member module-to-mutate other-modules)))
@@ -120,7 +122,7 @@
   (define/match (instrument-module path-string stx)
     [{(== module-to-mutate) stx}
      (define-values (mutated-stx mutated-id)
-       (mutate-module stx mutation-index))
+       (mutate stx mutation-index))
      ;; ll: see above...
      (set-box! mutated-id-box mutated-id)
      (trace/maybe-write-module module-to-mutate mutated-stx)]
@@ -207,7 +209,8 @@ Blamed: ~a
                                           #:memory/gb [memory/gb 3]
                                           #:modules-base-path [base-path #f]
                                           #:write-modules-to [write-to-dir #f]
-                                          #:on-module-exists [on-module-exists 'error])
+                                          #:on-module-exists [on-module-exists 'error]
+                                          #:mutator [mutate mutate-module])
   (->i ([main-module simple-form-path?]
         [module-to-mutate simple-form-path?]
         [other-modules (listof simple-form-path?)]
@@ -220,7 +223,8 @@ Blamed: ~a
         #:memory/gb [memory/gb number?]
         #:modules-base-path [base-path (or/c simple-form-path? #f)]
         #:write-modules-to [write-to-dir (or/c path-string? #f)]
-        #:on-module-exists [on-module-exists (or/c 'error 'replace)])
+        #:on-module-exists [on-module-exists (or/c 'error 'replace)]
+        #:mutator [mutate (syntax? natural? . -> . (values syntax? symbol?))])
 
        #:pre (main-module module-to-mutate other-modules)
        (and (not (member main-module other-modules))
@@ -250,7 +254,8 @@ Blamed: ~a
                                   ctc-precision-config
                                   #:modules-base-path base-path
                                   #:write-modules-to write-to-dir
-                                  #:on-module-exists on-module-exists))
+                                  #:on-module-exists on-module-exists
+                                  #:mutator mutate))
     (define ((make-status* status-sym) [blamed #f])
       (make-status status-sym
                    blamed
