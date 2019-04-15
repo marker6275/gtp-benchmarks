@@ -64,7 +64,8 @@
                       #:run? [run? #f]
                       #:write-modules-to [dump-copy-dir-name #f]
                       #:print-trace? [print-trace? #f]
-                      #:suppress-output? [suppress-output? #t])
+                      #:suppress-output? [suppress-output? #t]
+                      #:no-mutate? [no-mutate? #f])
   (match-define (benchmark main others) (hash-ref benchmarks bench-name))
   (define config (read/fixup-config raw-config-string))
   (define config/formatted-for-runner (format-raw-config-for-runner config))
@@ -89,39 +90,64 @@
     (define dump-path
       (and dump-copy-dir-name
            (setup-dump-copy-dir! bench-name dump-copy-dir-name)))
-    (displayln "Running mutant...")
-    (match-define
-      (run-status trace outcome blamed _ mutated-id _ _)
-      (run-with-mutated-module (resolve-bench-path main)
-                               (resolve-bench-path mutated-module)
-                               (map resolve-bench-path
-                                    (set-remove others mutated-module))
-                               index
-                               config/formatted-for-runner
-                               #:timeout/s (* 5 60)
-                               #:modules-base-path (resolve-bench-path bench-name)
-                               #:write-modules-to dump-path
-                               #:on-module-exists 'replace
-                               #:suppress-output? suppress-output?))
-    (define maybe-blamed-vec
-      (match blamed
-        [(or #f (? exn?)) 'no-blamed]
-        [(? cons? mod-path)
-         (printf
-          "Blamed is module path: ~v, likely a ctc violation in flow-trace~n"
-          mod-path)
-         'no-blamed]
-        [(? vector? vec) vec]))
-    (define blamed-level
-      (match maybe-blamed-vec
-        [(vector id path)
-         (hash-ref (hash-ref config/formatted-for-runner path) id)]
-        [_ 'no-blame]))
-    (define mutated-id-level
-      (hash-ref (hash-ref config/formatted-for-runner
-                          (resolve-bench-path mutated-module))
-                mutated-id))
-    (printf "
+    (cond [no-mutate?
+           (displayln "Running original benchmark with configuration...")
+           (match-define
+             (run-status trace outcome _ _ _ _ _)
+             (run-with-mutated-module (resolve-bench-path main)
+                                      (resolve-bench-path mutated-module)
+                                      (map resolve-bench-path
+                                           (set-remove others mutated-module))
+                                      index
+                                      config/formatted-for-runner
+                                      #:timeout/s (* 5 60)
+                                      #:modules-base-path (resolve-bench-path bench-name)
+                                      #:write-modules-to dump-path
+                                      #:on-module-exists 'replace
+                                      #:suppress-output? suppress-output?
+                                      #:mutator (λ (stx _) (values stx '<none>))))
+           (printf "
+Outcome: ~v
+Trace length: ~v
+"
+                   outcome
+                   (trace-length trace))
+           (when print-trace?
+             (printf "~n~nTrace:~n~v" trace))]
+          [else
+           (displayln "Running mutant...")
+           (match-define
+             (run-status trace outcome blamed _ mutated-id _ _)
+             (run-with-mutated-module (resolve-bench-path main)
+                                      (resolve-bench-path mutated-module)
+                                      (map resolve-bench-path
+                                           (set-remove others mutated-module))
+                                      index
+                                      config/formatted-for-runner
+                                      #:timeout/s (* 5 60)
+                                      #:modules-base-path (resolve-bench-path bench-name)
+                                      #:write-modules-to dump-path
+                                      #:on-module-exists 'replace
+                                      #:suppress-output? suppress-output?))
+           (define maybe-blamed-vec
+             (match blamed
+               [(or #f (? exn?)) 'no-blamed]
+               [(? cons? mod-path)
+                (printf
+                 "Blamed is module path: ~v, likely a ctc violation in flow-trace~n"
+                 mod-path)
+                'no-blamed]
+               [(? vector? vec) vec]))
+           (define blamed-level
+             (match maybe-blamed-vec
+               [(vector id path)
+                (hash-ref (hash-ref config/formatted-for-runner path) id)]
+               [_ 'no-blame]))
+           (define mutated-id-level
+             (hash-ref (hash-ref config/formatted-for-runner
+                                 (resolve-bench-path mutated-module))
+                       mutated-id))
+           (printf "
 Run result: ~a ~a
 
 Mutated (~a) is at ~a
@@ -130,15 +156,15 @@ Blamed (~a) is at ~a
 
 Trace length: ~v
 "
-            outcome maybe-blamed-vec
-            mutated-id mutated-id-level
-            maybe-blamed-vec blamed-level
-            (trace-length trace))
+                   outcome maybe-blamed-vec
+                   mutated-id mutated-id-level
+                   maybe-blamed-vec blamed-level
+                   (trace-length trace))
 
-    (when (exn? blamed)
-      (displayln ",-------------------- Exn message --------------------")
-      ((error-display-handler) (exn-message blamed) blamed)
-      (displayln "`--------------------------------------------------"))
+           (when (exn? blamed)
+             (displayln ",-------------------- Exn message --------------------")
+             ((error-display-handler) (exn-message blamed) blamed)
+             (displayln "`--------------------------------------------------"))
 
-    (when print-trace?
-      (printf "~n~nTrace:~n~v" trace))))
+           (when print-trace?
+             (printf "~n~nTrace:~n~v" trace))])))
