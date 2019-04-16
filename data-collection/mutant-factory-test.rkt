@@ -458,7 +458,7 @@ HERE
                      [data-output-dir test-mutant-dir])
         (for/fold ([current-factory the-factory])
                   ([i (in-naturals)]
-                   #:break (or (> i 5)
+                   #:break (or (> i 6)
                                (unbox exit-called?)))
           (sleep 2)
           (sweep-dead-mutants current-factory))))))
