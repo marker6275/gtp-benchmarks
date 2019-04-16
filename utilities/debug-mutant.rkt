@@ -93,7 +93,7 @@
     (cond [no-mutate?
            (displayln "Running original benchmark with configuration...")
            (match-define
-             (run-status trace outcome _ _ _ _ _)
+             (run-status trace outcome blamed _ _ _ _)
              (run-with-mutated-module (resolve-bench-path main)
                                       (resolve-bench-path mutated-module)
                                       (map resolve-bench-path
@@ -112,6 +112,10 @@ Trace length: ~v
 "
                    outcome
                    (trace-length trace))
+           (when (exn? blamed)
+             (displayln ",-------------------- Exn message --------------------")
+             ((error-display-handler) (exn-message blamed) blamed)
+             (displayln "`--------------------------------------------------"))
            (when print-trace?
              (printf "~n~nTrace:~n~v" trace))]
           [else
