@@ -73,8 +73,7 @@
              [result MonoStore/c]
              #:post (store result)
              (for/and ([(b vs) (in-hash store)])
-               (define result-vs (hash-ref result (Binding-var b)
-                                           (λ _ (set))))
+               (define result-vs (hash-ref result (Binding-var b) set))
                (define mono-vs (list->set (set-map vs monovariant-value)))
                (subset? mono-vs result-vs)))]
    [types (Store/c . -> . MonoStore/c)])

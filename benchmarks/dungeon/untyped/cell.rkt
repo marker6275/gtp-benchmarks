@@ -98,7 +98,7 @@
    [max (->i ([c% cell%/c]
               [char char?])
              [result void?]
-             #:post (c% char) (class-equal? (dict-ref chars->cell%s char (λ x (void)))
+             #:post (c% char) (class-equal? (dict-ref chars->cell%s char void)
                                             c%))]
    [types (cell%/c char? . -> . void?)])
 

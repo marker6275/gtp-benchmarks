@@ -40,14 +40,7 @@
                           (match id
                             [(Ref _ var)
                              (=> fail)
-                             (match benv
-                               [(hash-table ((== var) benv-var) _ ...)
-                                (match store
-                                  [(hash-table ((== benv-var) res) _ ...)
-                                   (equal? result res)]
-                                  [_ (fail)])]
-                               [_ (fail)])
-                             ]
+                             (equal? result (hash-ref store (hash-ref benv var fail) fail))]
                             [(Ref _ var)
                              (set-empty? result)]
                             [(? Lam?)

@@ -115,8 +115,7 @@
                       (hash-with/c addr
                                    (equal?/c
                                     (set-union value
-                                               (hash-ref s addr
-                                                         (λ _ (set)))))))])]
+                                               (hash-ref s addr set)))))])]
    [types (Store/c Addr? Denotable/c . -> . Store/c)])
   ;(: update-lam (-> Denotable Denotable))
   (define (update-lam d) (d-join d value))
@@ -148,10 +147,9 @@
              [result Store/c]
              #:post (s1 s2 result)
              (for/and ([(k v) (in-hash result)])
-               (equal? v (set-union (hash-ref s1 k (λ _ (set)))
-                                    (hash-ref s2 k (λ _ (set)))))))]
+               (equal? v (set-union (hash-ref s1 k set)
+                                    (hash-ref s2 k set)))))]
    [types (Store/c Store/c . -> . Store/c)])
   (for/fold ([new-store s1])
     ([(k v) (in-hash s2)])
     (store-update new-store k v)))
-
