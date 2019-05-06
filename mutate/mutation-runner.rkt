@@ -264,13 +264,17 @@ Blamed: ~a
     (define run/handled
       (λ _
         (with-handlers
-          ([exn:fail:contract:blame? (compose
-                                      (make-status* 'blamed)
-                                      (match-lambda [`(function ,id) id]
-                                                    [`(definition ,id) id]
-                                                    [other other])
-                                      blame-positive
-                                      exn:fail:contract:blame-object)]
+          ([exn:fail:contract:blame?
+            (λ (e)
+              (define blamed ((compose
+                               (match-lambda [`(function ,id) id]
+                                             [`(definition ,id) id]
+                                             [other other])
+                               blame-positive
+                               exn:fail:contract:blame-object)
+                              e))
+              ((make-status* 'blamed)
+                            (cons blamed (exn-continuation-marks e))))]
            [exn:fail:out-of-memory? (λ _ ((make-status* 'oom)))]
            [exn? (make-status* 'crashed)])
           (run)
