@@ -1,10 +1,11 @@
-#lang racket
+#lang at-exp racket
 
 (provide debug-mutant
          read/fixup-config)
 
 (require "../data-collection/benchmarks.rkt"
          "../mutate/mutation-runner.rkt"
+         "../mutate/trace-collect.rkt"
          (submod "../mutate/mutation-runner.rkt" debug)
          racket/serialize
          racket/runtime-path
@@ -27,17 +28,17 @@
   (define config-string/local-paths/quoted
     (if (string-contains? raw-config-string "\"/")
          config-string/local-paths
-         (regexp-replace* "(/[^ ]+)"
+         (regexp-replace* #px"(/[^\\s]+)"
                           config-string/local-paths
                           "\"\\1\"")))
   config-string/local-paths/quoted)
 
 (define (setup-dump-copy-dir! bench-name dump-copy-dir-name)
   (cond [(hash-has-key? benchmarks dump-copy-dir-name)
-         (displayln
-          (string-append
-           "Directory to modules into is an original benchmark, "
-           "refusing to overwrite it."))
+         (displayln @~a{
+                        Directory to modules into is an original benchmark,
+                        refusing to overwrite it.
+                        })
          #f]
         [else
          (define dump-dir-path (resolve-bench-path dump-copy-dir-name))
@@ -65,19 +66,22 @@
                       #:write-modules-to [dump-copy-dir-name #f]
                       #:print-trace? [print-trace? #f]
                       #:suppress-output? [suppress-output? #t]
-                      #:no-mutate? [no-mutate? #f])
+                      #:no-mutate? [no-mutate? #f]
+                      #:distance-analyze? [analyze? #f])
   (match-define (benchmark main others) (hash-ref benchmarks bench-name))
   (define config (read/fixup-config raw-config-string))
   (define config/formatted-for-runner (format-raw-config-for-runner config))
 
   (when print-configs?
-    (displayln ",-------------------- Config --------------------")
-    (pretty-print config)
-    (displayln "`----------------------------------------")
-    (newline)
-    (displayln ",-------------------- Serialized config --------------------")
-    (writeln (serialize config/formatted-for-runner))
-    (displayln "`----------------------------------------"))
+    (displayln @~a{
+                   ,-------------------- Config --------------------
+                   @(pretty-format config)
+                   `------------------------------------------------
+
+                   ,--------------- Serialized config --------------
+                   @~s[(serialize config/formatted-for-runner)]
+                   `------------------------------------------------
+                   }))
 
   (when diff-mutant?
     (displayln ",-------------------- Mutant diff --------------------")
@@ -90,85 +94,75 @@
     (define dump-path
       (and dump-copy-dir-name
            (setup-dump-copy-dir! bench-name dump-copy-dir-name)))
-    (cond [no-mutate?
-           (displayln "Running original benchmark with configuration...")
-           (match-define
-             (run-status trace outcome blamed _ _ _ _)
-             (run-with-mutated-module (resolve-bench-path main)
-                                      (resolve-bench-path mutated-module)
-                                      (map resolve-bench-path
-                                           (set-remove others mutated-module))
-                                      index
-                                      config/formatted-for-runner
-                                      #:timeout/s (* 5 60)
-                                      #:modules-base-path (resolve-bench-path bench-name)
-                                      #:write-modules-to dump-path
-                                      #:on-module-exists 'replace
-                                      #:suppress-output? suppress-output?
-                                      #:mutator (λ (stx _) (values stx '<none>))))
-           (printf "
-Outcome: ~v
-Trace length: ~v
-"
-                   outcome
-                   (trace-length trace))
-           (when (exn? blamed)
-             (displayln ",-------------------- Exn message --------------------")
-             ((error-display-handler) (exn-message blamed) blamed)
-             (displayln "`--------------------------------------------------"))
-           (when print-trace?
-             (printf "~n~nTrace:~n~v" trace))]
-          [else
-           (displayln "Running mutant...")
-           (match-define
-             (run-status trace outcome blamed _ mutated-id _ _)
-             (run-with-mutated-module (resolve-bench-path main)
-                                      (resolve-bench-path mutated-module)
-                                      (map resolve-bench-path
-                                           (set-remove others mutated-module))
-                                      index
-                                      config/formatted-for-runner
-                                      #:timeout/s (* 5 60)
-                                      #:modules-base-path (resolve-bench-path bench-name)
-                                      #:write-modules-to dump-path
-                                      #:on-module-exists 'replace
-                                      #:suppress-output? suppress-output?))
-           (define maybe-blamed-vec
-             (match blamed
-               [(or #f (? exn?)) 'no-blamed]
-               [(? cons? mod-path)
-                (printf
-                 "Blamed is module path: ~v, likely a ctc violation in flow-trace~n"
-                 mod-path)
-                'no-blamed]
-               [(? vector? vec) vec]))
-           (define blamed-level
-             (match maybe-blamed-vec
-               [(vector id path)
-                (hash-ref (hash-ref config/formatted-for-runner path) id)]
-               [_ 'no-blame]))
-           (define mutated-id-level
-             (hash-ref (hash-ref config/formatted-for-runner
-                                 (resolve-bench-path mutated-module))
-                       mutated-id))
-           (printf "
-Run result: ~a ~a
+    (match-define (and (run-status trace outcome blamed _ mutated-id _ _)
+                       result)
+      (run-with-mutated-module
+       (resolve-bench-path main)
+       (resolve-bench-path mutated-module)
+       (map resolve-bench-path
+            (set-remove others mutated-module))
+       index
+       config/formatted-for-runner
+       #:timeout/s (* 5 60)
+       #:modules-base-path (resolve-bench-path bench-name)
+       #:write-modules-to dump-path
+       #:on-module-exists 'replace
+       #:suppress-output? suppress-output?
+       #:mutator
+       (cond [no-mutate?
+              (displayln "Running original benchmark with configuration...")
+              (λ (stx _) (values stx '<none>))]
+             [else
+              (displayln "Running mutant...")
+              mutate-module])))
+    (define maybe-blamed-vec
+      (match blamed
+        [(or #f (? exn?)) 'no-blamed]
+        [(cons (? vector? vec) marks) vec]
+        [(? cons? mod-path)
+         (displayln
+          @~a{
+              Blamed is module path: @|mod-path|,
+              likely a ctc violation in flow-trace
+              })
+         'no-blamed]
+        [else (displayln @~a{Blamed has unexpected shape: @blamed})]))
+    (define blamed-level
+      (match maybe-blamed-vec
+        [(vector id path)
+         (hash-ref (hash-ref config/formatted-for-runner path) id)]
+        [_ 'no-blame]))
+    (define mutated-id-level
+      (hash-ref (hash-ref config/formatted-for-runner
+                          (resolve-bench-path mutated-module))
+                mutated-id))
+    (displayln @~a{
+                   Run result: @outcome @maybe-blamed-vec
 
-Mutated (~a) is at ~a
+                   Mutated (@mutated-id) is at @mutated-id-level
 
-Blamed (~a) is at ~a
+                   Blamed (@maybe-blamed-vec) is at @blamed-level
 
-Trace length: ~v
-"
-                   outcome maybe-blamed-vec
-                   mutated-id mutated-id-level
-                   maybe-blamed-vec blamed-level
-                   (trace-length trace))
+                   Trace length: @(trace-length trace)
 
-           (when (exn? blamed)
-             (displayln ",-------------------- Exn message --------------------")
-             ((error-display-handler) (exn-message blamed) blamed)
-             (displayln "`--------------------------------------------------"))
+                   Distance: @(if analyze?
+                                  (struct-copy
+                                   mutant-run
+                                   (make-trace-distance-results bench-name
+                                                                result)
+                                   [precision "[omitted]"]
+                                   [trace "[omitted]"])
+                                  "Disabled")
+                   })
 
-           (when print-trace?
-             (printf "~n~nTrace:~n~v" trace))])))
+    (when (exn? blamed)
+      (displayln ",-------------------- Exn message --------------------")
+      ((error-display-handler) (exn-message blamed) blamed)
+      (displayln "`--------------------------------------------------"))
+
+    (when print-trace?
+      (displayln @~a{
+
+                     Trace:
+                     @~v[trace]
+                     }))))
