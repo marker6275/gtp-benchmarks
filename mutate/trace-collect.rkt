@@ -109,9 +109,11 @@ Mutant: ~v @ ~a (~~ ~v) with config
                                    ;; stack when its ctc gets
                                    ;; violated.
                                    current-label-mark-key
-                                   ;; ;; Gives the id of the ctc
-                                   ;; ;; currently being checked
-                                   ;; current-ctc-continuation-mark-key
+                                   ;; From the ctc-continuation-marks
+                                   ;; we can figure out if a violation
+                                   ;; occurred during the extent of
+                                   ;; checking other ctcs, and also
+                                   ;; which ctcs they were
                                    contract-continuation-mark-key)))
 
   (define-match-expander blame-for
