@@ -15,6 +15,7 @@
          (struct-out label-missing))
 
 (require racket/serialize
+         (for-syntax syntax/parse)
          "mutation-runner.rkt"
          "trace.rkt"
          ;; ll: for label-bounds accessors
@@ -113,67 +114,11 @@ Mutant: ~v @ ~a (~~ ~v) with config
                                    ;; current-ctc-continuation-mark-key
                                    contract-continuation-mark-key)))
 
-  ;; Examples: ctc on function 'bar
-
-  ;;;; Case 1: ctc directly violates another fns ctc
-  ;; 'blamed
-  ;; '(#(bar #<path:/home/lukas/tmp/test7.rkt>) . #<continuation-mark-set>)
-  ;; '(#(#f #f (#<blame-yes-swap> . #f))
-  ;;   #(#f
-  ;;     #f
-  ;;     (#<blame-no-swap>
-  ;;      .
-  ;;      #(#<path:/home/lukas/tmp/test7.rkt> #<path:/home/lukas/tmp/test7.rkt>)))
-  ;;   #(bar #f #f)
-  ;;   #(#<path:/home/lukas/tmp/test7.rkt> #f #f)
-  ;;   #(#f bar #f))
-
-  ;;;; Case 2: ctc causes indirect ctc violation
-  ;; 'blamed
-  ;; '(#(foo #<path:/home/lukas/tmp/test7.rkt>) . #<continuation-mark-set>)
-  ;; '(#(#f #f (#<blame-no-swap> . #(bar #<path:/home/lukas/tmp/test7.rkt>)))
-  ;;   #(unbox #f #f)
-  ;;   #(#f
-  ;;     #f
-  ;;     (#<blame-no-swap>
-  ;;      .
-  ;;      #(#<path:/home/lukas/tmp/test7.rkt> #<path:/home/lukas/tmp/test7.rkt>)))
-  ;;   #(bar #f #f)
-  ;;   #(#<path:/home/lukas/tmp/test7.rkt> #f #f)
-  ;;   #(#f bar #f))
-  ;;
-  ;;;; Another case 2:
-  ;; 'blamed
-  ;; '(#(make-let ...))
-  ;; '(#(#f #f (#<blame-no-swap> . #(standard-example #<path:/home/lukas/github_sync/grad/projects/blame-utility/src/gtp-benchmarks/benchmarks/kcfa/untyped/main.rkt>)))
-  ;;   #(#f #f #<blame-no-swap>)
-  ;;   #(#f main #f)
-  ;;   #(#f #f #f))
-
-  ;;;; Case 3: ctc calls another fn which causes a violation
-  ;; 'blamed
-  ;; '(#(foo #<path:/home/lukas/tmp/test7.rkt>) . #<continuation-mark-set>)
-  ;; '(#(#f #f (#<blame-yes-swap> . #f))
-  ;;   #(foo #f #f)
-  ;;   #(#f baz #f)
-  ;;   #(foo #f #f)
-  ;;   #(foo #f #f)
-  ;;   #(#f
-  ;;     #f
-  ;;     (#<blame-no-swap>
-  ;;      .
-  ;;      #(#<path:/home/lukas/tmp/test7.rkt> #<path:/home/lukas/tmp/test7.rkt>)))
-  ;;   #(bar #f #f)
-  ;;   #(#<path:/home/lukas/tmp/test7.rkt> #f #f)
-  ;;   #(#f bar #f))
-
-  ;; (displayln marks*)
-  ;; (displayln blame-vec)
-
-  ;; (displayln `(first pos ,(blame-positive (car (vector-ref (first marks*) 1)))))
-  ;; (displayln `(first neg ,(blame-negative (car (vector-ref (first marks*) 1)))))
-  ;; (displayln `(second pos ,(blame-positive (vector-ref (second marks*) 1))))
-  ;; (displayln `(second neg ,(blame-negative (vector-ref (second marks*) 1))))
+  (define-match-expander blame-for
+    (syntax-parser
+      [(_ pat)
+       #'(and (? blame?)
+              (app blame-positive pat))]))
 
   (match marks*
     ;; If there are no ctc marks on the stack after the first, this
@@ -188,8 +133,8 @@ Mutant: ~v @ ~a (~~ ~v) with config
     ;; The region whose ctc was being checked at the time of violation is blamed
     ;; => the ctc done goofed (directly violated another ctc)
     [(list (vector #f _)
-           (vector #f (or (cons (app blame-positive (== blame-vec)) _)
-                          (app blame-positive (== blame-vec))))
+           (vector #f (or (cons (blame-for (== blame-vec)) _)
+                          (blame-for (== blame-vec))))
            _ ...)
      'direct/bug!]
 
@@ -198,12 +143,10 @@ Mutant: ~v @ ~a (~~ ~v) with config
     ;; is a violation caused indirectly during contract checking e.g.
     ;; triggering a delayed violation, or calling a helper that
     ;; causes a violation
-    [(list (vector #f _) #;(cons (or (app blame-positive (== blame-vec))
-                                (app blame-negative (== blame-vec)))
-                            _)
+    [(list (vector #f _)
            (vector _ #f) ...
-           (vector #f (or (cons (app blame-positive (not (== blame-vec))) _)
-                          (app blame-positive (not (== blame-vec)))))
+           (vector #f (or (cons (blame-for (not (== blame-vec))) _)
+                          (blame-for (not (== blame-vec)))))
            _ ...)
      'indirect]
 
