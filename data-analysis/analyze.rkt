@@ -267,28 +267,40 @@
     (apply + (hash-values root-sample-counts/by-mutant)))
   (define root-sample-count/less-irrelevant-mutants
     (- total-root-sample-count (- total-mutant-count relevant-mutant-count)))
-  (displayln @~a{
-                 relevant mutant count: @relevant-mutant-count
-                 root-sample-count/less-irrelevant-mutants: @root-sample-count/less-irrelevant-mutants
-                 })
   (define root-sample-count/avg (/ root-sample-count/less-irrelevant-mutants
                                    relevant-mutant-count))
   (define root-sample-count/avg/hit-blame
     (/ (sample-size) root-sample-count/avg))
 
-  (printf "
-Created ~a mutants, of which ~a were relevant.
-Total configurations visited:                            ~a
-Blame-trail root count per relevant mutant:              ~a
-Average attempted root sample count per relevant mutant: ~a = ~a
-Average proportion of root samples that hit blame:       ~a = ~a
-"
-          total-mutant-count relevant-mutant-count
-          total-visit-count
-          (sample-size)
-          root-sample-count/avg (exact->inexact root-sample-count/avg)
-          root-sample-count/avg/hit-blame (exact->inexact
-                                           root-sample-count/avg/hit-blame))
+  (match-define
+    (list normal-blame-count indirect-blame-count buggy-blame-count err-count)
+    (for/fold ([counts '(0 0 0 0)])
+              ([(mutant samples) (in-hash data/by-mutant)]
+               #:when #t
+               [run (in-set samples)])
+      (match (mutant-run-blame-type (cdr run))
+        [(? symbol? type)
+         (list-update counts
+                   (index-of '(normal indirect direct/bug! error:unexpected-shape)
+                             type)
+                   add1)]
+        [#f counts])))
+
+  (displayln
+   @~a{
+
+Created @total-mutant-count mutants, of which @relevant-mutant-count were relevant.
+Total configurations visited:                            @total-visit-count
+Blame-trail root count per relevant mutant:              @(sample-size)
+Average attempted root sample count per relevant mutant: @root-sample-count/avg = @(exact->inexact root-sample-count/avg)
+Average proportion of root samples that hit blame:       @root-sample-count/avg/hit-blame = @(exact->inexact root-sample-count/avg/hit-blame)
+
+Blame categories
+(regular violation)                   Normal:            @normal-blame-count
+(indirect violation in ctc checking)  Indirect:          @indirect-blame-count
+(direct violation by ctc code)        Direct/bug:        @buggy-blame-count
+(blame in unexpected context)         Unknown:           @err-count
+})
 
   root-sample-count/avg)
 
