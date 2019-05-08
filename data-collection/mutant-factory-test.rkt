@@ -7,8 +7,9 @@
                       [and/test/message test/and/message]
                       [and/test test/and]
                       [not/test test/not])
+           syntax/parse/define
            "../utilities/test-env.rkt"
-           syntax/parse/define)
+           "../mutate/trace-collect.rkt")
   (provide test-begin/with-env)
 
   (define-test-env (setup-test-env! cleanup-test-env!)
@@ -47,24 +48,60 @@ HERE
 ]
 [mutant0-path "m0.rktd"
               (let ([path (string->path "m0.rkt")])
-                (format "~s\n" (serialize (list "test" 102 path 'foo 0 'crashed #f
-                                                (hash path (hash 'foo 'max path 'none))
-                                                #f))))]
+                (format "~s\n" (serialize
+                                (mutant-run "test"
+                                            path
+                                            (hash path (hash 'foo 'max path 'none))
+                                            'crashed
+                                            #f
+                                            #f
+                                            'foo
+                                            (no-blame)
+                                            0
+                                            #f
+                                            "err"))))]
 [mutant1-path/1 "m11.rktd"
                 (let ([path (string->path "m1.rkt")])
-                  (format "~s\n" (serialize (list "test" 102 path 'foo 0 'blamed '#(foo "./mutant-factory-test.rkt")
-                                                  (hash path (hash 'foo 'max path 'none))
-                                                  #f))))]
+                  (format "~s\n" (serialize
+                                  (mutant-run "test"
+                                            path
+                                            (hash path (hash 'foo 'max path 'none))
+                                            'blamed
+                                            '#(foo "./mutant-factory-test.rkt")
+                                            'normal
+                                            'foo
+                                            (distance 102)
+                                            0
+                                            #f
+                                            "err"))))]
 [mutant1-path/2 "m12.rktd"
                 (let ([path (string->path "m1.rkt")])
-                  (format "~s\n" (serialize (list "test" 102 path 'foo 0 'blamed '#(foo "./mutant-factory-test.rkt")
-                                                  (hash path (hash 'foo 'types path 'none))
-                                                  #f))))]
+                  (format "~s\n" (serialize
+                                  (mutant-run "test"
+                                            path
+                                            (hash path (hash 'foo 'max path 'none))
+                                            'blamed
+                                            '#(foo "./mutant-factory-test.rkt")
+                                            'normal
+                                            'foo
+                                            (distance 102)
+                                            0
+                                            #f
+                                            "err"))))]
 [mutant2-path "m2.rktd"
               (let ([path (string->path "m2.rkt")])
-                  (format "~s\n" (serialize (list "test" 102 path 'foo 0 'crashed #f
-                                                  (hash path (hash 'foo 'max 'bar 'none path 'none))
-                                                  #f))))]
+                (format "~s\n" (serialize
+                                (mutant-run "test"
+                                            path
+                                            (hash path (hash 'foo 'max path 'none))
+                                            'crashed
+                                            #f
+                                            #f
+                                            'foo
+                                            (no-blame)
+                                            0
+                                            #f
+                                            "err"))))]
 [empty-file-path "empty-file.rktd"
                  ""])
 
@@ -162,59 +199,67 @@ HERE
   (dead-mutant-process (mutant e-path 0)
                        (hash 'baz 'none
                              e-path 'none)
-                       `("test"
-                         N/A
-                         ,(path->string e-path)
-                         'baz
-                         0
-                         crashed
-                         #f
-                         ,(hash 'baz 'none
-                                (path->string e-path) 'none)
-                         #f)
+                       (mutant-run "test"
+                                   (path->string e-path)
+                                   (hash 'baz 'none
+                                          (path->string e-path) 'none)
+                                   'crashed
+                                   #f
+                                   #f
+                                   'baz
+                                   (no-blame)
+                                   0
+                                   #f
+                                   #f)
                        42
                        'no-blame
                        #f))
 (define dead-e-proc/completed
   (struct-copy dead-mutant-process
                dead-e-proc/crashed
-               [result `("test"
-                         N/A
-                         ,(path->string e-path)
-                         'baz
-                         0
-                         completed
-                         #f
-                         ,(hash 'baz 'none
-                                (path->string e-path) 'none)
-                         #f)]))
+               [result (mutant-run "test"
+                                   (path->string e-path)
+                                   (hash 'baz 'none
+                                          (path->string e-path) 'none)
+                                   'completed
+                                   #f
+                                   #f
+                                   'baz
+                                   (no-blame)
+                                   0
+                                   #f
+                                   #f)]))
 (define dead-e-proc/blame-e
   (struct-copy dead-mutant-process
                dead-e-proc/crashed
-               [result `("test"
-                         N/A
-                         ,(path->string e-path)
-                         'baz
-                         0
-                         blamed
-                         ,e-path
-                         ,(hash 'baz 'none
-                                (path->string e-path) 'none)
-                         #f)]
+               [result (mutant-run "test"
+                                   (path->string e-path)
+                                   (hash 'baz 'none
+                                          (path->string e-path) 'none)
+                                   'blamed
+                                   e-path
+                                   'normal
+                                   'baz
+                                   (no-blame)
+                                   0
+                                   #f
+                                   #f)]
                [blame-trail-id 42]))
 (define dead-e-proc/blame-baz
   (struct-copy dead-mutant-process
                dead-e-proc/crashed
-               [result `("test"
-                         N/A
-                         ,(path->string e-path)
-                         'baz
-                         0
-                         blamed
-                         baz
-                         ,(hash 'baz 'none
-                                (path->string e-path) 'none)
-                         #f)]))
+               [result (mutant-run "test"
+                                   (path->string e-path)
+                                   (hash 'baz 'none
+                                          (path->string e-path) 'none)
+                                   'blamed
+                                   'baz
+                                   'normal
+                                   'baz
+                                   (no-blame)
+                                   0
+                                   #f
+                                   #f)]))
 (test-begin/with-env
  #:name dead-process-blame
  (not (try-get-blamed dead-e-proc/crashed))
@@ -525,10 +570,10 @@ HERE
                          increased-limits?))
   (define orig-dead-mutant
     (make-dead-mutant
-      (list #f #f #f #f #f 'blamed (vector 'm2 mutant1-path/1) #f #f)
+     (mutant-run #f #f #f 'blamed (vector 'm2 mutant1-path/1) 'normal #f #f #f #f #f)
       #f))
   (define new-dead-mutant
-    (make-dead-mutant (list #f #f #f #f #f outcome #f #f #f)
+    (make-dead-mutant (mutant-run #f #f #f outcome #f #f #f #f #f #f #f)
                       has-increased-limits?))
   (define respawn-call (box #f))
   (define handler
@@ -681,7 +726,7 @@ HERE
 
 ;; Full run test
 (parameterize ([data-output-dir test-mutant-dir]
-               [process-limit 7]
+               [process-limit 1]
                [sample-size 10])
   (define d&e-mutant-total 4)
   (test-begin/with-env
@@ -705,18 +750,27 @@ HERE
    ;; 1*(sample-size) for the 1 mutation of d.rkt that causes blame
    (test->= (length data) (+ 3 (sample-size)))
    (test-match data
-               (list (list (or (? natural?) 'no-blame)
-                           "mutant-test"
-                           (or (? natural?) 'N/A)
-                           (or (== d-path) (== e-path))
-                           (? symbol?)
-                           (? natural?)
-                           (or 'blamed 'completed 'crashed 'timeout 'oom)
-                           (or (vector (or (? symbol?) (? path-string?))
-                                       (or (? symbol?) (? path-string?)))
-                               #f)
-                           (? hash?)
-                           (or #f (? string?)))
+               (list
+                (cons (or (? natural?) 'no-blame)
+                      (struct* mutant-run
+                               ([bench "mutant-test"]
+                                [module (or (== d-path) (== e-path))]
+                                [precision (? hash?)]
+                                [outcome (or 'blamed
+                                             'completed
+                                             'crashed
+                                             'timeout
+                                             'oom)]
+                                [blamed (or (vector
+                                             (or (? symbol?) (? path-string?))
+                                             (or (? symbol?) (? path-string?)))
+                                            #f)]
+                                [mutated (? symbol?)]
+                                [distance (or (? distance?)
+                                              (? no-blame?)
+                                              (? label-missing?))]
+                                [mutation-index (? natural?)]
+                                [message (or #f (? string?))])))
                      ___))))
 
 

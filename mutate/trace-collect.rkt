@@ -4,10 +4,15 @@
                         (string?
                          run-status?
                          . -> .
-                         mutant-outcome?)])
+                         mutant-run?)])
          display-mutant-outcome/csv
          write-mutant-outcome/sexp
-         make-safe-for-reading)
+         write-mutant-outcome
+         make-safe-for-reading
+         (struct-out mutant-run)
+         (struct-out distance)
+         (struct-out no-blame)
+         (struct-out label-missing))
 
 (require racket/serialize
          "mutation-runner.rkt"
@@ -15,16 +20,17 @@
          ;; ll: for label-bounds accessors
          (submod flow-trace/collapsing compressed trace-api))
 
-(struct mutant-outcome (bench module
-                              precision
-                              outcome
-                              blamed
-                              blame-type
-                              mutated
-                              distance
-                              mutation-index
-                              trace
-                              message)
+(serializable-struct mutant-run
+                     (bench module
+                            precision
+                            outcome
+                            blamed
+                            blame-type
+                            mutated
+                            distance
+                            mutation-index
+                            trace
+                            message)
   #:transparent)
 
 (define (last-label trace)
@@ -77,7 +83,7 @@ Mutant: ~v @ ~a (~~ ~v) with config
                                             blamed-id
                                             (raw-trace trace)
                                             fail))
-   (mutant-outcome bench
+   (mutant-run bench
                    mutated-module
                    precision
                    outcome
@@ -205,9 +211,9 @@ Mutant: ~v @ ~a (~~ ~v) with config
 
 
 
-(struct distance (value) #:transparent)
-(struct no-blame () #:transparent)
-(struct label-missing (label) #:transparent)
+(serializable-struct distance (value) #:transparent)
+(serializable-struct no-blame () #:transparent)
+(serializable-struct label-missing (label) #:transparent)
 (define (trace-distance-between mutated-label
                                 blamed-label
                                 trace
@@ -232,17 +238,17 @@ Mutant: ~v @ ~a (~~ ~v) with config
 
 
 (define/match (display-mutant-outcome/csv outcome)
-  [{(mutant-outcome bench
-                    mutated-module
-                    precision
-                    outcome
-                    blamed
-                    blame-type
-                    mutated
-                    maybe-distance
-                    index
-                    _
-                    msg)}
+  [{(mutant-run bench
+                mutated-module
+                precision
+                outcome
+                blamed
+                blame-type
+                mutated
+                maybe-distance
+                index
+                _
+                msg)}
    (define distance/repr (match maybe-distance
                            [(distance n) n]
                            [(no-blame) 'N/A]
@@ -258,17 +264,17 @@ Mutant: ~v @ ~a (~~ ~v) with config
            distance/repr)])
 
 (define/match (write-mutant-outcome/sexp outcome)
-  [{(mutant-outcome bench
-                    mutated-module
-                    precision
-                    outcome
-                    blamed
-                    blame-type
-                    mutated
-                    maybe-distance
-                    index
-                    _
-                    msg)}
+  [{(mutant-run bench
+                mutated-module
+                precision
+                outcome
+                blamed
+                blame-type
+                mutated
+                maybe-distance
+                index
+                _
+                msg)}
    (define distance/repr (match maybe-distance
                            [(distance n) n]
                            [(no-blame) 'N/A]
@@ -283,4 +289,8 @@ Mutant: ~v @ ~a (~~ ~v) with config
                              blame-type
                              precision
                              msg)))])
+
+(define (write-mutant-outcome outcome)
+  ;; Trace can't be serialized, and we don't want to anyway
+  (writeln (serialize (struct-copy mutant-run outcome [trace #f]))))
 

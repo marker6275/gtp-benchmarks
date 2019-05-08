@@ -128,7 +128,7 @@
 (struct mutant (module index) #:transparent)
 
 ;; will?           := (factory? dead-mutant-process? -> factory?)
-;; result?         := list? (see `trace-collect.rkt`)
+;; result?         := mutant-run? (see `trace-collect.rkt`)
 ;; ctc-level?      := symbol?
 ;; config?         := (hash path-string?
 ;;                         (hash (or symbol? path-string?) ctc-level?))
@@ -421,7 +421,7 @@
                            _
                            increased-limits?)
       dead-successor)
-    (match* {(mutant-outcome dead-succ-result) increased-limits?}
+    (match* {(mutant-run-outcome dead-succ-result) increased-limits?}
       [{(and outcome (or 'timeout 'oom)) #f}
        (log-factory info
                     "
@@ -461,7 +461,7 @@ Predecessor (id [~a]) blamed ~a and had config:
                     mod index dead-succ-id
                     dead-succ-config
                     dead-succ-result
-                    (if (equal? (list-ref dead-succ-result 5)
+                    (if (equal? (mutant-run-outcome dead-succ-result)
                                 'crashed)
                         "Likely due to a buggy contract
    on the region blamed by the predecessor (see below) that crashed"
@@ -673,7 +673,7 @@ Attempting revival ~a / ~a
      (log-factory info
                   "      Dead mutant [~a] result: ~v"
                   id
-                  (list-ref result 5))
+                  (mutant-run-outcome result))
      (define dead-mutant-proc
        (dead-mutant-process (mutant mod index)
                             config
@@ -750,7 +750,7 @@ Attempting revival ~a / ~a
     #:mode 'text
     (λ _ (writeln (serialize (cons blame-trail-id result))))))
 
-;; mutant-process? -> (or/c serialized-list? eof?)
+;; mutant-process? -> (or/c mutant-run? eof?)
 (define (read-mutant-result mutant-proc)
   (define path (mutant-process-file mutant-proc))
   (define (report-malformed-output . _)
@@ -758,8 +758,7 @@ Attempting revival ~a / ~a
       mutant-proc)
     (log-factory warning
                  "Result read from mutant output not of the expected shape.
-Expected: (or (list _ _ _ _ _ (or 'crashed 'completed 'timeout) #f _ _)
-              (list _ _ _ _ _ 'blamed (vector _ _) _ _))
+Expected: a mutant-run
 Found: ~v
 If this has the right shape, it may contain an unreadable value.
 
@@ -775,8 +774,12 @@ Mutant: [~a] ~a @ ~a with config:
   ;; from deserializing the wrong value are arbitrary.
   (with-handlers ([exn? report-malformed-output])
     (match (deserialize (with-input-from-file path read))
-      [(and (or (list _ _ _ _ _ (or 'crashed 'completed 'timeout) #f _ _)
-                (list _ _ _ _ _ 'blamed (vector _ _) _ _))
+      [(and (or (struct* mutant-run
+                         ([outcome (or 'crashed 'completed 'timeout)]
+                          [blamed #f]))
+                (struct* mutant-run
+                         ([outcome 'blamed]
+                          [blamed (vector _ _)])))
             result/well-formed)
        result/well-formed])))
 
@@ -786,16 +789,12 @@ Mutant: [~a] ~a @ ~a with config:
 
 (define natural? exact-nonnegative-integer?)
 
-;; result? -> symbol?
-(define/match (mutant-outcome result)
-  [{(list _ _ _ _ _ outcome _ _ _)}
-   outcome])
-
 ;; result? -> (vector/c (or/c symbol? path-string?) path-string?)
 (define/match (try-get-blamed/from-result result)
-  [{(list _ _ _ _ _ 'blamed blamed _ _)}
+  [{(struct* mutant-run ([outcome 'blamed]
+                         [blamed blamed]))}
    blamed]
-  [{(list _ _ _ _ _ (not 'blamed) _ _ _)}
+  [{(struct* mutant-run ([outcome (not 'blamed)]))}
    #f])
 
 ;; dead-mutant-process? -> (vector (or/c symbol? path-string?))
@@ -886,9 +885,11 @@ Benchmark must be one of: ~v"
                         (hash-keys benchmarks)))))
 
 (define (blamed-is-bug? blamed result)
-  (match-define (vector id mod) blamed)
+  (match-define (vector blamed-id mod) blamed)
   (match result
-    [(list _ _ _ (== id) _ 'blamed (== blamed) _ _)
+    [(struct* mutant-run ([mutated (== blamed-id)]
+                          [outcome 'blamed]
+                          [blamed (== blamed)]))
      #t]
     [_ #f]))
 

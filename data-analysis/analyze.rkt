@@ -1,20 +1,12 @@
-#lang racket
+#lang at-exp racket
 
 (require racket/serialize
-         syntax/parse
          (only-in (submod "../data-collection/mutant-factory.rkt" test)
                   mutant
                   sample-size)
          "../data-collection/benchmarks.rkt"
-         "../utilities/read-definitions.rkt")
-
-;; data-list? := (list/c blame-trail-id?
-;;                       string?
-;;                       distance?
-;;                       mod-path? mutated-id? mutation-index?
-;;                       outcome? blamed?
-;;                       precision-config
-;;                       err-msg?)
+         "../utilities/read-definitions.rkt"
+         "../mutate/trace-collect.rkt")
 
 (define (read-data data-dir)
   (for/fold ([data-so-far empty])
@@ -23,130 +15,161 @@
             (map (compose deserialize (curryr call-with-input-string read))
                  (file->lines f)))))
 
-;; samples? := (set/c data-list?)
+;; samples? := (set/c mutant-run?)
 
-;; (listof data-list?) -> (hash/c mutant? samples?)
+;; (listof mutant-run?) -> (hash/c mutant? samples?)
 (define (organize-by-mutant data)
   (for/fold ([data/by-mutant (hash)])
-            ([data-list (in-list data)])
+            ([data-pair (in-list data)])
     (with-handlers ([exn:misc:match?
                      (λ (e)
                        (error 'organize-by-mutant
                               "Found data missing blame trail id~n~a~n"
                               e))])
-      (match-define (list _ _ _ mod _ index _ _ _ _) data-list)
+      (match-define (cons _
+                          (struct* mutant-run ([module mod]
+                                               [mutation-index index])))
+        data-pair)
       (define this-mutant (mutant mod index))
       (define data-for-mutant (hash-ref data/by-mutant this-mutant
                                         (λ _ (set))))
       (hash-set data/by-mutant
                 this-mutant
-                (set-add data-for-mutant data-list)))))
+                (set-add data-for-mutant data-pair)))))
 
 (define (find-increasing-distances sample-set)
   (for/fold ([results (set)])
             ([sample1 (in-set sample-set)])
     (define increasing-pairs/sample1
       (for/set ([sample2 (in-set sample-set)]
-                #:when (and (config-stronger? sample2 sample1)
-                            (number? (blame-distance sample2))
-                            (number? (blame-distance sample1))
-                            (> (blame-distance sample2)
-                               (blame-distance sample1))))
+                #:when
+                (match* {sample1 sample2}
+                  [{(cons _ (struct* mutant-run ([blame-type 'normal]
+                                                 [distance (distance dist1)]
+                                                 [precision config1])))
+                    (cons _ (struct* mutant-run ([blame-type 'normal]
+                                                 [distance (distance dist2)]
+                                                 [precision config2])))}
+                   (and (config-stronger? config2 config1)
+                        (> dist2 dist1))]
+                  [{_ _} #f]))
         (cons sample1 sample2)))
     (set-union results
                increasing-pairs/sample1)))
 
 (module+ test
   (require ruinit)
+  (define (make-run-result dist config)
+    (cons #f (mutant-run #f #f config #f #f 'normal #f (distance dist) #f #f #f)))
   (test-begin
     (set-empty? (find-increasing-distances
-                 (set (list #f #f 50 (hash 'mod-a (hash 'foo 'max
+                 (set (make-run-result 50
+                                       (hash 'mod-a (hash 'foo 'max
                                                         'bar 'types)
-                                           'mod-b (hash 'baz 'max)))
-                      (list #f #f 50 (hash 'mod-a (hash 'foo 'max
+                                              'mod-b (hash 'baz 'max)))
+                      (make-run-result 50
+                                       (hash 'mod-a (hash 'foo 'max
                                                         'bar 'max)
-                                           'mod-b (hash 'baz 'max))))))
+                                              'mod-b (hash 'baz 'max))))))
     (set-empty? (find-increasing-distances
-                 (set (list #f #f 50 (hash 'mod-a (hash 'foo 'max
+                 (set (make-run-result 50
+                                       (hash 'mod-a (hash 'foo 'max
                                                         'bar 'types)
-                                           'mod-b (hash 'baz 'max)))
-                      (list #f #f 25 (hash 'mod-a (hash 'foo 'max
+                                              'mod-b (hash 'baz 'max)))
+                      (make-run-result 25
+                                       (hash 'mod-a (hash 'foo 'max
                                                         'bar 'max)
-                                           'mod-b (hash 'baz 'max))))))
+                                              'mod-b (hash 'baz 'max))))))
     (set-empty? (find-increasing-distances
-                 (set (list #f #f 50 (hash 'mod-a (hash 'foo 'none
+                 (set (make-run-result 50
+                                       (hash 'mod-a (hash 'foo 'none
                                                         'bar 'types)
-                                           'mod-b (hash 'baz 'types)))
-                      (list #f #f 50 (hash 'mod-a (hash 'foo 'types
+                                              'mod-b (hash 'baz 'types)))
+                      (make-run-result 50
+                                       (hash 'mod-a (hash 'foo 'types
                                                         'bar 'types)
-                                           'mod-b (hash 'baz 'max))))))
+                                              'mod-b (hash 'baz 'max))))))
     (set-empty? (find-increasing-distances
-                 (set (list #f #f 50 (hash 'mod-a (hash 'foo 'none
+                 (set (make-run-result 50
+                                       (hash 'mod-a (hash 'foo 'none
                                                         'bar 'types)
-                                           'mod-b (hash 'baz 'types)))
-                      (list #f #f 50 (hash 'mod-a (hash 'foo 'types
+                                              'mod-b (hash 'baz 'types)))
+                      (make-run-result 50
+                                       (hash 'mod-a (hash 'foo 'types
                                                         'bar 'types)
-                                           'mod-b (hash 'baz 'max)))
-                      (list #f #f 25 (hash 'mod-a (hash 'foo 'max
+                                              'mod-b (hash 'baz 'max)))
+                      (make-run-result 25
+                                       (hash 'mod-a (hash 'foo 'max
                                                         'bar 'max)
-                                           'mod-b (hash 'baz 'max))))))
+                                              'mod-b (hash 'baz 'max))))))
     (test-equal? (find-increasing-distances
-                  (set (list #f #f 50 (hash 'mod-a (hash 'foo 'none
-                                                         'bar 'types)
-                                            'mod-b (hash 'baz 'types)))
-                       (list #f #f 51 (hash 'mod-a (hash 'foo 'types
-                                                         'bar 'types)
-                                            'mod-b (hash 'baz 'max)))
-                       (list #f #f 25 (hash 'mod-a (hash 'foo 'max
-                                                         'bar 'max)
-                                            'mod-b (hash 'baz 'max)))))
-                 (set (cons (list #f #f 50 (hash 'mod-a (hash 'foo 'none
-                                                              'bar 'types)
-                                                 'mod-b (hash 'baz 'types)))
-                            (list #f #f 51 (hash 'mod-a (hash 'foo 'types
-                                                              'bar 'types)
-                                                 'mod-b (hash 'baz 'max))))))
+                  (set (make-run-result 50
+                                        (hash 'mod-a (hash 'foo 'none
+                                                           'bar 'types)
+                                              'mod-b (hash 'baz 'types)))
+                       (make-run-result 51
+                                        (hash 'mod-a (hash 'foo 'types
+                                                           'bar 'types)
+                                              'mod-b (hash 'baz 'max)))
+                       (make-run-result 25
+                                        (hash 'mod-a (hash 'foo 'max
+                                                           'bar 'max)
+                                              'mod-b (hash 'baz 'max)))))
+                 (set (cons (make-run-result 50
+                                             (hash 'mod-a (hash 'foo 'none
+                                                                'bar 'types)
+                                                   'mod-b (hash 'baz 'types)))
+                            (make-run-result 51
+                                             (hash 'mod-a (hash 'foo 'types
+                                                                'bar 'types)
+                                                   'mod-b (hash 'baz 'max))))))
     (test-equal? (find-increasing-distances
-                  (set (list #f #f 50 (hash 'mod-a (hash 'foo 'none
+                  (set (make-run-result 50
+                                        (hash 'mod-a (hash 'foo 'none
                                                          'bar 'types)
-                                            'mod-b (hash 'baz 'types)))
-                       (list #f #f 20 (hash 'mod-a (hash 'foo 'types
+                                               'mod-b (hash 'baz 'types)))
+                       (make-run-result 20
+                                        (hash 'mod-a (hash 'foo 'types
                                                          'bar 'types)
-                                            'mod-b (hash 'baz 'max)))
-                       (list #f #f 25 (hash 'mod-a (hash 'foo 'max
+                                               'mod-b (hash 'baz 'max)))
+                       (make-run-result 25
+                                        (hash 'mod-a (hash 'foo 'max
                                                          'bar 'max)
-                                            'mod-b (hash 'baz 'max)))))
-                 (set (cons (list #f #f 20 (hash 'mod-a (hash 'foo 'types
+                                               'mod-b (hash 'baz 'max)))))
+                 (set (cons (make-run-result 20
+                                             (hash 'mod-a (hash 'foo 'types
                                                               'bar 'types)
-                                                 'mod-b (hash 'baz 'max)))
-                            (list #f #f 25 (hash 'mod-a (hash 'foo 'max
+                                                    'mod-b (hash 'baz 'max)))
+                            (make-run-result 25
+                                             (hash 'mod-a (hash 'foo 'max
                                                               'bar 'max)
-                                                 'mod-b (hash 'baz 'max))))))
+                                                    'mod-b (hash 'baz 'max))))))
     (test-equal? (find-increasing-distances
-                  (set (list #f #f 50 (hash 'mod-a (hash 'foo 'none
+                  (set (make-run-result 50
+                                        (hash 'mod-a (hash 'foo 'none
                                                          'bar 'types)
-                                            'mod-b (hash 'baz 'types)))
-                       (list #f #f 20 (hash 'mod-a (hash 'foo 'types
+                                               'mod-b (hash 'baz 'types)))
+                       (make-run-result 20
+                                        (hash 'mod-a (hash 'foo 'types
                                                          'bar 'types)
-                                            'mod-b (hash 'baz 'types)))
-                       (list #f #f 25 (hash 'mod-a (hash 'foo 'types
+                                               'mod-b (hash 'baz 'types)))
+                       (make-run-result 25
+                                        (hash 'mod-a (hash 'foo 'types
                                                          'bar 'types)
-                                            'mod-b (hash 'baz 'max)))))
-                 (set (cons (list #f #f 20 (hash 'mod-a (hash 'foo 'types
+                                               'mod-b (hash 'baz 'max)))))
+                 (set (cons (make-run-result 20
+                                             (hash 'mod-a (hash 'foo 'types
                                                               'bar 'types)
-                                                 'mod-b (hash 'baz 'types)))
-                            (list #f #f 25 (hash 'mod-a (hash 'foo 'types
+                                                    'mod-b (hash 'baz 'types)))
+                            (make-run-result 25
+                                             (hash 'mod-a (hash 'foo 'types
                                                               'bar 'types)
-                                                 'mod-b (hash 'baz 'max))))))))
+                                                    'mod-b (hash 'baz 'max))))))))
 
 (define (analyze-for-increasing-distance data)
   (for/hash ([(mutant samples) (in-hash data)])
     (values mutant
             (find-increasing-distances samples))))
-
-(define/match (blame-distance data-list)
-  [{(list-rest _ _ distance _)}
-   distance])
 
 (define CONFIG-LEVELS '(none types max))
 
@@ -154,47 +177,45 @@
 ;;
 ;; A config is "stronger" than another if every individual level in A
 ;; is at least as strong as the corresponding level in B.
-(define/match (config-stronger? sample-A sample-B)
-  [{(list-no-order (? hash? config-A) _ ...)
-    (list-no-order (? hash? config-B) _ ...)}
-   (for*/and ([(mod mod-config/A) (in-hash config-A)]
-              [(region level/A) (in-hash mod-config/A)])
-     (define level/B (hash-ref (hash-ref config-B mod) region))
-     (>= (index-of CONFIG-LEVELS level/A)
-         (index-of CONFIG-LEVELS level/B)))])
+(define (config-stronger? config-A config-B)
+  (for*/and ([(mod mod-config/A) (in-hash config-A)]
+             [(region level/A) (in-hash mod-config/A)])
+    (define level/B (hash-ref (hash-ref config-B mod) region))
+    (>= (index-of CONFIG-LEVELS level/A)
+        (index-of CONFIG-LEVELS level/B))))
 
 (module+ test
   (test-begin
-    (config-stronger? (list (hash 'mod-a (hash 'foo 'none)))
-                      (list (hash 'mod-a (hash 'foo 'none))))
-    (config-stronger? (list (hash 'mod-a (hash 'foo 'types)))
-                      (list (hash 'mod-a (hash 'foo 'none))))
-    (config-stronger? (list (hash 'mod-a (hash 'foo 'max)))
-                      (list (hash 'mod-a (hash 'foo 'none))))
-    (config-stronger? (list (hash 'mod-a (hash 'foo 'max)))
-                      (list (hash 'mod-a (hash 'foo 'types))))
-    (config-stronger? (list (hash 'mod-a (hash 'foo 'max)))
-                      (list (hash 'mod-a (hash 'foo 'max))))
-    (config-stronger? (list (hash 'mod-a (hash 'foo 'max
-                                               'bar 'types)))
-                      (list (hash 'mod-a (hash 'foo 'none
-                                               'bar 'types))))
-    (not (config-stronger? (list (hash 'mod-a (hash 'foo 'max
-                                                    'bar 'types)))
-                           (list (hash 'mod-a (hash 'foo 'none
-                                                    'bar 'max)))))
-    (config-stronger? (list (hash 'mod-a (hash 'foo 'max
-                                               'bar 'types)
-                                  'mod-b (hash 'baz 'max)))
-                      (list (hash 'mod-a (hash 'foo 'none
-                                               'bar 'types)
-                                  'mod-b (hash 'baz 'none))))
-    (not (config-stronger? (list (hash 'mod-a (hash 'foo 'max
-                                                    'bar 'types)
-                                       'mod-b (hash 'baz 'max)))
-                           (list (hash 'mod-a (hash 'foo 'none
-                                                    'bar 'max)
-                                       'mod-b (hash 'baz 'none)))))))
+    (config-stronger? (hash 'mod-a (hash 'foo 'none))
+                      (hash 'mod-a (hash 'foo 'none)))
+    (config-stronger? (hash 'mod-a (hash 'foo 'types))
+                      (hash 'mod-a (hash 'foo 'none)))
+    (config-stronger? (hash 'mod-a (hash 'foo 'max))
+                      (hash 'mod-a (hash 'foo 'none)))
+    (config-stronger? (hash 'mod-a (hash 'foo 'max))
+                      (hash 'mod-a (hash 'foo 'types)))
+    (config-stronger? (hash 'mod-a (hash 'foo 'max))
+                      (hash 'mod-a (hash 'foo 'max)))
+    (config-stronger? (hash 'mod-a (hash 'foo 'max
+                                         'bar 'types))
+                      (hash 'mod-a (hash 'foo 'none
+                                         'bar 'types)))
+    (not (config-stronger? (hash 'mod-a (hash 'foo 'max
+                                              'bar 'types))
+                           (hash 'mod-a (hash 'foo 'none
+                                              'bar 'max))))
+    (config-stronger? (hash 'mod-a (hash 'foo 'max
+                                         'bar 'types)
+                            'mod-b (hash 'baz 'max))
+                      (hash 'mod-a (hash 'foo 'none
+                                         'bar 'types)
+                            'mod-b (hash 'baz 'none)))
+    (not (config-stronger? (hash 'mod-a (hash 'foo 'max
+                                              'bar 'types)
+                                 'mod-b (hash 'baz 'max))
+                           (hash 'mod-a (hash 'foo 'none
+                                              'bar 'max)
+                                 'mod-b (hash 'baz 'none))))))
 
 
 (define (report-distance-increases data/by-mutant)
@@ -226,7 +247,7 @@
       (define mutant-relevant?
         (for/first ([run (in-set runs)]
                     #:when (match run
-                             [(list _ _ _ _ _ _ 'blamed _ _ _) #t]
+                             [(cons _ (struct* mutant-run ([outcome 'blamed]))) #t]
                              [_ #f]))
           #t))
       (define root-sample-count
@@ -246,8 +267,12 @@
     (apply + (hash-values root-sample-counts/by-mutant)))
   (define root-sample-count/less-irrelevant-mutants
     (- total-root-sample-count (- total-mutant-count relevant-mutant-count)))
+  (displayln @~a{
+                 relevant mutant count: @relevant-mutant-count
+                 root-sample-count/less-irrelevant-mutants: @root-sample-count/less-irrelevant-mutants
+                 })
   (define root-sample-count/avg (/ root-sample-count/less-irrelevant-mutants
-                              relevant-mutant-count))
+                                   relevant-mutant-count))
   (define root-sample-count/avg/hit-blame
     (/ (sample-size) root-sample-count/avg))
 
@@ -267,7 +292,7 @@ Average proportion of root samples that hit blame:       ~a = ~a
 
   root-sample-count/avg)
 
-(define run-result->blame-trail-id first)
+(define run-result->blame-trail-id car)
 
 (define (report-lattice-size bench-name avg-samples-per-mutant)
   (define total-region-count (count-top-level-defs bench-name))

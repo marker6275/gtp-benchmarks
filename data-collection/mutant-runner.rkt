@@ -86,4 +86,4 @@
   (define trace-distance-results
     (make-trace-distance-results (benchmark-name) result))
 
-  (write-mutant-outcome/sexp trace-distance-results))
+  (write-mutant-outcome trace-distance-results))
