@@ -15,4 +15,4 @@
 ;; parent: (union #f node)
 ;; children: (listof node)
 ;; suffix-link: (union #f node)
-(define-struct node ([up-label : label] [parent : (U #f node)] [children : (Listof node)] [suffix-link : (U #f node)]) #:mutable)
+(struct node ([up-label : label] [parent : (U #f node)] [children : (Listof node)] [suffix-link : (U #f node)]) #:mutable #:constructor-name make-node)
