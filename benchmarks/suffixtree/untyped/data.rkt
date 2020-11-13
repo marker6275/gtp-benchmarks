@@ -3,7 +3,8 @@
 (provide
   (struct-out label)
   (struct-out suffix-tree)
-  (struct-out node))
+  (struct-out node)
+  (rename-out [node make-node]))
 
 
 (define-struct label (datum i j) #:mutable)
@@ -15,4 +16,4 @@
 ;; parent: (union #f node)
 ;; children: (listof node)
 ;; suffix-link: (union #f node)
-(struct node (up-label parent children suffix-link) #:mutable #:constructor-name make-node)
+(struct node (up-label parent children suffix-link) #:mutable)
