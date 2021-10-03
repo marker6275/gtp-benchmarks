@@ -12,7 +12,7 @@
 
 ;; =============================================================================
 (require require-typed-check
- "automata.rkt"
+ "automata-interface.rkt"
  "utilities.rkt"
 )
 

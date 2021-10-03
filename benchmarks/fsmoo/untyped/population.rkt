@@ -25,7 +25,7 @@
  )
 
 ;; =============================================================================
-(require "automata.rkt" "utilities.rkt")
+(require "automata-interface.rkt" "utilities.rkt")
 
 ;; Population = (Cons Automaton* Automaton*)
 ;; Automaton* = [Vectorof Automaton]

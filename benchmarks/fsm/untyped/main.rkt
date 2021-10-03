@@ -6,7 +6,7 @@
 ;; =============================================================================
 (require require-typed-check
  "../base/untyped.rkt"
- "automata.rkt"
+ "automata-interface.rkt"
  "population.rkt"
  "utilities.rkt")
 

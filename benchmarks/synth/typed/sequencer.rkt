@@ -3,10 +3,10 @@
 (require require-typed-check
          "typed-data.rkt")
 
-(require/typed/check "array-struct.rkt"
+(require/typed/check "array-interface.rkt"
   [build-array (-> Indexes (-> Indexes Flonum) Array)])
 
-(require/typed/check "array-transform.rkt"
+(require/typed/check "array-interface.rkt"
   [array-append* ((Listof Array) -> Array)])
 
 (require/typed/check "synth.rkt"

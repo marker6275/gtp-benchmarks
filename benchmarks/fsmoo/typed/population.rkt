@@ -3,7 +3,7 @@
 ;; Populations of Automata
 
 (require
-  "automata-adapted.rkt"
+  "automata-interface.rkt"
   require-typed-check)
 (require/typed/check "utilities.rkt"
  (choose-randomly

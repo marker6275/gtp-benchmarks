@@ -10,17 +10,9 @@
 (require require-typed-check
          (only-in racket/string string-split string-join string-trim)
          "../base/typed-zo-structs.rkt"
-         racket/match)
+         racket/match
+         "zo-interface.rkt")
 
-(require/typed/check "zo-string.rkt"
-  [zo->spec (-> zo Spec)]
-  [zo->string (->* (zo) (#:deep? Boolean) String)])
-(require/typed/check "zo-transition.rkt"
-  [zo-transition (-> zo String (values (U zo (Listof zo)) Boolean))])
-(require/typed/check "zo-find.rkt"
-  [zo-find (-> zo String [#:limit (U Natural #f)] (Listof result))]
-  [#:struct result ([zo : zo]
-                    [path : (Listof zo)])])
 (require/typed "../base/compiler-zo-parse.rkt"
                [zo-parse (->* () (Input-Port) zo)])
 

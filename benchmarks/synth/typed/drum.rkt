@@ -3,17 +3,17 @@
 (require require-typed-check
          "typed-data.rkt")
 
-(require/typed/check "array-struct.rkt"
+(require/typed/check "array-interface.rkt"
   [array-size (-> Array Integer)]
   [make-array (-> In-Indexes Flonum Array)]
   [build-array (-> In-Indexes (-> Indexes Float) Array)]
   [unsafe-vector->array (-> Indexes (Vectorof Float) Mutable-Array)])
 
-(require/typed/check "array-utils.rkt"
+(require/typed/check "array-interface.rkt"
   [array-shape-size (-> Indexes Integer)]
   [check-array-shape (-> In-Indexes (-> Nothing) Indexes)])
 
-(require/typed/check "array-transform.rkt"
+(require/typed/check "array-interface.rkt"
   [array-append* ((Listof Array) -> Array)])
 
 (require/typed/check "synth.rkt"

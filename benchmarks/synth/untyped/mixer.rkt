@@ -1,14 +1,14 @@
 #lang racket/base
 
-(require (only-in "array-struct.rkt"
+(require (only-in "array-interface.rkt"
                     array?
                     array-shape
                     array-default-strict!
                     unsafe-array-proc
                     unsafe-build-array)
          (only-in racket/list first second rest)
-           (only-in "array-broadcast.rkt" array-broadcast array-shape-broadcast)
-         (only-in "array-broadcast.rkt" array-broadcasting))
+           (only-in "array-interface.rkt" array-broadcast array-shape-broadcast)
+         (only-in "array-interface.rkt" array-broadcasting))
 
 (provide mix)
 

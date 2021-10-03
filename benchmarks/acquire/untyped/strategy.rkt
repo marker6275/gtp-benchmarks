@@ -13,21 +13,8 @@
 
 (require
  "../base/untyped.rkt"
- "board.rkt"
- "state.rkt"
+ "acquire-interface.rkt"
  )
-(require (only-in "basics.rkt"
-  ALL-HOTELS
-  SHARES-PER-TURN#
-  hotel<=?
-  price-per-share
-  shares++
-  shares--
-  shares-available
-))
-(require (only-in "auxiliaries.rkt"
-  randomly-pick
-))
 
 (define nat-SHARES-PER-TURN# (assert SHARES-PER-TURN# exact-nonnegative-integer?))
 

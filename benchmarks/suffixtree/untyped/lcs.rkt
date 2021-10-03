@@ -3,10 +3,7 @@
 
 (require
  "../base/untyped.rkt"
- (except-in "data.rkt" make-label)
- "label.rkt"
- "structs.rkt"
- "ukkonen.rkt")
+ "suffixtree-interface.rkt")
 
 (define false-thunk (lambda () #f))
 

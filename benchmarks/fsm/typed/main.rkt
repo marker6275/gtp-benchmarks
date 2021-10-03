@@ -5,7 +5,7 @@
 
 ;; =============================================================================
 (require require-typed-check
- "automata-adapted.rkt")
+ "automata-interface.rkt")
 (require/typed/check "population.rkt"
  (build-random-population
   (-> Natural Population))

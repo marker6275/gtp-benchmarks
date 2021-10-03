@@ -2,27 +2,8 @@
 ;; Some utilities.
 
 (require require-typed-check
-         (except-in "typed-data.rkt" make-label)
+         "suffixtree-interface.rkt"
          racket/list)
-
-(require/typed/check "label.rkt"
- [label->string (-> Label String)]
- [string->label (-> String Label)]
- [string->label/with-sentinel (-> String Label)]
- [make-label (-> (U String (Vectorof (U Char Symbol))) Label)]
- [label-source-eq? (-> Label Label Boolean)]
- [label-length (-> Label Index)]
- [vector->label (-> (Vectorof (U Char Symbol)) Label)]
- [label-ref (-> Label Integer (U Symbol Char))])
-
-(require/typed/check
- "structs.rkt"
- [make-tree (-> Tree)]
- [tree-root (-> Tree Node)]
- )
-
-(require/typed/check "ukkonen.rkt"
- [tree-add! (-> Tree Label Void)])
 
 (: false-thunk (-> #f))
 (define false-thunk (lambda () #f))

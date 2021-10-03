@@ -8,19 +8,12 @@
 (require
   racket/list
   racket/class
-  "board.rkt"
-  "state.rkt"
+  "acquire-interface.rkt"
 )
-(require (only-in "admin.rkt"
-  administrator%
-))
 (require (only-in "player.rkt"
  random-players
  ordered-players
  inf-loop-player
-))
-(require (only-in "auxiliaries.rkt"
-  randomly-pick
 ))
 
 ;; =============================================================================

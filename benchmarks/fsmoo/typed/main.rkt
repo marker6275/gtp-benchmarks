@@ -6,7 +6,7 @@
 
 ;; =============================================================================
 (require
-  "automata-adapted.rkt"
+  "automata-interface.rkt"
   "population-adapted.rkt"
   require-typed-check
 )

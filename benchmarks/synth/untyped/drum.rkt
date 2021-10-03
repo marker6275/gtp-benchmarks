@@ -1,14 +1,14 @@
 #lang racket/base
 
-(require (only-in "array-struct.rkt"
+(require (only-in "array-interface.rkt"
                   array-size
                   make-array
                   build-array
                   unsafe-vector->array)
-         (only-in "array-utils.rkt"
+         (only-in "array-interface.rkt"
                   array-shape-size
                   check-array-shape)
-         (only-in "array-transform.rkt" array-append*)
+         (only-in "array-interface.rkt" array-append*)
          (only-in "synth.rkt" fs seconds->samples)
          "data.rkt")
 

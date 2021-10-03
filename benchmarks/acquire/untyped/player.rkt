@@ -14,18 +14,9 @@
 
 (require
  "../base/untyped.rkt"
- "state.rkt"
+ "acquire-interface.rkt"
 )
-(require (only-in "admin.rkt"
-  administrator%
-  turn%
-))
-(require (only-in "basics.rkt"
-  player-shares0
-  *combine-shares
-  shares-minus
-  banker-shares0
-))
+
 (require (only-in "strategy.rkt"
   ordered-s
   random-s

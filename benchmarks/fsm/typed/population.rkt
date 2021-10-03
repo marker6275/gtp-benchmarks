@@ -28,7 +28,7 @@
 
 ;; =============================================================================
 (require require-typed-check
- "automata-adapted.rkt")
+ "automata-interface.rkt")
 (require/typed/check "utilities.rkt"
  (choose-randomly
   (-> [Listof Probability] Natural [#:random (U False Real)] [Listof Natural]))
