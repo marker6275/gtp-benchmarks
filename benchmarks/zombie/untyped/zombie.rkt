@@ -13,14 +13,9 @@
   empty-scene
   place-image
   circle
-))
-(require (only-in "math.rkt"
-  min
-  max
-  abs
-  sqr
-  msqrt
-))
+  )
+         "math-interface.rkt")
+
 
 ;; =============================================================================
 
