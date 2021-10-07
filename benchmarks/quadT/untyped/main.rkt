@@ -6,17 +6,10 @@
 
 (require
  (only-in typed/racket/class new send)
+ "quad-interface.rkt"
 )
-(require (only-in "world.rkt"
-  world:allow-hyphenated-last-word-in-paragraph
-  world:quality-default
-  world:draft-quality))
 (require (only-in "quad-main.rkt"
   typeset))
-(require (only-in "quick-sample.rkt"
-  quick-sample))
-(require (only-in "render.rkt"
-  pdf-renderer%))
 
 ;; =============================================================================
 

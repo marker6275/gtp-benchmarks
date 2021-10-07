@@ -8,75 +8,15 @@
 
 (require
   "../base/untyped.rkt"
-  "../base/core.rkt"
-  "../base/quad.rkt"
+  ;; "../base/core.rkt"
+  ;; "../base/quad.rkt"
   (only-in racket/list append* empty empty? split-at drop-right)
   racket/class
   (only-in racket/sequence sequence->list)
   (only-in math/flonum fl+ fl fl>)
+  "quad-interface.rkt"
 )
-(require (only-in "quads.rkt"
-  quads->doc
-  quads->page
-  quads->block
-  quad-attrs
-  line
-  quad-car
-  quad-name
-  quad-attr-ref
-  group-quad-list
-  quad-list
-  quad-has-attr?
-  quads->column
-  page
-  column))
-(require (only-in "wrap.rkt"
-  insert-spacers-in-line
-  wrap-adaptive
-  wrap-best
-  wrap-first
-  fill
-  add-horiz-positions))
-(require (only-in "world.rkt"
-  world:line-looseness-key
-  world:allow-hyphenated-last-word-in-paragraph
-  world:line-looseness-tolerance
-  world:line-index-key
-  world:measure-key
-  world:use-hyphenation?
-  world:max-quality
-  world:total-lines-key
-  world:draft-quality
-  world:quality-key
-  world:quality-key-default
-  world:paper-width-default
-  world:column-count-key
-  world:column-count-key-default
-  world:column-gutter-key
-  world:column-gutter-key-default
-  world:column-index-key
-  world:min-first-lines
-  world:min-last-lines
-  world:minimum-lines-per-column
-  world:default-lines-per-column))
-(require (only-in "measure.rkt"
-  round-float
-  load-text-cache-file
-  update-text-cache-file))
-(require (only-in "utils.rkt"
-  merge-attrs
-  split-last
-  join-quads
-  hyphenate-quad
-  quad-map
-  group-quad-attr-set*
-  quad-attr-set*
-  attr-change
-  compute-line-height
-  add-vert-positions
-  split-quad))
-(require (only-in "sugar-list.rkt"
- slice-at))
+
 ;; bg: should maybe import this
 (require (only-in "../base/csp/csp.rkt"
   problem%))
