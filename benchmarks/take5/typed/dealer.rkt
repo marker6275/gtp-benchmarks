@@ -35,7 +35,7 @@
 (require/typed/check "deck.rkt"
   (create-deck (-> CardPool Deck))
 )
-(require/typed/check "player.rkt"
+(require/typed/check "base-player.rkt"
   (player% Player%)
 )
 

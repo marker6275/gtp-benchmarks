@@ -9,13 +9,11 @@
   require-typed-check
   racket/class
   "../base/untyped.rkt"
+  "take5-interface.rkt"
 )
 
 (require (only-in "player.rkt"
   create-player
-))
-(require (only-in "dealer.rkt"
-  create-dealer
 ))
 
 ;; =============================================================================

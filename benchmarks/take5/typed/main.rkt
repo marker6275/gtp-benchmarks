@@ -8,16 +8,11 @@
 (require
   require-typed-check
   typed/racket/class
-  "player-types.rkt"
-  "dealer-types.rkt"
+  "take5-interface.rkt"
 )
 
 (require/typed/check "player.rkt"
   (create-player (-> Natural Player)))
-
-(require/typed/check "dealer.rkt"
-  (create-dealer (-> (Listof Player) Dealer))
-)
 
 ;; =============================================================================
 

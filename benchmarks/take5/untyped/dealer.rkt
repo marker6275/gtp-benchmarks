@@ -29,7 +29,7 @@
 (require (only-in "deck.rkt"
   create-deck
 ))
-(require (only-in "player.rkt"
+(require (only-in "base-player.rkt"
   player%
 ))
 ;; ---------------------------------------------------------------------------------------------------

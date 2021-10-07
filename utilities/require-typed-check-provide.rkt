@@ -1,7 +1,8 @@
 #lang racket
 
 (provide require/typed/check/provide
-         require/typed/check)
+         require/typed/check
+         reprovide)
 
 (require syntax/parse/define
          require-typed-check)
@@ -17,4 +18,8 @@
     (require/typed/check mod-path clause ...)
     (provide {~? name {~@}} ...
              {~? (struct-out struct-name) {~@}} ...)))
+
+(define-simple-macro (reprovide mod-path ...)
+  (begin (require mod-path ...)
+         (provide (all-from-out mod-path) ...)))
 
