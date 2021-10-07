@@ -7,6 +7,7 @@
   racket/class
   "../base/un-types.rkt"
   racket/match
+  "dungeon-interface.rkt"
 )
 (require (only-in racket/set
   set-intersect
@@ -18,44 +19,7 @@
     (if (and (not (unbox ok)) (equal? (car x) p))
       (begin (set-box! ok #t) (cons p c))
       x)))
-(require (only-in "cell.rkt"
-  void-cell%
-  wall%
-  door%
-  vertical-door%
-  horizontal-door%
-  horizontal-wall%
-  four-corner-wall%
-  pillar%
-  vertical-wall%
-  north-west-wall%
-  north-east-wall%
-  south-west-wall%
-  south-east-wall%
-  north-tee-wall%
-  west-tee-wall%
-  east-tee-wall%
-  south-tee-wall%
-  empty-cell%
-))
-(require (only-in "grid.rkt"
-  left
-  right
-  up
-  down
-  grid-ref
-  grid-height
-  grid-width
-  show-grid
-  array-set!
-  build-array
-))
-(require (only-in "utils.rkt"
-  random-between
-  random-from
-  random
-  reset!
-))
+
 
 ;; =============================================================================
 ;(define-type Poss->Cells (Listof (Pairof Pos Cell%)))
