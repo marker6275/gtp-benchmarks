@@ -54,8 +54,7 @@
                           (fail
                            (lambda () (failure 'R)))));`(R ,(exn-message x)))))))
                        (exn:fail?
-                        raise
-                        #;(lambda ([x : Any])
+                        (lambda ([x : Any])
                           (fail
                            (lambda () (failure 'X)))))) ;`(X ,(exn-message x))))))))
                       ((inst call-with-limits A) sec-limit mb-limit producer))])
