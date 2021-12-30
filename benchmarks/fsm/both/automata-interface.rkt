@@ -10,7 +10,7 @@
 (define-type Transition [Vectorof State])
 
 (require "benchmark-util.rkt")
-(require/typed/check "automata.rkt"
+(require/typed/check/provide "automata.rkt"
  [#:opaque Automaton automaton?]
  (automaton-payoff (-> Automaton Payoff))
  (defects (-> Payoff Automaton))
@@ -27,9 +27,8 @@
   (-> Automaton Automaton))
 )
 
-(provide
-defects cooperates tit-for-tat grim-trigger match-pair automaton-reset clone
-make-random-automaton
-automaton-payoff
-Automaton
-Probability Population Automaton* Payoff)
+(provide Automaton
+         Probability
+         Population
+         Automaton*
+         Payoff)

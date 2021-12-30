@@ -91,14 +91,14 @@
 ;; -----------------------------------------------------------------------------
 ;; from `player-factory.rkt`
 
-(define (players S n)
-  (for/list ((name '("a" "b" "c" "d" "e" "f")) (i (in-range n))) (create name S)))
+(define (players S n prefix)
+  (for/list ((name '("a" "b" "c" "d" "e" "f")) (i (in-range n))) (create (~a prefix '- name) S)))
 
 (define (random-players n)
-  (players random-s n))
+  (players random-s n "random"))
 
 (define (ordered-players n)
-  (players ordered-s n))
+  (players ordered-s n "ordered"))
 
 (define (inf-loop-player n)
   (define m 0)

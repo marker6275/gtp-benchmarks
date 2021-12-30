@@ -401,7 +401,7 @@
         [(_ _ _ _) (raise-user-error 'voidcase)])))))
 
 
-(define LOOPS 100)
+(define LOOPS 1)
 
 (define (main)
   (for ((_i (in-range LOOPS)))
