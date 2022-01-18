@@ -5,24 +5,29 @@
                      racket/base
                      (only-in racket/function
                               curryr)
-                     racket/path
-                     racket/runtime-path)
+                     racket/runtime-path
+                     racket/file)
          racket/contract
          (only-in racket/function curry)
-         (only-in racket/match match)
-         (for-syntax "current-precision-setting.rkt")
-         (only-in (submod flow-trace/collapsing compressed)
-                  define/ctc-helper
-                  define-syntax/ctc-helper
-                  define-syntax-rule/ctc-helper))
+         (only-in racket/match match))
 
 (provide configurable-ctc
-         (all-from-out (submod flow-trace/collapsing compressed)))
+         define/ctc-helper
+         define-syntax/ctc-helper)
 
 (begin-for-syntax
-  (define-runtime-path benchmarks-directory "../benchmarks/")
-  ; resolve the “..” component in the path, which define-runtime-path doesn’t do
-  (define simplified-benchmarks-directory (simplify-path benchmarks-directory)))
+  (define known-precision-configs '(none types max/sub1 max))
+  (define-runtime-path current-precision-config.rktd
+    "current-precision-config.rktd")
+  (define current-precision-config
+    (file->value current-precision-config.rktd))
+  (unless (member current-precision-config known-precision-configs)
+    (raise-user-error 'precision-config.rkt
+                      "Current precision config ~e is not one of the valid levels ~e"
+                      current-precision-config
+                      known-precision-configs)))
+
+;; Must be a member of known-precision-configs; modify to change all configurable-ctc precision levels
 
 ;; Usage:
 ;; (configurable-ctc [<unquoted-precision-config> contract?] ...)
@@ -39,32 +44,32 @@
     [(_ [level ctc] ...)
      (let* ([levels (syntax->datum #'(level ...))]
             [ctcs (flatten (syntax->list #'(ctc ...)))]
-            [current-module-path/absolute (path->string (syntax-source stx))]
-            [current-module-path/relative
-             (find-relative-path simplified-benchmarks-directory
-                                 current-module-path/absolute)]
-            [current-module-precision
-             (hash-ref current-precision-config
-                       (path->string current-module-path/relative)
-                       (λ _ (error 'configurable-ctc
-                                   "Current module has no configuration: ~v"
-                                   current-module-path/relative)))]
             [current-level-index (index-of levels
-                                           current-module-precision)]
+                                           current-precision-config)]
             [current-ctc-stx
              (cond [(number? current-level-index)
                     (list-ref ctcs current-level-index)]
                    ;; none wasn't really intended to be specified
-                   [(equal? current-module-precision 'none)
+                   [(equal? current-precision-config 'none)
                     #'any/c]
                    [else
                     (error 'configurable-ctc
                            "Contract fails to specify current module precision: ~a"
-                           current-module-precision)])])
+                           current-precision-config)])])
        (begin
-         (unless (andmap (curryr member precision-configs) levels)
+         (unless (andmap (curryr member known-precision-configs) levels)
            (error 'configurable-ctc
                   "Unknown precision config provided at ~a" stx))
          (with-syntax ([ctc-for-current-level current-ctc-stx])
            (syntax/loc current-ctc-stx
              ctc-for-current-level))))]))
+
+(define-syntax (define/ctc-helper stx)
+  (syntax-parse stx
+    [(_ e ...)
+     (syntax/loc stx (define e ...))]))
+(define-syntax (define-syntax/ctc-helper stx)
+  (syntax-parse stx
+    [(_ e ...)
+     (syntax/loc stx (define-syntax e ...))]))
+
