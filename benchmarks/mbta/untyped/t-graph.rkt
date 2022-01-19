@@ -27,40 +27,100 @@
  ;; read the specification of the T map from file and construct an object that can
  ;; -- convert a string to a (list of) station(s) 
  ;; -- find a path from one station to another
- read-t-graph)
+ read-t-graph
+ mbta+c%)
 
 ;; ===================================================================================================
-(require "../base/my-graph.rkt")
+(require "../base/my-graph.rkt"
+         "../../../ctcs/precision-config.rkt"
+         "../../../ctcs/common.rkt"
+         "data.rkt"
+         "helpers.rkt")
 
 ;; type Lines       = [Listof [List String Connections]]
 ;; type Connections = [Listof Connection]
 ;; type Connection  = [List Station Station]
 
-(define SOURCE-DIRECTORY "../base/~a.dat")
-(define COLORS '("blue" "orange" "green" "red"))
+(define/contract SOURCE-DIRECTORY
+  (configurable-ctc
+   [max (λ (res)
+          (string=? "../base/~a.dat" res))]
+   [max/sub1 (and/c string?
+                    (λ (s)
+                      (let ([split (string-split s ".")])
+                        (string=? "dat"
+                                  (list-ref split (- (length split) 1))))))]                                           
+   [types string?])
+  "../base/~a.dat")
+
+(define/contract COLORS
+  (configurable-ctc
+   [max (and/c (listof color?)
+               (λ (lst)
+                 (andmap (λ (color-file)
+                           (file-exists? (format SOURCE-DIRECTORY color-file)))
+                         lst)))]
+   [max/sub1 (listof color?)]
+   [types (listof string?)])
+   '("blue" "orange" "green" "red"))
 
 ;; ---------------------------------------------------------------------------------------------------
 ;; String -> [Maybe [Listof String]]
-(define (line-specification? line)
+(define/contract (line-specification? line)
+  (configurable-ctc
+   [max (->i ([s string?])
+             [result (s)
+                     (λ (res)
+                       (if res
+                           (and (andmap line? res)
+                                (andmap (λ (l) (substring? l s)) res))
+                           (not (substring? "--" s))))])]
+   [max/sub1 (->i ([s string?])
+                  [result (s)
+                          (λ (res)
+                            (if res
+                                (< (length res) (string-length s))
+                                (not (substring? "-- " s))))])]                      
+   [types (-> string? (or/c boolean? (listof string?)))])
   (define r (regexp-match #px"--* (.*)" line))
   (and r (string-split (second r))))
 
 #| ASSUMPTIONS about source files:
-
    A data file has the following format: 
    LineSpecification 
    [Station
     | 
     LineSpecification
     ]* 
-
    A LineSpecification consists of dashes followed by the name of lines, separated by blank spaces. 
-
    A Station is the string consisting of an entire line, minus surrounding blank spaces. 
 |#
 
 ;; ---------------------------------------------------------------------------------------------------
-(define (read-t-graph)
+(define/contract (read-t-graph)
+  (configurable-ctc
+   ;; not the strongest contract I can think of here
+   ;; maybe you could check if find-path returns all valid paths
+   [max (-> (object/c
+             (render (->m (set/c string?) string?))
+             (station? (->m string? boolean?))
+             (station (->m string? (λ (res)
+                                     (or (and (not (cons? res)) (station? res))
+                                         (and (> (length res) 1) (listof station?))))))
+             (find-path (->m station? station?
+                             (listof (listof (list/c station? (set/c line?))))))))]
+   [max/sub1 (-> (object/c
+                  (render (->m (set/c string?) string?))
+                  (station? (->m string? boolean?))
+                  (station (->m string? (or/c station? (listof station?))))
+                  (find-path (->m station? station?
+                                  (listof (listof (list/c station? (set/c line?))))))))]
+   [types (-> (object/c
+               (render (->m (set/c string?) string?))
+               (station? (->m string? boolean?))
+               (station (->m string? (or/c string? (listof string?))))
+               (find-path (->m string? string?
+                              (listof (listof (list/c string? (set/c string?))))))))])
   (define-values (all-lines bundles)
     (for/fold ((all-lines '()) (all-bundles '())) ((color COLORS))
       (define next (read-t-line-from-file color))
@@ -83,14 +143,54 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 ;; String[name of line ~ stem of filename] -> Lines
-(define (read-t-line-from-file line-file)
+(define/contract (read-t-line-from-file line-file)
+  (configurable-ctc
+   [max (->i ([lf (λ (lf) (color? lf))])
+             [result (lf)
+                     (λ (res)
+                       (andmap (λ (pair)
+                                 (and (line? (first pair))
+                                      (= (remainder (length (second pair)) 2) 0)
+                                      (check-station-pairs? (second pair))))
+                               res))])]
+   [max/sub1 (->i ([lf (λ (lf) (color? lf))])
+                  [result (lf)
+                          (λ (res)
+                            (andmap (λ (pair)
+                                      (and (line? (first pair))
+                                           (= (remainder (length (second pair)) 2) 0)))
+                                    res))])]                 
+   [types (-> string?
+              (listof (list/c string?
+                              (listof (list/c string? string?)))))])
   (define full-path (format SOURCE-DIRECTORY line-file))
   (for/list ([(name line) (in-hash (lines->hash (file->lines full-path)))])
     (list name (rest line))))
 
 ;; ---------------------------------------------------------------------------------------------------
 ;; [Listof String] -> [Hashof String [Cons String [Listof Connections]]]
-(define (lines->hash lines0)
+(define/contract (lines->hash lines0)
+  (configurable-ctc
+   [max (->i ([lines (listof string?)])
+             [result (lines)
+                     (λ (h)
+                       (and (andmap line? (hash-keys h))
+                            (andmap (cons/c string? (listof (list/c station? station?)))
+                                    (hash-values h))
+                            (= (remainder (length (rest (first (hash-values h)))) 2) 0)
+                            (check-station-pairs? (rest (first (hash-values h))))))])]
+   [max/sub1 (->i ([lines (listof string?)])
+                  [result (lines)
+                          (λ (h)
+                            (and (andmap line? (hash-keys h))
+                                 (andmap (cons/c string? (listof (list/c station? station?)))
+                                         (hash-values h))
+                                 (= (remainder (length (rest (first (hash-values h)))) 2) 0)))])]
+
+   [types (-> (listof string?)
+              (hash/c string?
+                      (cons/c string?
+                              (listof (list/c string? string?)))))])
   (define names0 (line-specification? (first lines0)))
   (define pred0  (second lines0))
   (define Hlines0 (make-immutable-hash (for/list ([name names0]) (cons name (cons pred0 '())))))
@@ -116,7 +216,6 @@
           (read-t-line (rest lines) names new-connections)])])))
 
 ;; ---------------------------------------------------------------------------------------------------
-
 (define mbta%
   (class object% 
     (init-field
@@ -172,3 +271,49 @@
              (define paths-from-from-to-to
                (map (lambda (p) (cons from p)) (search n visited*)))
              (append all-paths paths-from-from-to-to))])))))
+
+
+(define/contract mbta+c% 
+  (configurable-ctc
+   [max
+    (class/c
+     (render (->m (set/c string?) string?))
+     (station? (->m string? boolean?))
+     (station (->m string? (λ (res)
+                             (or (and (not (cons? res)) (station? res))
+                                 (and (> (length res) 1) (listof station?))))))
+     (find-path (->m station? station?
+                     (listof (listof (list/c station? (set/c line?))))))
+     (field [G graph?]
+            [stations (listof station?)]
+            [connection-on (-> station? station? (set/c line?))]
+            [bundles (and/c (listof (list/c color? (set/c line?)))
+                            (λ (res)
+                              (andmap (λ (lst)
+                                        (lines-in-color-file?
+                                         (set->list(second lst))
+                                         (file->lines (format SOURCE-DIRECTORY (first lst)))))
+                                      res)))]))]
+   [max/sub1
+    (class/c
+     (render (->m (set/c string?) string?))
+     (station? (->m string? boolean?))
+     (station (->m string? (or/c station? (listof station?))))
+     (find-path (->m station? station?
+                     (listof (listof (list/c station? (set/c line?))))))
+     (field [G graph?]
+            [stations (listof station?)]
+            [connection-on (-> station? station? (set/c line?))]
+            [bundles (listof (list/c color? (set/c line?)))]))]
+   [types
+    (class/c
+     (render (->m (set/c string?) string?))
+     (station? (->m string? boolean?))
+     (station (->m string? (or/c string? (listof string?))))
+     (find-path (->m string? string?
+                     (listof (listof (list/c string? (set/c string?))))))
+     (field [G graph?]
+            [stations (listof string?)]
+            [connection-on (-> string? string? (set/c string?))]
+            [bundles (listof (list/c string? (set/c string?)))]))])
+  mbta%)

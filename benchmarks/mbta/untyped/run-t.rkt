@@ -16,18 +16,122 @@
 
 ;; ===================================================================================================
 
-(require "t-view.rkt")
+(require "t-view.rkt"
+         "../../../ctcs/precision-config.rkt"
+         "../../../ctcs/common.rkt"
+         "helpers.rkt"
+         "t-graph.rkt")
 
-(define PATH    #rx"from (.*) to (.*)$")
-(define DISABLE #rx"disable (.*)$")
-(define ENABLE  #rx"enable (.*)$")
+(define/contract PATH
+  (configurable-ctc
+   [max (λ (re)
+          (equal? #rx"from (.*) to (.*)$" re))]
+   [types regexp?])
+  #rx"from (.*) to (.*)$")
 
-(define DONE    "done")
-(define EOM     "eom")
+(define/contract DISABLE
+  (configurable-ctc
+   [max (λ (re)
+          (equal? #rx"disable (.*)$" re))]
+   [types regexp?])
+  #rx"disable (.*)$")
 
-(define manage (new manage%))
+(define/contract ENABLE
+  (configurable-ctc
+   [max (λ (re)
+          (equal? #rx"enable (.*)$" re))]
+   [types regexp?])
+  #rx"enable (.*)$")
 
-(define (run-t next)
+(define/contract DONE
+  (configurable-ctc
+   [max "done"]
+   [types string?])
+  "done")
+
+(define/contract EOM
+  (configurable-ctc
+   [max "eom"]
+   [types string?])
+  "eom")
+
+(define/contract manage
+  (configurable-ctc
+   [max (instanceof/c manage-c/max-ctc)]
+   [max/sub1 (instanceof/c manage-c/max/sub1-ctc)]
+   [types (instanceof/c manage-c/types-ctc)])
+  (new manage%))
+
+(define/contract (run-t next)
+  (configurable-ctc
+   [max (let ([stash-len (box #f)])
+          (->i ([next string?])
+               #:pre ()
+               (set-box! stash-len (length (get-field disabled manage)))
+               [result (next)
+                       (λ (res)
+                         (cond
+                           [(regexp-match PATH next)
+                            => (lambda (x)
+                                 (let ([x2 (second x)]
+                                       [x3 (third x)])
+                                   (and (substring? x2 res)
+                                        (substring? x3 res))))]
+                           [(regexp-match DISABLE next)
+                            => (lambda (x)
+                                 (let* ([x2 (second x)]
+                                        [station (send t-graph station x2)])
+                                   (cond
+                                     [(string? station) "done"]
+                                     [(empty? station) (substring? x2 res)]
+                                     [else (substring? (string-join station) res)])))]
+                           [(regexp-match ENABLE next)
+                            => (lambda (x)
+                                 (let* ([x2 (second x)]
+                                        [station (send t-graph station x2)])
+                                   (cond
+                                     [(string? station) "done"]
+                                     [(empty? station) (substring? x2 res)]
+                                     [else (substring? (string-join station res))])))]
+                           [else "message not understood"]))]
+               #:post (next)
+               (cond
+                 [(regexp-match DISABLE next)
+                  (let ([x2 (second (regexp-match DISABLE next))])
+                    (> (length (get-field disabled manage))
+                        (unbox stash-len)))]
+                 [(regexp-match ENABLE next)
+                  (<= (length (get-field disabled manage))
+                     (unbox stash-len))]
+                 [else #t])))]                           
+   [max/sub1 (->i ([next string?])
+                  [result (next)
+                          (λ (res)
+                            (cond
+                              [(regexp-match PATH next)
+                               => (lambda (x)
+                                    (let ([x2 (second x)]
+                                          [x3 (third x)])
+                                      (and (substring? x2 res)
+                                           (substring? x3 res))))]
+                              [(regexp-match DISABLE next)
+                               => (lambda (x)
+                                    (let* ([x2 (second x)]
+                                           [station (send t-graph station x2)])
+                                      (cond
+                                        [(string? station) "done"]
+                                        [(empty? station) (substring? x2 res)]
+                                        [else (substring? (string-join station) res)])))]
+                              [(regexp-match ENABLE next)
+                               => (lambda (x)
+                                    (let* ([x2 (second x)]
+                                           [station (send t-graph station x2)])
+                                      (cond
+                                        [(string? station) "done"]
+                                        [(empty? station) (substring? x2 res)]
+                                        [else (substring? (string-join station res))])))]
+                              [else "message not understood"]))])]
+   [types (-> string? string?)])
     (cond
       [(regexp-match PATH next)
        => (lambda (x)
@@ -53,4 +157,3 @@
     (if (boolean? status)
         DONE
         status)))
-

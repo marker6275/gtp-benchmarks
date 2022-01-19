@@ -2,27 +2,91 @@
 
 ;; ===================================================================================================
 (require "run-t.rkt"
+         "data.rkt"
+         "helpers.rkt"
+         "../../../ctcs/precision-config.rkt"
+         "../../../ctcs/common.rkt"
          (only-in racket/string string-join))
 
-(define (dat->station-names fname)
+;; ===================================================================================================
+(define/contract (dat->station-names fname)
+  (configurable-ctc
+   [max (->i ([fname (and/c string? (λ (f) (file-exists? f)))])
+             [result (fname)
+                     (and/c (listof station?)
+                            (λ (lst)
+                              (sublist? lst (file->lines fname))))])]            
+   [max/sub1 (-> (and/c string? (λ (f) (file-exists? f)))
+                 (listof station?))]             
+   [types (-> string? (listof string?))])
   (for/list ([line (in-list (file->lines fname))]
              #:when (and (< 0 (string-length line))
                          (not (eq? #\- (string-ref line 0)))))
     (string-trim line)))
 
-(define BLUE-STATIONS (dat->station-names "../base/blue.dat"))
-(define GREEN-STATIONS (dat->station-names "../base/green.dat"))
+(define/contract BLUE-STATIONS
+  (configurable-ctc
+   [max (and/c (listof station?)
+               (λ (lst)
+                 (sublist? lst (file->lines "../base/blue.dat"))))]
+   [max/sub1 (listof station?)]
+   [types (listof string?)])
+  (dat->station-names "../base/blue.dat"))
+
+(define/contract GREEN-STATIONS
+  (configurable-ctc
+   [max (and/c (listof station?)
+               (λ (lst)
+                 (sublist? lst (file->lines "../base/green.dat"))))]
+   [max/sub1 (listof station?)]
+   [types (listof string?)])
+  (dat->station-names "../base/green.dat"))
 
 ;; String String -> String
-(define (path from to)
+(define/contract (path from to)
+  (configurable-ctc
+   [max (->i ([from string?]
+              [to string?])
+             [result (from to)
+                     (λ (res)
+                       (ordered-substrings? (list "from" from "to" to) res))])]
+   [max/sub1 (->i ([from string?]
+                   [to string?])
+                  [result (from to)
+                          (λ (res)
+                            (and (substring? from res)
+                                 (substring? to res)))])]
+   [types (-> string? string? string?)])
   (format "from ~a to ~a" from to))
 
 ;; String -> String
-(define (enable s)
+(define/contract (enable s)
+  (configurable-ctc
+   [max (->i ([s string?])
+             [result (s)
+                     (λ (res)
+                       (ordered-substrings? (list "enable" s) res))])]
+   [max/sub1 (->i ([s string?])
+                  [result (s)
+                          (λ (res)
+                            (substring? s res))])]
+   [types (-> string? string?)])
   (format "enable ~a" s))
 
-(define (disable s)
+(define/contract (disable s)
+  (configurable-ctc
+   [max (->i ([s string?])
+             [result (s)
+                     (λ (res)
+                       (ordered-substrings? (list "disable" s) res))])]
+   [max/sub1 (->i ([s string?])
+                  [result (s)
+                          (λ (res)
+                            (substring? s res))])]
+   [types (-> string? string?)])
   (format "disable ~a" s))
+
+;; ===================================================================================================
 
 (define (assert result expected-length)
   (define num-result (length (string-split result "\n")))
