@@ -1,4 +1,4 @@
-#lang flow-trace
+#lang racket
 
 (require racket/contract
          (only-in racket/list first empty? rest))

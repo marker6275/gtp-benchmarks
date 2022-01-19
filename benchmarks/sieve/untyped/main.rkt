@@ -1,4 +1,4 @@
-#lang flow-trace
+#lang racket
 
 (require #;racket/contract
          "../../../ctcs/precision-config-dummy.rkt"
