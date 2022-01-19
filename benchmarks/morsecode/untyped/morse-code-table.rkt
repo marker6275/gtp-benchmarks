@@ -2,10 +2,17 @@
 
 ;; Copyright 2014 John Clements, except the portion that comes from wikipedia!
 
-(provide char-table)
-(require racket/match)
+(provide char-table
+         morse-string?)
+(require racket/match
+         racket/contract
+         "../../../ctcs/precision-config.rkt"
+         "../../../ctcs/common.rkt"
+         racket/string
+         racket/set)
 
-(define wikipedia-text
+(define/contract wikipedia-text
+  string?
 #<<#
 | {{Audio-nohelp|A morse code.ogg|A}} || '''·&nbsp;–'''
 | {{Audio-nohelp|J morse code.ogg|J}} || '''·&nbsp;–&nbsp;–&nbsp;–'''
@@ -64,11 +71,51 @@
 #
 )
 
+(define/ctc-helper ((length=/c n) l)
+  (= (length l) n))
+
+(define/ctc-helper (lines-in str)
+  (length (string-split str "\n" #:trim? #f)))
+
 ;; the lines of the wikipedia text
-(define lines (regexp-split #px"\n" wikipedia-text))
+(define/contract lines
+  (configurable-ctc
+   [max (and/c (listof string?) (length=/c (lines-in wikipedia-text)))]
+   [types (listof string?)])
+  (regexp-split #px"\n" wikipedia-text))
+
+;; Does `target` contain any of `strs`?
+(define/ctc-helper ((string-contains/c . strs) target)
+  (ormap (λ (str) (string-contains? target str))
+         strs))
+
+;; Is `new-str` a subsequence of `orig-str`, possibly with chars of
+;; `orig-str` altered according to mapping `orig-char-swaps`?
+(define/ctc-helper ((subsequence-of/c orig-str #:swap orig-char-swaps) new-str)
+  (let loop ([orig-remaining (string->list orig-str)]
+             [new-remaining (string->list new-str)])
+    (match* {orig-remaining new-remaining}
+      [{_ '()} #t]
+      [{(cons orig orig-rest)
+        (cons new new-rest)}
+       (loop orig-rest
+             (if (or (equal? orig new)
+                     (equal? (hash-ref orig-char-swaps orig orig) new))
+                 new-rest
+                 new-remaining))]
+      [{'() (not '())} #f])))
 
 ;; replace some unicode chars with ascii ones in the wikipedia patterns
-(define (clean-pattern pat)
+(define/contract (clean-pattern pat)
+  (configurable-ctc
+   [max (->i ([pat string?])
+             [result (pat)
+                     (and/c string?
+                            (not/c (string-contains/c "·" "–" "&nbsp;"))
+                            (subsequence-of/c pat
+                                              #:swap (hash #\· #\.
+                                                           #\– #\-)))])]
+   [types (string? . -> . string?)])
   (regexp-replace*
    #px"·"
    (regexp-replace*
@@ -77,8 +124,25 @@
     "-")
    "."))
 
+(define/ctc-helper ((string-of/c chars) s)
+  (and (non-empty-string? s)
+       (subset? (string->list s) chars)))
+(define/ctc-helper morse-string? (string-of/c '(#\- #\.)))
+
+(define/ctc-helper all-chars
+  (string->list #;"abcdefghijklmnopqrstuvwxyz1234567890-=!@$&()_+,./?"
+                ;; word list only contains alpha characters
+                "abcdefghijklmnopqrstuvwvwxyz"))
+
+(define/ctc-helper ((hash-with-keys/c key-set) h)
+  (subset? key-set (hash-keys h)))
+
 ;; parse the wikipedia text into a table mapping characters to their morse code representations
-(define char-table
+(define/contract char-table
+  (configurable-ctc
+   [max (and/c (hash/c char? (and/c non-empty-string? morse-string?))
+               (hash-with-keys/c all-chars))]
+   [types (hash/c char? string?)])
 (make-hash
  (for/list
    ([l lines])

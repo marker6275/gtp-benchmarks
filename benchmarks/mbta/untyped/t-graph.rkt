@@ -28,14 +28,33 @@
  ;; -- convert a string to a (list of) station(s) 
  ;; -- find a path from one station to another
  read-t-graph
- mbta+c%)
+ mbta%)
 
 ;; ===================================================================================================
 (require "../base/my-graph.rkt"
          "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt"
          "data.rkt"
-         "helpers.rkt")
+         "helpers.rkt"
+         racket/contract)
+
+
+(define/contract unweighted-graph/directed*
+  ((listof (list/c any/c any/c)) . -> . any)
+  (primitivize unweighted-graph/directed))
+(define/contract attach-edge-property*
+  ([(primitivized-value/c graph?)]
+   [#:init any/c
+    #:for-each any/c]
+   . ->* .
+   any)
+  (primitivize attach-edge-property))
+(define/contract in-neighbors*
+  ((primitivized-value/c graph?) any/c . -> . any)
+  (primitivize in-neighbors))
+
+
+
 
 ;; type Lines       = [Listof [List String Connections]]
 ;; type Connections = [Listof Connection]
@@ -45,7 +64,7 @@
   (configurable-ctc
    [max (λ (res)
           (string=? "../base/~a.dat" res))]
-   [max/sub1 (and/c string?
+   #;[max/sub1 (and/c string?
                     (λ (s)
                       (let ([split (string-split s ".")])
                         (string=? "dat"
@@ -60,7 +79,7 @@
                  (andmap (λ (color-file)
                            (file-exists? (format SOURCE-DIRECTORY color-file)))
                          lst)))]
-   [max/sub1 (listof color?)]
+   #;[max/sub1 (listof color?)]
    [types (listof string?)])
    '("blue" "orange" "green" "red"))
 
@@ -75,7 +94,7 @@
                            (and (andmap line? res)
                                 (andmap (λ (l) (substring? l s)) res))
                            (not (substring? "--" s))))])]
-   [max/sub1 (->i ([s string?])
+   #;[max/sub1 (->i ([s string?])
                   [result (s)
                           (λ (res)
                             (if res
@@ -104,12 +123,10 @@
    [max (-> (object/c
              (render (->m (set/c string?) string?))
              (station? (->m string? boolean?))
-             (station (->m string? (λ (res)
-                                     (or (and (not (cons? res)) (station? res))
-                                         (and (> (length res) 1) (listof station?))))))
+             (station (->m string? (or/c station? (listof station?))))
              (find-path (->m station? station?
                              (listof (listof (list/c station? (set/c line?))))))))]
-   [max/sub1 (-> (object/c
+   #;[max/sub1 (-> (object/c
                   (render (->m (set/c string?) string?))
                   (station? (->m string? boolean?))
                   (station (->m string? (or/c station? (listof station?))))
@@ -129,8 +146,8 @@
   (define connections (apply append (map second all-lines)))
   (define stations (set-map (for/fold ((s* (set))) ((c connections)) (set-add s* (first c))) values))
   
-  (define graph (unweighted-graph/directed connections))
-  (define-values (connection-on _  connection-on-set!) (attach-edge-property graph #:init (set)))
+  (define graph (unweighted-graph/directed* connections))
+  (define-values (connection-on _  connection-on-set!) (attach-edge-property* graph #:init (set)))
   (for ((line (in-list all-lines)))
     (define name (first line))
     (define connections* (second line))
@@ -153,7 +170,7 @@
                                       (= (remainder (length (second pair)) 2) 0)
                                       (check-station-pairs? (second pair))))
                                res))])]
-   [max/sub1 (->i ([lf (λ (lf) (color? lf))])
+   #;[max/sub1 (->i ([lf (λ (lf) (color? lf))])
                   [result (lf)
                           (λ (res)
                             (andmap (λ (pair)
@@ -173,13 +190,14 @@
   (configurable-ctc
    [max (->i ([lines (listof string?)])
              [result (lines)
+                     ;; ll: checked 4x per unique line
                      (λ (h)
                        (and (andmap line? (hash-keys h))
                             (andmap (cons/c string? (listof (list/c station? station?)))
                                     (hash-values h))
                             (= (remainder (length (rest (first (hash-values h)))) 2) 0)
                             (check-station-pairs? (rest (first (hash-values h))))))])]
-   [max/sub1 (->i ([lines (listof string?)])
+   #;[max/sub1 (->i ([lines (listof string?)])
                   [result (lines)
                           (λ (h)
                             (and (andmap line? (hash-keys h))
@@ -216,7 +234,47 @@
           (read-t-line (rest lines) names new-connections)])])))
 
 ;; ---------------------------------------------------------------------------------------------------
-(define mbta%
+(define/contract mbta%
+  (configurable-ctc
+   [max
+    (class/c
+     (render (->m (set/c string?) string?))
+     (station? (->m string? boolean?))
+     (station (->m string? (or/c station? (listof station?))))
+     (find-path (->m station? station?
+                     (listof (listof (list/c station? (set/c line?))))))
+     (field [G graph?]
+            [stations (listof station?)]
+            [connection-on (-> station? station? (set/c line?))]
+            [bundles (and/c (listof (list/c color? (set/c line?)))
+                            (λ (res)
+                              (andmap (λ (lst)
+                                        (lines-in-color-file?
+                                         (set->list(second lst))
+                                         (file->lines (format SOURCE-DIRECTORY (first lst)))))
+                                      res)))]))]
+   #;[max/sub1
+    (class/c
+     (render (->m (set/c string?) string?))
+     (station? (->m string? boolean?))
+     (station (->m string? (or/c station? (listof station?))))
+     (find-path (->m station? station?
+                     (listof (listof (list/c station? (set/c line?))))))
+     (field [G graph?]
+            [stations (listof station?)]
+            [connection-on (-> station? station? (set/c line?))]
+            [bundles (listof (list/c color? (set/c line?)))]))]
+   [types
+    (class/c
+     (render (->m (set/c string?) string?))
+     (station? (->m string? boolean?))
+     (station (->m string? (or/c string? (listof string?))))
+     (find-path (->m string? string?
+                     (listof (listof (list/c string? (set/c string?))))))
+     (field [G graph?]
+            [stations (listof station?)]
+            [connection-on (-> string? string? (set/c string?))]
+            [bundles (listof (list/c string? (set/c string?)))]))])
   (class object% 
     (init-field
      ;; Graph 
@@ -267,53 +325,7 @@
           [(member from visited) (list)]
           [else
            (define visited* (cons from visited))
-           (for/fold ((all-paths '())) ([n (in-neighbors G from)])
+           (for/fold ((all-paths '())) ([n (in-neighbors* G from)])
              (define paths-from-from-to-to
                (map (lambda (p) (cons from p)) (search n visited*)))
              (append all-paths paths-from-from-to-to))])))))
-
-
-(define/contract mbta+c% 
-  (configurable-ctc
-   [max
-    (class/c
-     (render (->m (set/c string?) string?))
-     (station? (->m string? boolean?))
-     (station (->m string? (λ (res)
-                             (or (and (not (cons? res)) (station? res))
-                                 (and (> (length res) 1) (listof station?))))))
-     (find-path (->m station? station?
-                     (listof (listof (list/c station? (set/c line?))))))
-     (field [G graph?]
-            [stations (listof station?)]
-            [connection-on (-> station? station? (set/c line?))]
-            [bundles (and/c (listof (list/c color? (set/c line?)))
-                            (λ (res)
-                              (andmap (λ (lst)
-                                        (lines-in-color-file?
-                                         (set->list(second lst))
-                                         (file->lines (format SOURCE-DIRECTORY (first lst)))))
-                                      res)))]))]
-   [max/sub1
-    (class/c
-     (render (->m (set/c string?) string?))
-     (station? (->m string? boolean?))
-     (station (->m string? (or/c station? (listof station?))))
-     (find-path (->m station? station?
-                     (listof (listof (list/c station? (set/c line?))))))
-     (field [G graph?]
-            [stations (listof station?)]
-            [connection-on (-> station? station? (set/c line?))]
-            [bundles (listof (list/c color? (set/c line?)))]))]
-   [types
-    (class/c
-     (render (->m (set/c string?) string?))
-     (station? (->m string? boolean?))
-     (station (->m string? (or/c string? (listof string?))))
-     (find-path (->m string? string?
-                     (listof (listof (list/c string? (set/c string?))))))
-     (field [G graph?]
-            [stations (listof string?)]
-            [connection-on (-> string? string? (set/c string?))]
-            [bundles (listof (list/c string? (set/c string?)))]))])
-  mbta%)

@@ -16,7 +16,7 @@
                      (and/c (listof station?)
                             (λ (lst)
                               (sublist? lst (file->lines fname))))])]            
-   [max/sub1 (-> (and/c string? (λ (f) (file-exists? f)))
+   #;[max/sub1 (-> (and/c string? (λ (f) (file-exists? f)))
                  (listof station?))]             
    [types (-> string? (listof string?))])
   (for/list ([line (in-list (file->lines fname))]
@@ -29,18 +29,18 @@
    [max (and/c (listof station?)
                (λ (lst)
                  (sublist? lst (file->lines "../base/blue.dat"))))]
-   [max/sub1 (listof station?)]
+   #;[max/sub1 (listof station?)]
    [types (listof string?)])
   (dat->station-names "../base/blue.dat"))
 
-(define/contract GREEN-STATIONS
+(define/contract ORANGE-STATIONS
   (configurable-ctc
    [max (and/c (listof station?)
                (λ (lst)
-                 (sublist? lst (file->lines "../base/green.dat"))))]
-   [max/sub1 (listof station?)]
+                 (sublist? lst (file->lines "../base/orange.dat"))))]
+   #;[max/sub1 (listof station?)]
    [types (listof string?)])
-  (dat->station-names "../base/green.dat"))
+  (dat->station-names "../base/orange.dat"))
 
 ;; String String -> String
 (define/contract (path from to)
@@ -50,7 +50,7 @@
              [result (from to)
                      (λ (res)
                        (ordered-substrings? (list "from" from "to" to) res))])]
-   [max/sub1 (->i ([from string?]
+   #;[max/sub1 (->i ([from string?]
                    [to string?])
                   [result (from to)
                           (λ (res)
@@ -66,7 +66,7 @@
              [result (s)
                      (λ (res)
                        (ordered-substrings? (list "enable" s) res))])]
-   [max/sub1 (->i ([s string?])
+   #;[max/sub1 (->i ([s string?])
                   [result (s)
                           (λ (res)
                             (substring? s res))])]
@@ -79,7 +79,7 @@
              [result (s)
                      (λ (res)
                        (ordered-substrings? (list "disable" s) res))])]
-   [max/sub1 (->i ([s string?])
+   #;[max/sub1 (->i ([s string?])
                   [result (s)
                           (λ (res)
                             (substring? s res))])]
@@ -88,7 +88,8 @@
 
 ;; ===================================================================================================
 
-(define (assert result expected-length)
+(define/contract (assert result expected-length)
+  (string? natural? . -> . void?)
   (define num-result (length (string-split result "\n")))
   (unless (= num-result expected-length)
     (error (format "Expected ~a results, got ~a\nFull list:~a"
@@ -96,7 +97,8 @@
                    num-result
                    result))))
 
-(define (main)
+(define/contract (main)
+  any/c
   (define (run-query str)
     (define r (run-t str))
     (if r
@@ -112,7 +114,7 @@
   (assert (run-query (enable "Park Street")) 1)
   (assert (run-query (path "Northeastern" "Harvard Square")) 12)
   ;; --
-  (for* ([s1 (in-list GREEN-STATIONS)] [s2 (in-list BLUE-STATIONS)])
+  (for* ([s1 (in-list ORANGE-STATIONS)] [s2 (in-list BLUE-STATIONS)])
     (run-query (path s1 s2))))
 
 (time (main))

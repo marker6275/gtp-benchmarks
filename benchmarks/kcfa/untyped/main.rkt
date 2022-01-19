@@ -45,10 +45,10 @@
    [max (->i ([fun Exp-type/c])
              #:rest [args (listof Exp-type/c)]
              [result (fun args)
-                     (and Call-type/c
-                          (Call/c symbol?
-                                  (equal?/c fun)
-                                  (equal?/c args)))])]
+                     (and/c Call-type/c
+                            (Call/c symbol?
+                                    (equal?/c fun)
+                                    (equal?/c args)))])]
    [types (Exp-type/c Exp-type/c ... . -> . Call-type/c)])
   (Call (new-label) fun args))
 

@@ -5,7 +5,8 @@
          "data.rkt")
 
 (define/ctc-helper (substring? maybe-substr str)
-  (cond
+  (string-contains? str maybe-substr)
+  #;(cond
     [(< (string-length str) (string-length maybe-substr)) #f]
     [(string=? (substring str 0 (string-length maybe-substr)) maybe-substr)
      #t]
@@ -18,7 +19,8 @@
                (ordered-substrings? (rest lst) str))]))
 
 (define/ctc-helper (count-strs-in-lst lst)
-  (cond
+  (count string? lst)
+  #;(cond
     [(empty? lst) 0]
     [else (if (string? (first lst))
               (+ 1 (count-strs-in-lst (rest lst)))
@@ -26,7 +28,7 @@
 
 (define/ctc-helper (sublist? maybe-sublst lst)
   (cond
-    [(and (empty? maybe-sublst) (empty? lst) #t)]
+    #;[(and (empty? maybe-sublst) (empty? lst) #t)]
     [(empty? maybe-sublst) #t]
     [(empty? lst) #f]
     [else (define str (string-trim (first lst)))
@@ -60,7 +62,7 @@
 ;;-----------------------------------------------------------------------------
 (define/ctc-helper (lines-in-color-file? lines color-file)
   (cond
-    [(and (empty? lines) (empty? color-file)) #t]
+    #;[(and (empty? lines) (empty? color-file)) #t]
     [(empty? lines) #t]
     [(empty? color-file) #f]
     [else (if (substring? (first lines) (first color-file))

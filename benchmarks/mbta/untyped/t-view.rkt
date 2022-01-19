@@ -17,10 +17,15 @@
 (require "t-graph.rkt"
          "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt"
-         "helpers.rkt")
+         "helpers.rkt"
+         racket/contract)
 
-(define/ctc-helper t-graph
-  (read-t-graph))
+(define/ctc-helper t-graph-val (box #f))
+(define/ctc-helper (t-graph)
+  (cond [(unbox t-graph-val) => values]
+        [else
+         (set-box! t-graph-val (read-t-graph))
+         (unbox t-graph-val)]))
 
 ;; ===================================================================================================
 ;; [X -> Real] [Listof X] -> X
@@ -37,7 +42,7 @@
                                       (<= (count-strs-in-lst out-lst)
                                           (count-strs-in-lst l)))
                                     inp-lst)))])]
-   [max/sub1 (->i ([inp-lst (listof (listof any/c))])
+   #;[max/sub1 (->i ([inp-lst (listof (listof any/c))])
                   [result (inp-lst)
                           (λ (out-lst)
                             (and (list? out-lst)
@@ -122,7 +127,11 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 
-(define manage%
+(define/contract manage%
+  (configurable-ctc
+   [max manage-c/max-ctc]
+   #;[max/sub1 manage-c/max/sub1-ctc]
+   [types manage-c/types-ctc])
   (class object% 
     (super-new)
     
@@ -211,7 +220,7 @@
                     (list* (format SWITCH pred-string stop-string) stop remainder)]
                    [else (cons stop remainder)])]))))))
 
-(define find-method-ctc
+#;(define/ctc-helper find-method-ctc
   (->i ([this any/c]
         [from string?]
         [to string?])
@@ -228,61 +237,75 @@
                      [else (and (substring? from res)
                                 (substring? to res))])))]))
 
+(define/ctc-helper stash1 (box #f))
+(define/ctc-helper stash2 (box #f))
+(define/ctc-helper stash3 (box #f))
 (define/ctc-helper manage-c/max-ctc
   (class/c
    (add-to-disabled
-    (let ([stash-len (box #f)])
-      (->i ([this any/c]
-            [s string?])
-           #:pre (this)
-           (set-box! stash-len (length (get-field disabled this)))
-           [result (s)
-                   (let ([station (send t-graph station s)])
-                     (cond
-                       [(string? station) #f]
-                       [(empty? station) (λ (res) (substring? res s))]
-                       [else (λ (res) (substring? res (string-join station)))]))]
-           #:post (this s)
-           (let ([station (send t-graph station s)])
-             (and (> (length (get-field disabled this))
-                     (unbox stash-len))
-                  (when (string? station)
-                    (member station (get-field disabled this))))))))
+    (->i ([this any/c]
+          [s string?])
+         #:pre (this)
+         (set-box! stash1 (length (get-field disabled this)))
+         [result (s)
+                 (let ([station (send (t-graph) station s)])
+                   (cond
+                     [(string? station) #f]
+                     [(empty? station) (λ (res) (substring? res s))]
+                     [else (λ (res) (substring? res (string-join station)))]))]
+         #:post (this s)
+         (let ([station (send (t-graph) station s)]
+               [disabled (get-field disabled this)])
+           (and (list? disabled)
+                (> (length disabled)
+                   (unbox stash1))
+                (when (string? station)
+                  (member station (get-field disabled this)))))))
    (remove-from-disabled
-    (let ([stash-len (box #f)])
-      (->i ([this any/c]
-            [s string?])
-           #:pre (this)
-           (set-box! stash-len (length (get-field disabled this)))
-           [result (s)
-                   (let ([station (send t-graph station s)])
-                     (cond
-                       [(string? station) #f]
-                       [(empty? station) (λ (res) (substring? res s))]
-                       [else (λ (res) (substring? res (string-join station)))]))]
-           #:post (this s)
-           (let ([station (send t-graph station s)])
-             (and (<= (length (get-field disabled this))
-                      (unbox stash-len))
-                  (when (string? station)
-                    (not (member station (get-field disabled this)))))))))
+    (->i ([this any/c]
+          [s string?])
+         #:pre (this)
+         (set-box! stash2 (length (get-field disabled this)))
+         [result (s)
+                 (let ([station (send (t-graph) station s)])
+                   (cond
+                     [(string? station) #f]
+                     [(empty? station) (λ (res) (substring? res s))]
+                     [else (λ (res) (substring? res (string-join station)))]))]
+         #:post (this s)
+         (let ([station (send (t-graph) station s)]
+               [disabled (get-field disabled this)])
+           (and (list? disabled)
+                (<= (length disabled)
+                    (unbox stash2))
+                (when (string? station)
+                  (not (member station (get-field disabled this))))))))
    (find (->i ([this any/c]
                [from string?]
                [to string?])
               [result (from to)
                       (λ (res)
-                        (let ([from-station (send t-graph station from)]
-                              [to-station (send t-graph station to)])
-                          (cond
-                            [(string=? from to) (substring? to res)]
-                            [(cons? from-station) (substring? (string-join from-station) res)]
-                            [(cons? to-station) (substring? (string-join to-station) res)]
-                            [(empty? from-station) (substring? from res)]
-                            [(empty? to-station) (substring? to res)]
-                            [else (and (substring? from res)
-                                       (substring? to res))])))]))
-   (field [mbta-subways (is-a?/c mbta+c%)]
+                        (correct-find-result? from to res))]))
+   (field [mbta-subways (is-a?/c mbta%)]
           [disabled list?])))
+
+(define/ctc-helper find-result-memo (make-hash))
+(define/ctc-helper (correct-find-result? from to res)
+  (cond [(hash-ref find-result-memo (list from to res) #f) => values]
+        [else
+         (define r
+           (let ([from-station (send (t-graph) station from)]
+                 [to-station (send (t-graph) station to)])
+             (cond
+               [(string=? from to) (substring? to res)]
+               [(cons? from-station) (substring? (string-join from-station) res)]
+               [(cons? to-station) (substring? (string-join to-station) res)]
+               [(empty? from-station) (substring? from res)]
+               [(empty? to-station) (substring? to res)]
+               [else (and (substring? from res)
+                          (substring? to res))])))
+         (hash-set! find-result-memo (list from to res) r)
+         r]))
 
 (define/ctc-helper manage-c/max/sub1-ctc
   (class/c
@@ -290,7 +313,7 @@
     (->i ([this any/c]
           [s string?])
          [result (s)
-                 (let ([station (send t-graph station s)])
+                 (let ([station (send (t-graph) station s)])
                    (cond
                      [(string? station) #f]
                      [(empty? station) (λ (res) (substring? res s))]
@@ -298,52 +321,36 @@
          #:post (this)
          (not (empty? (get-field disabled this)))))
    (remove-from-disabled
-    (let ([stash-len (box #f)])
-      (->i ([this any/c]
-            [s string?])
-           #:pre (this)
-           (set-box! stash-len (length (get-field disabled this)))
-           [result (s)
-                   (let ([station (send t-graph station s)])
-                     (cond
-                       [(string? station) #f]
-                       [(empty? station) (λ (res) (substring? s res))]
-                       [else (λ (res) (substring? (string-join station) res))]))]
+    (->i ([this any/c]
+          [s string?])
+         #:pre (this)
+         (set-box! stash3 (length (get-field disabled this)))
+         [result (s)
+                 (let ([station (send (t-graph) station s)])
+                   (cond
+                     [(string? station) #f]
+                     [(empty? station) (λ (res) (substring? s res))]
+                     [else (λ (res) (substring? (string-join station) res))]))]
 
-           #:post (this)
-           (let ([disabled-len (length (get-field disabled this))])
-             (<= disabled-len (unbox stash-len))))))
+         #:post (this)
+         (let ([disabled (get-field disabled this)])
+           (and (list? disabled)
+                (<= (length disabled) (unbox stash3))))))
    (find
     (->i ([this any/c]
           [from string?]
           [to string?])
          [result (from to)
                  (λ (res)
-                   (let ([from-station (send t-graph station from)]
-                         [to-station (send t-graph station to)])
-                     (cond
-                       [(string=? from to) (substring? to res)]
-                       [(cons? from-station) (substring? (string-join from-station) res)]
-                       [(cons? to-station) (substring? (string-join to-station) res)]
-                       [(empty? from-station) (substring? from res)]
-                       [(empty? to-station) (substring? to res)]
-                       [else (and (substring? from res)
-                                  (substring? to res))])))]))))
+                   (correct-find-result? from to res))]))))
 
-(define manage-c/types-ctc
+(define/ctc-helper manage-c/types-ctc
   (class/c
      (add-to-disabled (->m string? (or/c string? #f)))
      (remove-from-disabled (->m string? (or/c string? #f)))
      (find (->m string? string? string?))
-     (field [mbta-subways (is-a?/c mbta+c%)]
+     (field [mbta-subways (is-a?/c mbta%)]
             [disabled list?])))
-
-(define/contract manage+c%
-  (configurable-ctc
-   [max manage-c/max-ctc]
-   [max/sub1 manage-c/max/sub1-ctc]
-   [types manage-c/types-ctc])
-   manage%)
 
 (provide manage-c/max-ctc
          manage-c/max/sub1-ctc
