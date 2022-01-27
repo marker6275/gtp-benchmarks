@@ -18,6 +18,7 @@
   (only-in "../../../ctcs/common.rkt"
            memberof/c
            permutationof/c)
+  "../../../ctcs/precision-config.rkt"
 )
 
 ;; =============================================================================

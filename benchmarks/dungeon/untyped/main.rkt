@@ -9,6 +9,7 @@
   racket/match
   racket/contract
   (only-in "../../../ctcs/common.rkt" or-#f/c)
+  "../../../ctcs/precision-config.rkt"
 )
 (require (only-in racket/set
   set-intersect
@@ -108,14 +109,14 @@
 (define/contract N exact-nonnegative-integer? 1)
 
 (define/contract wall-cache
-  #:mutable
+  ;; #:mutable
   (configurable-ctc
    [max (hash/c array-coord? boolean?)]
    [types hash?])
   (make-hash))
 
 (define/contract free-cache
-  #:mutable
+  ;; #:mutable
   (configurable-ctc
    [max (hash/c array-coord? boolean?)]
    [types hash?])

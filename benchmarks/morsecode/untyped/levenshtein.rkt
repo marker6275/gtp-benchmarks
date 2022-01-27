@@ -45,7 +45,8 @@
  racket/contract
  "../../../ctcs/precision-config.rkt"
  "../../../ctcs/common.rkt"
- racket/match)
+ racket/match
+ racket/math)
 
 (define/contract (%identity x)
   (-> any/c any/c)

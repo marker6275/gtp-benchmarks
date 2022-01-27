@@ -13,7 +13,8 @@
 
 (provide configurable-ctc
          define/ctc-helper
-         define-syntax/ctc-helper)
+         define-syntax/ctc-helper
+         define-syntax-rule/ctc-helper)
 
 (begin-for-syntax
   (define known-precision-configs '(none types max/sub1 max))
@@ -72,4 +73,8 @@
   (syntax-parse stx
     [(_ e ...)
      (syntax/loc stx (define-syntax e ...))]))
+(define-syntax (define-syntax-rule/ctc-helper stx)
+  (syntax-parse stx
+    [(_ e ...)
+     (syntax/loc stx (define-syntax-rule e ...))]))
 

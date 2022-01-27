@@ -23,6 +23,7 @@
  "../base/un-types.rkt"
  racket/contract
  (only-in "../../../ctcs/common.rkt" class/c*)
+ "../../../ctcs/precision-config.rkt"
  )
 (require (only-in racket/function
                   curry))

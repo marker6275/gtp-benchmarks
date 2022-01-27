@@ -41,17 +41,17 @@
 
 (define/contract unweighted-graph/directed*
   ((listof (list/c any/c any/c)) . -> . any)
-  (primitivize unweighted-graph/directed))
+  unweighted-graph/directed)
 (define/contract attach-edge-property*
-  ([(primitivized-value/c graph?)]
+  ([graph?]
    [#:init any/c
     #:for-each any/c]
    . ->* .
    any)
-  (primitivize attach-edge-property))
+  attach-edge-property)
 (define/contract in-neighbors*
-  ((primitivized-value/c graph?) any/c . -> . any)
-  (primitivize in-neighbors))
+  (graph? any/c . -> . any)
+  in-neighbors)
 
 
 

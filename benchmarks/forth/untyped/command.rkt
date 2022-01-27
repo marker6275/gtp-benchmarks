@@ -86,7 +86,8 @@
 ;;  the identifier is then applied to the top 2 numbers on the stack.
 (define/ctc-helper binop-command%/c
   (and/c command%/c
-         (class/dc
+         ;; original: depends on an extension of class/c
+         #;(class/dc
           (init-field [binop (number? number? . -> . number?)])
           (inherit-field [id symbol?]
                          [binop (number? number? . -> . number?)])
@@ -99,6 +100,21 @@
                                         (list (== id eq?))}
                                        (equal?/c
                                         (cons E (cons (binop v2 v1) S-rest)))]
+                                      [{_ _} #f])])]))
+         (class/c
+          (init-field [binop (number? number? . -> . number?)])
+          (inherit-field [id symbol?]
+                         [binop (number? number? . -> . number?)])
+          (field [id symbol?]
+                 [exec (->i ([E env?] [S stack?] [v any/c])
+                            [result (E S v)
+                                    (match* {S v}
+                                      [{(list-rest v1 v2 S-rest)
+                                        (list symbol?)}
+                                       (or/c #f ;; if the symbol above is not == id
+                                             (cons/c (equal?/c E)
+                                                     (cons/c number?
+                                                             (equal?/c S-rest))))]
                                       [{_ _} #f])])]))))
 
 (require (for-syntax syntax/parse))

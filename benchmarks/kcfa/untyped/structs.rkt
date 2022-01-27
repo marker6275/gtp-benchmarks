@@ -35,7 +35,6 @@
 (struct Stx
  (label ;: Symbol]))
   )
-  #:mutable
   #:transparent)
 (struct useless-exp Stx ()
   #:mutable
@@ -44,20 +43,17 @@
 (struct Ref useless-exp
  (var ;: Symbol]))
 )
-  #:mutable
   #:transparent)
 (struct Lam useless-exp
  (formals ;: (Listof Symbol)]
   call ;: (U exp Ref Lam Call)]))
 )
-  #:mutable
   #:transparent)
 
 (struct Call Stx
  (fun ;: (U exp Ref Lam Call)]
   args ;: (Listof (U exp Ref Lam Call))]))
 )
-  #:mutable
   #:transparent)
 
 
@@ -82,8 +78,8 @@
 (define/ctc-helper Exp-type/c
   (or/c #;exp-type/c
         Ref-type/c
-        (recursive-contract Lam-type/c #:impersonator)
-        (recursive-contract Call-type/c #:impersonator)))
+        (recursive-contract Lam-type/c #:flat)
+        (recursive-contract Call-type/c #:flat)))
 (define/ctc-helper Lam-type/c (struct/c Lam symbol?
                                         (listof Var?)
                                         Exp-type/c))

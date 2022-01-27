@@ -1,7 +1,7 @@
 #lang racket
 
 (require #;racket/contract
-         "../../../ctcs/precision-config-dummy.rkt"
+         "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt"
          "streams.rkt")
 

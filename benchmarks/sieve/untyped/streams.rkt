@@ -1,7 +1,7 @@
 #lang racket
 
 (require #;racket/contract
-         "../../../ctcs/precision-config-dummy.rkt"
+         "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt")
 
 
@@ -22,14 +22,14 @@
          simple-stream-first)
 
 ;; A simple-stream is a cons of a value and a thunk that computes the next value when applied
-(struct simple-stream (first rest) #:mutable #:transparent)
+(struct simple-stream (first rest) #:transparent)
 
 
 (define/ctc-helper (simple-stream/c first/c rest/c)
   (struct/c simple-stream first/c rest/c))
 
 (define/ctc-helper (simple-streamof el/c)
-  (letrec ([this-ctc (simple-stream/c el/c (-> (recursive-contract this-ctc)))])
+  (letrec ([this-ctc (simple-stream/c el/c (-> (recursive-contract this-ctc #:chaperone)))])
     this-ctc))
 
 ;; elem-contract? (elem -> elem-contract?) -> simple-stream-contract?

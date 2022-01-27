@@ -1,7 +1,8 @@
 #lang racket
 
 (require racket/contract
-         (only-in racket/list first empty? rest))
+         (only-in racket/list first empty? rest)
+         "../../../ctcs/precision-config.rkt")
 
 (provide
   enqueue-message!
@@ -12,7 +13,6 @@
 ;; list of strings (messages) which were produced since the previous
 ;; previous display, and need to be displayed now
 (define/contract message-queue
-  #:mutable
   (configurable-ctc
    [max (listof string?)]
    [types (listof string?)])

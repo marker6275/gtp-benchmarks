@@ -60,13 +60,15 @@
 (define/ctc-helper (Binding/c var/c time/c)
   (struct/c Binding var/c time/c))
 
-(define/ctc-helper Closure-type/c (Closure/c Lam-type/c BEnv?))
-(define/ctc-helper Binding-type/c (Binding/c Var? Time?))
-
 (define/ctc-helper Time? (listof symbol?))
+
+(define/ctc-helper Binding-type/c (Binding/c Var? Time?))
 (define/ctc-helper Addr? Binding-type/c)
 
+
 (define/ctc-helper BEnv? (hash/c Var? Addr? #:immutable #t))
+
+(define/ctc-helper Closure-type/c (Closure/c Lam-type/c BEnv?))
 
 
 ;; -- public
