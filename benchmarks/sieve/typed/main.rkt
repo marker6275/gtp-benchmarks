@@ -1,6 +1,6 @@
 #lang typed/racket/base
 
-(require "streams-interface.rkt")
+(require "type-interface.rkt")
 
 ;;--------------------------------------------------------------------------------------------------
 
