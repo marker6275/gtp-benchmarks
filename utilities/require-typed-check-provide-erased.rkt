@@ -21,12 +21,12 @@
                                                this-syntax))))
 
 (define-simple-macro (require/typed/check/provide mod-path clause:r/t/c-clause ...)
-  #:with req (syntax-local-introduce #'(require mod-path))
-  #:with prov (syntax-local-introduce #'(provide clause.provide-stx ...))
+  #:with req (datum->syntax this-syntax `(require ,#'mod-path) this-syntax)
+  #:with prov (datum->syntax this-syntax `(provide . ,(attribute clause.provide-stx)) this-syntax)
   (begin req prov))
 
 (define-simple-macro (require/typed/check mod-path clause:r/t/c-clause ...)
-  #:with req (syntax-local-introduce #'(require mod-path))
+  #:with req (datum->syntax this-syntax `(require ,#'mod-path) this-syntax)
   req)
 
 (define-simple-macro (reprovide mod-path ...)
