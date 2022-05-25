@@ -6,7 +6,7 @@
 
 (require
  (only-in typed/racket/class new send)
- "quad-interface.rkt"
+ "type-interface.rkt"
 )
 (require (only-in "quad-main.rkt"
   typeset))
