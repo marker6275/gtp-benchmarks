@@ -1,53 +1,6 @@
 #lang racket/base
 
-(require
-  require-typed-check
-  "gregor-structs.rkt"
-)
-
-(require (only-in "date.rkt"
-    date=? ;(-> Date Date Boolean)]
-    date ;(->* (Natural) (Month Natural) Date)]
-    date->iso8601 ;(-> Date String)]
-))
-(require (only-in "time.rkt"
-    time=? ;(-> Time Time Boolean)]
-    time->iso8601 ;(-> Time String)]
-    make-time ;(->* (Integer) (Integer Integer Integer) Time)]
-))
-(require (only-in "datetime.rkt"
-    datetime=? ;(-> DateTime DateTime Boolean)]
-    datetime<=? ;(-> DateTime DateTime Boolean)]
-    datetime ;(->* (Natural) (Month Natural Natural Natural Natural Natural) DateTime)]
-    datetime->time ;(-> DateTime Time)]
-    datetime->date ;(-> DateTime Date)]
-    datetime->iso8601 ;(-> DateTime String)]
-    datetime->posix ;(-> DateTime Exact-Rational)]
-))
-(require (only-in "moment.rkt"
-    current-timezone ;(Parameterof (U tz #f))
-    moment ;(->* (Natural) (Month Natural Natural Natural Natural Natural #:tz (U tz #f) #:resolve-offset (-> (U tzgap tzoverlap) DateTime (U String #f) (U #f Moment) Moment)) Moment)]
-    moment=? ;(-> Moment Moment Boolean)]
-    UTC ;String]
-    moment->iso8601/tzid ;(-> Moment String)]
-    posix->moment ;(-> Exact-Rational Moment)]
-))
-(require (only-in "clock.rkt"
-    current-clock ;(Parameterof (-> Exact-Rational))]
-    today/utc ;(-> Date)]
-    today ;(->* () (#:tz (U tz #f)) Date)]
-    current-time/utc ;(-> Time)]
-    current-time ;(-> Time)]
-    now/utc ;(-> DateTime)]
-    now ;(-> DateTime)]
-    now/moment/utc ;(-> Moment)]
-    now/moment ;(-> Moment)]
-))
-(require (only-in "difference.rkt"
-    datetime-months-between ;(-> DateTime DateTime Integer)]
-    datetime-days-between ;(-> DateTime DateTime Integer)]
-    datetime-nanoseconds-between ;(-> DateTime DateTime Integer)]
-))
+(require "type-interface.rkt")
 
 ;; =============================================================================
 
@@ -171,4 +124,4 @@
     (test-difference dates)))
 
 ;(time (main 10 #f)) ; 90ms
-(time (main 10 #t)) ; 240ms
+(time (main 1 #t)) ; 240ms
