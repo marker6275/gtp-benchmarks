@@ -9,7 +9,7 @@
   require-typed-check
   racket/list
   typed/racket/class
-  "acquire-interface.rkt"
+  "type-interface.rkt"
   )
 (require/typed/check "player.rkt"
  (random-players (-> Natural (Listof (Instance Player%))))
@@ -48,4 +48,4 @@
   (for ((i (in-range n)))
     (go (inf-loop-player 99))))
 
-(time (main 100))
+(time (main 1))

@@ -4,10 +4,6 @@
 
 (reprovide "../base/quad-types.rkt")
 
-(provide USQ)
-
-(define-type USQ (U String Quad))
-
 (require/typed/check/provide "quick-sample.rkt"
   (quick-sample (-> Quad))
 )

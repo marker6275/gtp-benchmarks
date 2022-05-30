@@ -13,7 +13,7 @@
 
 (require
  "../base/untyped.rkt"
- "acquire-interface.rkt"
+ "type-interface.rkt"
  )
 
 (define nat-SHARES-PER-TURN# (assert SHARES-PER-TURN# exact-nonnegative-integer?))

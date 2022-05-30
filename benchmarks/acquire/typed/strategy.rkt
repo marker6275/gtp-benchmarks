@@ -14,7 +14,7 @@
 (require
  require-typed-check
  "../base/types.rkt"
- "acquire-interface.rkt"
+ "type-interface.rkt"
  )
 
 

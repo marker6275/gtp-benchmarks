@@ -15,7 +15,7 @@
 (require
  require-typed-check
  "../base/types.rkt"
- "acquire-interface.rkt"
+ "type-interface.rkt"
 )
 (require/typed/check "strategy.rkt"
   (ordered-s Strategy)

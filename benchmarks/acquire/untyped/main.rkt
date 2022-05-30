@@ -8,7 +8,7 @@
 (require
   racket/list
   racket/class
-  "acquire-interface.rkt"
+  "type-interface.rkt"
 )
 (require (only-in "player.rkt"
  random-players
@@ -41,4 +41,4 @@
   (for ((i (in-range n)))
     (go (inf-loop-player 99))))
 
-(time (main 100))
+(time (main 1))

@@ -5,7 +5,7 @@
 (require
  require-typed-check
  (only-in typed/racket/class new send)
- "quad-interface.rkt")
+ "type-interface.rkt")
 
 (require/typed/check "quad-main.rkt"
   (typeset (-> Quad Quad))

@@ -13,7 +13,7 @@
   (only-in racket/list append* split-at drop-right)
   (only-in racket/sequence sequence->list)
   (only-in math/flonum fl+ fl fl>)
-  "quad-interface.rkt")
+  "type-interface.rkt")
 
 ;; bg: should maybe import this
 (require (only-in "../base/csp/csp.rkt"

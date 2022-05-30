@@ -14,7 +14,7 @@
 
 (require
  "../base/untyped.rkt"
- "acquire-interface.rkt"
+ "type-interface.rkt"
 )
 
 (require (only-in "strategy.rkt"
