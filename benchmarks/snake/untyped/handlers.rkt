@@ -1,9 +1,7 @@
 #lang racket
 ;; Movie handlers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  
-(require "data.rkt"
-         "motion.rkt"
-         "collide.rkt")
+(require "type-interface.rkt")
 
 ;; handle-key : World String -> World
 (define (handle-key w ke)

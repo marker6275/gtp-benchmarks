@@ -2,12 +2,7 @@
 ;; Movie handlers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (require require-typed-check
-         "data-adaptor.rkt")
-(require/typed/check "collide.rkt"
-                     [snake-wall-collide? (Snake . -> . Boolean)]
-                     [snake-self-collide? (Snake . -> . Boolean)])
-(require/typed/check "motion.rkt"
-                     [world-change-dir (World Dir . -> . World)])
+         "type-interface.rkt")
 
 (: handle-key : (World String . -> . World) )
 (define (handle-key w ke)

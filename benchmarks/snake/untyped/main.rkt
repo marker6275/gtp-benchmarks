@@ -1,9 +1,7 @@
 #lang racket
 
-(require "data.rkt"
-         "const.rkt"
-         "handlers.rkt"
-         "motion.rkt")
+(require "type-interface.rkt"
+         "handlers.rkt")
 
 (define (replay w0 hist)
   (reset!)
@@ -24,7 +22,7 @@
   (void))
 
 (define DATA (with-input-from-file "../base/snake-hist.rktd" read))
-(define LOOPS 200)
+(define LOOPS 1)
 
 (define (main hist)
   (define w0 (WORLD))

@@ -1,12 +1,7 @@
 #lang typed/racket
 
 (require require-typed-check
-         "data-adaptor.rkt")
-(require/typed/check "const.rkt"
-                     [WORLD (-> World)])
-(require/typed/check "motion.rkt"
-                     [reset!           (-> Void)]
-                     [world->world     (World . -> . World)])
+         "type-interface.rkt")
 (require/typed/check "handlers.rkt"
                      [handle-key (World String . -> . World)]
                      [game-over? (World . -> . Boolean)])
@@ -32,7 +27,7 @@
   (void))
 
 (define DATA (with-input-from-file "../base/snake-hist.rktd" read))
-(define LOOPS 200)
+(define LOOPS 1)
 
 (: main (-> Any Void))
 (define (main hist)
