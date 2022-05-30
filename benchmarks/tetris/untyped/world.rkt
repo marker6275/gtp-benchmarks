@@ -1,11 +1,6 @@
 #lang racket
 
-(require "data.rkt"
-         "bset.rkt"
-         "tetras.rkt"
-         "aux.rkt"
-         "elim.rkt"
-         "consts.rkt")
+(require "type-interface.rkt")
 
 (provide world-key-move
          next-world

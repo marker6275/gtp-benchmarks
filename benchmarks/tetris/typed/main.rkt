@@ -1,12 +1,7 @@
 #lang typed/racket
 
-(require "base-types.rkt")
+(require "type-interface.rkt")
 (require require-typed-check)
-(require/typed/check "aux.rkt"
-  [list-pick-random (-> (Listof Tetra) Tetra)]
-  [tetras (Listof Tetra)])
-(require/typed/check "bset.rkt"
-   [blocks-overflow? (-> BSet Boolean)])
 (require/typed/check "world.rkt"
   [world-key-move (-> World String World)]
   [next-world (-> World World)])
@@ -31,7 +26,7 @@
   (void))
 
 (define DATA (with-input-from-file "../base/tetris-hist.rktd" read))
-(define LOOPS 2)
+(define LOOPS 1)
 
 (: main (-> Any Void))
 (define (main raw)

@@ -1,6 +1,7 @@
 #lang racket
 
-(require "aux.rkt" "world.rkt" "bset.rkt" "data.rkt")
+(require "type-interface.rkt"
+          "world.rkt")
 
 (define (world0)
   (world (list-pick-random tetras) empty))
@@ -19,7 +20,7 @@
   (void))
 
 (define DATA (with-input-from-file "../base/tetris-hist.rktd" read))
-(define LOOPS 2)
+(define LOOPS 1)
 
 (define (main raw)
   (define w0 (world0))
