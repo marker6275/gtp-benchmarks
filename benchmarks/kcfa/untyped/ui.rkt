@@ -2,17 +2,10 @@
 
 ;; User Interface to `ai.rkt`
 
-(require
-  require-typed-check
-  racket/set
-  "structs.rkt"
-  "benv.rkt"
-  "denotable.rkt"
-  "time.rkt"
-  (only-in racket/string string-join)
-)
-
-(require "ai.rkt")
+(require "type-interface.rkt"
+         racket/set
+         (only-in racket/string string-join)
+         )
 ;(require/typed/check "ai.rkt"
 ;  (atom-eval (-> BEnv Store (-> Exp Denotable)))
 ;  (next (-> State (Setof State)))

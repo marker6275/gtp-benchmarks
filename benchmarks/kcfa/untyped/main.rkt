@@ -2,10 +2,8 @@
 
 ;; Create a few examples and run abstract interpretation
 
-(require
-  "structs.rkt"
-  "ui.rkt"
-)
+(require "type-interface.rkt"
+         "ui.rkt")
 
 ;; =============================================================================
 
@@ -48,4 +46,4 @@
   (for ([a-k (in-range N)])
     (analyze e)))
 
-(time (main 2 mid-test))
+(time (main 1 mid-test))

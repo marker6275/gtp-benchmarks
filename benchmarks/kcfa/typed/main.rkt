@@ -2,10 +2,8 @@
 
 ;; Create a few examples and run abstract interpretation
 
-(require
-  require-typed-check
-  "structs-adapted.rkt"
-)
+(require require-typed-check
+         "type-interface.rkt")
 (require/typed/check "ui.rkt"
   [analyze (-> Exp MonoStore)]
   [format-mono-store (-> MonoStore String)])
@@ -54,4 +52,4 @@
   (for ([a-k (in-range N)])
     (analyze e)))
 
-(time (main 2 mid-test))
+(time (main 1 mid-test))
