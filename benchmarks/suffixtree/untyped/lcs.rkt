@@ -3,7 +3,7 @@
 
 (require
  "../base/untyped.rkt"
- "suffixtree-interface.rkt")
+ "type-interface.rkt")
 
 (define false-thunk (lambda () #f))
 

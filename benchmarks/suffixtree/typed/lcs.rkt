@@ -2,7 +2,7 @@
 ;; Some utilities.
 
 (require require-typed-check
-         "suffixtree-interface.rkt"
+         "type-interface.rkt"
          racket/list)
 
 (: false-thunk (-> #f))
