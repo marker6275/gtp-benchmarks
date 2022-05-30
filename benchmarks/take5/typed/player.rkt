@@ -8,7 +8,7 @@
  create-player)
 
 (require
-  "take5-interface.rkt"
+  "type-interface.rkt"
   typed/racket/class)
 
 ;; ---------------------------------------------------------------------------------------------------

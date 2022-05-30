@@ -9,7 +9,7 @@
   require-typed-check
   racket/class
   "../base/untyped.rkt"
-  "take5-interface.rkt"
+  "type-interface.rkt"
 )
 
 (require (only-in "player.rkt"
@@ -31,7 +31,7 @@
   (send dealer play-game))
 
 (define PLAYERS 10)
-(define LOOPS 1000)
+(define LOOPS 1)
 
 (module+ test
   (unless (equal? (main PLAYERS)
