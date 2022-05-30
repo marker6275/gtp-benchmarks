@@ -6,14 +6,14 @@
   seconds->samples
   emit)
 
-(require (only-in "array-interface.rkt"
+(require (only-in "type-interface.rkt"
            array?
            array-shape
            unsafe-array-proc
            array-size
            array-strictness)
          (only-in racket/unsafe/ops unsafe-fx+ unsafe-fx<)
-         (only-in "array-interface.rkt" next-indexes!)
+         (only-in "type-interface.rkt" next-indexes!)
          (only-in racket/math exact-floor)
          "../base/untyped.rkt")
 

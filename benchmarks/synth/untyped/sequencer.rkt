@@ -1,7 +1,7 @@
 #lang racket/base
 
-(require (only-in "array-interface.rkt" build-array)
-         (only-in "array-interface.rkt" array-append*)
+(require (only-in "type-interface.rkt" build-array)
+         (only-in "type-interface.rkt" array-append*)
          (only-in "synth.rkt" fs)
          (only-in "mixer.rkt" mix))
 

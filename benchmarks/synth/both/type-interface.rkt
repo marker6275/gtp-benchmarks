@@ -2,21 +2,7 @@
 
 (require "../../../utilities/require-typed-check-provide.rkt")
 
-(define-type Indexes (Vectorof Integer))
-(define-type In-Indexes Indexes)
-
-(require "typed-data.rkt")
-(provide (all-from-out "typed-data.rkt"))
-#;(require/typed/check/provide
- "data.rkt"
- [#:struct Array ([shape : Indexes]
-                  [size : Integer]
-                  [strict? : (Boxof Boolean)]
-                  [strict! : (-> Void)]
-                  [unsafe-proc : (-> Indexes Float)])]
- [#:struct (Settable-Array Array) ([set-proc : (Indexes Float -> Void)])]
- [#:struct (Mutable-Array Settable-Array) ([data : (Vectorof Float)])])
-
+(reprovide "typed-data.rkt")
 
 (require/typed/check/provide
  "array-broadcast.rkt"

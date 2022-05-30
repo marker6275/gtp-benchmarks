@@ -3,20 +3,17 @@
 (require require-typed-check
          "typed-data.rkt"
          (for-syntax racket/base)
-         (only-in racket/list first second rest))
+         (only-in racket/list first second rest)
+         (only-in "type-interface.rkt"
+                  array?
+                  array-shape
+                  array-default-strict!
+                  unsafe-array-proc
+                  unsafe-build-array
+                  array-broadcast
+                  array-shape-broadcast
+                  array-broadcasting))
 
-(require/typed/check "array-interface.rkt"
-  [array? (-> Array Boolean)]
-  [array-shape (-> Array Indexes)]
-  [array-default-strict! (-> Array Void)]
-  [unsafe-array-proc (-> Array (-> Indexes Float))]
-  [unsafe-build-array (-> Indexes (-> Indexes Float) Array)])
-
-(require/typed/check "array-interface.rkt"
-  [array-broadcast (-> Array Indexes Array)]
-  [array-shape-broadcast (case-> ((Listof Indexes) -> Indexes)
-                                 ((Listof Indexes) (U #f #t 'permissive) -> Indexes))]
-  [array-broadcasting (Parameterof (U #f #t 'permissive))])
 
 (provide mix)
 

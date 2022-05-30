@@ -6,21 +6,17 @@
   seconds->samples
   emit)
 
-(require require-typed-check
-         "typed-data.rkt"
+(require "typed-data.rkt"
          (only-in racket/unsafe/ops unsafe-fx+ unsafe-fx<)
-         (only-in racket/math exact-floor))
-
-(require/typed/check "array-interface.rkt"
-  [next-indexes! (-> Indexes Integer Indexes Void)])
-
-(require/typed/check "array-interface.rkt"
-  [array? (-> Array Boolean)] ;; Cannot be "Any". Get error about passing higher-order value
-  [array-shape (-> Array Indexes)]
-  [unsafe-array-proc (-> Array (-> Indexes Float))]
-  [array-size (-> Array Integer)]
-  [array-strictness (Parameterof (U #f #t))])
-
+         (only-in racket/math exact-floor)
+         (only-in "type-interface.rkt"
+                  next-indexes!
+                  array-strictness
+                  array-size
+                  unsafe-array-proc
+                  array-shape
+                  array?
+                  ))
 ;; --- from array-sequence.rkt
 
 (require (for-syntax racket/base syntax/parse))

@@ -1,13 +1,10 @@
 #lang typed/racket/base
 
 (require require-typed-check
-         "typed-data.rkt")
-
-(require/typed/check "array-interface.rkt"
-  [build-array (-> Indexes (-> Indexes Flonum) Array)])
-
-(require/typed/check "array-interface.rkt"
-  [array-append* ((Listof Array) -> Array)])
+         "typed-data.rkt"
+         (only-in "type-interface.rkt"
+                  build-array
+                  array-append*))
 
 (require/typed/check "synth.rkt"
   [fs Natural])

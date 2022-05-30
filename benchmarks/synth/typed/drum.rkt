@@ -1,20 +1,15 @@
 #lang typed/racket/base
 
 (require require-typed-check
-         "typed-data.rkt")
-
-(require/typed/check "array-interface.rkt"
-  [array-size (-> Array Integer)]
-  [make-array (-> In-Indexes Flonum Array)]
-  [build-array (-> In-Indexes (-> Indexes Float) Array)]
-  [unsafe-vector->array (-> Indexes (Vectorof Float) Mutable-Array)])
-
-(require/typed/check "array-interface.rkt"
-  [array-shape-size (-> Indexes Integer)]
-  [check-array-shape (-> In-Indexes (-> Nothing) Indexes)])
-
-(require/typed/check "array-interface.rkt"
-  [array-append* ((Listof Array) -> Array)])
+         "typed-data.rkt"
+         (only-in "type-interface.rkt"
+                  array-size
+                  make-array
+                  build-array
+                  unsafe-vector->array
+                  array-shape-size
+                  check-array-shape
+                  array-append*))
 
 (require/typed/check "synth.rkt"
   [fs Natural]
