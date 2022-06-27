@@ -30,7 +30,7 @@
 (define (longest-common-sublabel label-1 label-2)
   (define label-1-marks (make-hasheq))
   (define label-2-marks (make-hasheq))
-  (define deepest-node (node (make-label "no lcs") #f '() #f))
+  (define deepest-node (make-node (make-label "no lcs") #f '() #f))
   (define deepest-depth 0)
   (define (main)
     (define tree (make-tree))

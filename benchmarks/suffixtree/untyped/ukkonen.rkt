@@ -9,7 +9,7 @@
   (except-in "data.rkt" make-label)
   "label.rkt")
 
-(define dummy-node (node (make-label "dummy") #f '() #f))
+(define dummy-node (make-node (make-label "dummy") #f '() #f))
 
 
 (provide skip-count)

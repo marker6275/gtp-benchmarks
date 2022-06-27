@@ -136,7 +136,7 @@
 
 (require/typed/check/provide
  "auxiliaries.rkt"
- [randomly-pick (-> (Listof Tile) Tile)])
+ [randomly-pick (All (A) (-> (Listof A) A))])
 
 (require/typed/check/provide
  "basics.rkt"
