@@ -61,9 +61,3 @@
  [suffix-tree-add! (-> Tree Label Void)]
  [tree-add! (-> Tree Label Void)])
 
-(define-type Label label)
-(define-type Tree suffix-tree)
-(define-type Node node)
-
-(provide Label Tree Node)
-
