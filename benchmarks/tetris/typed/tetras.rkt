@@ -1,6 +1,6 @@
 #lang typed/racket
 
-(require "base-types.rkt")
+(require "data-adapter.rkt")
 (require require-typed-check)
 (require/typed/check "bset.rkt"
    [blocks-intersect (-> BSet BSet BSet)]

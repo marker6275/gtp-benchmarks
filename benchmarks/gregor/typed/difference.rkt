@@ -14,7 +14,7 @@
   require-typed-check
   racket/match
   "core-adapter.rkt"
-  "gregor-adapter.rkt"
+  "gregor-structs-adapter.rkt"
   (only-in racket/math exact-floor))
 (require/typed/check
   "ymd.rkt"

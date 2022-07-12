@@ -14,7 +14,7 @@
 (require
   require-typed-check
   racket/match
-  "gregor-adapter.rkt"
+  "gregor-structs-adapter.rkt"
   (only-in racket/format ~r)
 )
 (require/typed/check "datetime.rkt"

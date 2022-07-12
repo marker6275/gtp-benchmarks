@@ -6,7 +6,7 @@
 (require
   require-typed-check
   "core-adapter.rkt"
-  "gregor-adapter.rkt"
+  "gregor-structs-adapter.rkt"
   racket/match
   (only-in racket/math exact-round exact-floor))
 

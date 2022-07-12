@@ -2,8 +2,7 @@
 
 (require "../../../utilities/require-typed-check-provide.rkt")
 
-(require (except-in "typed-data.rkt" make-label))
-(provide (all-from-out "typed-data.rkt"))
+(reprovide (except-in "typed-data.rkt" make-label))
 
 (require/typed/check/provide
  "label.rkt"

@@ -6,7 +6,7 @@
   require-typed-check
   "tzinfo-adapter.rkt"
   "core-adapter.rkt"
-  "gregor-adapter.rkt"
+  "gregor-structs-adapter.rkt"
   racket/match)
 (require/typed/check "hmsn.rkt"
     [NS/SECOND Natural]

@@ -5,7 +5,8 @@
          reprovide)
 
 (require syntax/parse/define
-         (for-syntax syntax/parse))
+         (for-syntax syntax/parse)
+         (only-in "require-typed-check-provide.rkt" reprovide))
 
 (begin-for-syntax
   (define-syntax-class r/t/c-clause
@@ -32,6 +33,3 @@
   #:with req (datum->syntax this-syntax `(require ,#'mod-path) this-syntax)
   req)
 
-(define-simple-macro (reprovide mod-path ...)
-  (begin (require mod-path ...)
-         (provide (all-from-out mod-path) ...)))

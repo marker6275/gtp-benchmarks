@@ -22,7 +22,7 @@
   require-typed-check
   "../base/types.rkt"
   "tzinfo-adapter.rkt"
-  "gregor-adapter.rkt"
+  "gregor-structs-adapter.rkt"
 )
 (require/typed/check "moment.rkt"
     [current-timezone (Parameterof (U tz #f))]

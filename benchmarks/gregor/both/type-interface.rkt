@@ -3,7 +3,7 @@
 (require "../../../utilities/require-typed-check-provide.rkt")
 
 (reprovide "../base/types.rkt"
-           "gregor-adapter.rkt"
+           "gregor-structs-adapter.rkt"
            "tzinfo-adapter.rkt"
 )
 (require/typed/check/provide "date.rkt"

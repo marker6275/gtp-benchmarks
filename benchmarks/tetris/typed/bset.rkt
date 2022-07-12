@@ -1,6 +1,6 @@
 #lang typed/racket
 
-(require "base-types.rkt")
+(require "data-adapter.rkt")
 (require require-typed-check)
 (require/typed/check "block.rkt"
   [block-rotate-ccw (-> Posn Block Block)]

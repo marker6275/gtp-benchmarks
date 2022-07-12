@@ -2,7 +2,7 @@
 
 (require "../../../utilities/require-typed-check-provide.rkt")
 
-(reprovide "base-types.rkt")
+(reprovide "data-adapter.rkt")
 
 (require/typed/check/provide "bset.rkt"
    [blocks-overflow? (-> BSet Boolean)]

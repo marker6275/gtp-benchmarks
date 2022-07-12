@@ -7,7 +7,7 @@
 (require
   require-typed-check
   "../base/types.rkt"
-  "gregor-adapter.rkt"
+  "gregor-structs-adapter.rkt"
   racket/match
   (only-in racket/math exact-round)
   "tzinfo-adapter.rkt"

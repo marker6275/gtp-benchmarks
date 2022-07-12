@@ -25,7 +25,7 @@
   (only-in racket/math exact-round)
   (only-in racket/format ~r)
   "core-adapter.rkt"
-  "gregor-adapter.rkt"
+  "gregor-structs-adapter.rkt"
   racket/match)
 
 (require/typed/check
