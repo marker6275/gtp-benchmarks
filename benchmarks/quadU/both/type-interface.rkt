@@ -2,7 +2,7 @@
 
 (require "../../../utilities/require-typed-check-provide.rkt")
 
-(reprovide "../base/quad-types.rkt")
+(reprovide "../base/core-adapter.rkt")
 
 (require/typed/check/provide "quick-sample.rkt"
   (quick-sample (-> Quad))
