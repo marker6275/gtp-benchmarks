@@ -3,13 +3,17 @@
 (require #;racket/contract
          "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt"
+         "../../../ctcs/configurable.rkt"
          "streams.rkt")
 
 ;;--------------------------------------------------------------------------------------------------
 
+;; ll: All these configurable-ctc forms are commented out (unnecessary atm) because
+;; main provides nothing!
+
 ;; `count-from n` Build a stream of integers starting from `n` and iteratively adding 1
-(define/contract (count-from n)
-  (configurable-ctc
+(define (count-from n)
+  #;(configurable-ctc
    [max (->i ([n number?])
              [result (n)
                      (simple-stream/dc* (and/c number? (=/c n))
@@ -23,8 +27,8 @@
 
 ;; `sift n st` Filter all elements in `st` that are equal to `n`.
 ;; Return a new simple-stream.
-(define/contract (sift n st)
-  (configurable-ctc
+(define (sift n st)
+  #;(configurable-ctc
    [max (->i ([n integer?]
               [st (simple-streamof number?)])
              [result (n)
@@ -44,8 +48,8 @@
                              (-> (sieved-simple-stream-following/c first))))))
 
 ;; `sieve st` Sieve of Eratosthenes
-(define/contract (sieve st)
-  (configurable-ctc
+(define (sieve st)
+  #;(configurable-ctc
    [max (->i ([st (simple-streamof integer?)])
              [result (st)
                      (let ([first (simple-stream-first st)])
@@ -56,20 +60,20 @@
   (make-simple-stream hd (lambda () (sieve (sift hd tl)))))
 
 ;; simple-stream of prime numbers
-(define/contract primes
-  (configurable-ctc
+(define primes
+  #;(configurable-ctc
    [max (simple-streamof (and/c integer? prime?))]
    [types (simple-streamof integer?)])
   (sieve (count-from 2)))
 
-(define/contract N-1
-  (configurable-ctc
+(define N-1
+  #;(configurable-ctc
    [max (and/c natural? (=/c 20))]
    [types natural?])
   20)
 
-(define/contract (main)
-  (-> void?)
+(define (main)
+  #;(-> void?)
   (void (simple-stream-get primes N-1)))
 
 (time (main))

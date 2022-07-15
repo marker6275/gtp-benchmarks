@@ -2,24 +2,52 @@
 
 (require #;racket/contract
          "../../../ctcs/precision-config.rkt"
-         "../../../ctcs/common.rkt")
+         "../../../ctcs/common.rkt"
+         "../../../ctcs/configurable.rkt")
 
 
 
 ;; Simple streams library.
 ;; For building and using infinite lists.
 
+(provide/configurable-contract
+ [make-simple-stream {[max (->i ([hd any/c]
+                                 [thunk (-> simple-stream?)])
+                                [result (hd thunk)
+                                        (begin (displayln 'using-max!)
+                                        (simple-stream/c (equal?/c hd) (equal?/c thunk)))])]
+                      [types (-> any/c (-> simple-stream?) simple-stream?)]}]
+ [simple-stream-unfold {[max (->i ([st simple-stream?])
+                                  (values [r1 (st) (equal?/c (simple-stream-first st))]
+                                          [r2 simple-stream?]))]
+                        [types (-> simple-stream? (values any/c simple-stream?))]}]
+ [simple-stream-get {[max (->i ([st simple-stream?]
+                                [i exact-nonnegative-integer?])
+                               [result (st i)
+                                       (equal?/c (for/fold ([current-st st]
+                                                            #:result (simple-stream-first current-st))
+                                                           ([_ (in-range i)])
+                                                   ((simple-stream-rest current-st))))])]
+                     [types (-> simple-stream? exact-nonnegative-integer? any/c)]}]
+ [simple-stream-take {[max (->i ([st simple-stream?]
+                                 [n exact-nonnegative-integer?])
+                                [result (st n)
+                                        (and/c list?
+                                               (equal?/c
+                                                (for/fold ([lst '()]
+                                                           [current-st st]
+                                                           #:result (reverse lst))
+                                                          ([_ (in-range n)])
+                                                  (values (cons (simple-stream-first current-st) lst)
+                                                          ((simple-stream-rest current-st))))))])]
+                      [types (-> simple-stream? exact-nonnegative-integer? (listof any/c))]}])
+
 (provide (struct-out simple-stream)
-         make-simple-stream
-         simple-stream-unfold
-         simple-stream-get
-         simple-stream-take
 
          simple-stream/c
          simple-streamof
          simple-stream/dc
-         simple-stream/dc*
-         simple-stream-first)
+         simple-stream/dc*)
 
 ;; A simple-stream is a cons of a value and a thunk that computes the next value when applied
 (struct simple-stream (first rest) #:transparent)
@@ -69,54 +97,21 @@
 
 ;;--------------------------------------------------------------------------------------------------
 
-(define/contract (make-simple-stream hd thunk)
-  (configurable-ctc
-   [max (->i ([hd any/c]
-              [thunk (-> simple-stream?)])
-             [result (hd thunk)
-                     (simple-stream/c (equal?/c hd) (equal?/c thunk))])]
-   [types (-> any/c (-> simple-stream?) simple-stream?)])
+(define (make-simple-stream hd thunk)
   (simple-stream hd thunk))
 
 ;; `simple-stream-unfold st` Destruct a simple-stream `st` into its first value and the new simple-stream produced by de-thunking the tail
-(define/contract (simple-stream-unfold st)
-  (configurable-ctc
-   [max (->i ([st simple-stream?])
-             (values [r1 (st) (equal?/c (simple-stream-first st))]
-                     [r2 simple-stream?]))]
-   [types (-> simple-stream? (values any/c simple-stream?))])
+(define (simple-stream-unfold st)
   (values (simple-stream-first st) ((simple-stream-rest st))))
 
 ;; `simple-stream-get st i` Get the `i`-th element from the simple-stream `st`
-(define/contract (simple-stream-get st i)
-  (configurable-ctc
-   [max (->i ([st simple-stream?]
-              [i exact-nonnegative-integer?])
-             [result (st i)
-                     (equal?/c (for/fold ([current-st st]
-                                          #:result (simple-stream-first current-st))
-                                         ([_ (in-range i)])
-                                 ((simple-stream-rest current-st))))])]
-   [types (-> simple-stream? exact-nonnegative-integer? any/c)])
+(define (simple-stream-get st i)
   (define-values (hd tl) (simple-stream-unfold st))
   (cond [(= i 0) hd]
         [else    (simple-stream-get tl (sub1 i))]))
 
 ;; `simple-stream-take st n` Collect the first `n` elements of the simple-stream `st`.
-(define/contract (simple-stream-take st n)
-  (configurable-ctc
-   [max (->i ([st simple-stream?]
-              [n exact-nonnegative-integer?])
-             [result (st n)
-                     (and/c list?
-                            (equal?/c
-                             (for/fold ([lst '()]
-                                        [current-st st]
-                                        #:result (reverse lst))
-                                       ([_ (in-range n)])
-                               (values (cons (simple-stream-first current-st) lst)
-                                       ((simple-stream-rest current-st))))))])]
-   [types (-> simple-stream? exact-nonnegative-integer? (listof any/c))])
+(define (simple-stream-take st n)
   (cond [(= n 0) '()]
         [else (define-values (hd tl) (simple-stream-unfold st))
               (cons hd (simple-stream-take tl (sub1 n)))]))
