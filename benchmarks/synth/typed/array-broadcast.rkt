@@ -5,7 +5,19 @@
          (only-in racket/string string-join)
          (only-in racket/list empty? first rest)
          require-typed-check
-         "typed-data.rkt")
+         "typed-data.rkt"
+         )
+
+(struct Array ([shape : (Vectorof Integer)]
+                   [size : Integer]
+                   [strict? : (Boxof Boolean)]
+                   [strict! : (-> Void)]
+                   [unsafe-proc : (-> (Vectorof Integer) Float)])
+    #:prefab)
+  (struct Settable-Array Array ([set-proc : ((Vectorof Integer) Float -> Void)])
+    #:prefab)
+  (struct Mutable-Array Settable-Array ([data : (Vectorof Float)])
+    #:prefab)
 
 (require/typed/check "array-struct.rkt"
   [array-strict? (-> Array Boolean)]

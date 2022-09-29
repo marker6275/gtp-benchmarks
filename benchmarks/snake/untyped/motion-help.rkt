@@ -1,6 +1,9 @@
 #lang racket
 (require "data.rkt"
          "cut-tail.rkt")
+(struct snake (dir segs) #:prefab)
+(struct world (snake food) #:prefab)
+(struct posn (x y) #:prefab)
 
 ;; next-head : Posn Direction -> Posn
 ;; Compute next position for head.

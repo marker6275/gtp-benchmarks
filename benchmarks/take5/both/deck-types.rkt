@@ -11,6 +11,12 @@
   "basics-types.rkt"
   "card-adapted.rkt"
   "stack-types.rkt")
+(struct card (
+ [face : Face]
+ [bulls : Bulls])
+  #:prefab
+  #:type-name Card)
+
 
 (define-type BaseDeck%
     (Class

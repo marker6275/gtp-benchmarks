@@ -14,9 +14,10 @@
 (struct YMD (y ;: Natural]
              m ;: Month]
              d ;: Natural])
-)#:transparent)
+             )
+  #:prefab)
 (struct HMSN (h ;: Integer]
               m ;: Integer]
               s ;: Integer]
               n ;: Integer])
-) #:transparent)
+) #:prefab)

@@ -5,9 +5,40 @@
 (require
   require-typed-check
   "../base/tzinfo/main.rkt"
-  "core-structs.rkt"
-  "gregor-structs.rkt"
+  ;; "core-structs.rkt"
+  ;; "gregor-structs.rkt"
   racket/match)
+(struct YMD (y ;: Natural]
+             m ;: Month]
+             d ;: Natural])
+             )
+  #:prefab)
+(struct HMSN (h ;: Integer]
+              m ;: Integer]
+              s ;: Integer]
+              n ;: Integer])
+              ) #:prefab)
+(struct Date (ymd ;: YMD]
+              jdn ;: Integer]))
+              )
+  #:prefab)
+
+(struct Time (hmsn ;: HMSN]
+              ns ;: Natural]))
+)
+  #:prefab)
+
+(struct DateTime (date ;: Date]
+                  time ;: Time]
+                  jd ;: Exact-Rational]))
+)
+  #:prefab)
+
+(struct Moment (datetime/local ;: DateTime]
+                utc-offset ;: Integer]
+                zone ;: (U String #f)]))
+)
+  #:prefab)
 (require (only-in "hmsn.rkt"
     NS/SECOND ;Natural]
 ))

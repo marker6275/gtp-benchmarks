@@ -6,17 +6,10 @@
   seconds->samples
   emit)
 
-(require "typed-data.rkt"
+(require 
          (only-in racket/unsafe/ops unsafe-fx+ unsafe-fx<)
          (only-in racket/math exact-floor)
-         (only-in "type-interface.rkt"
-                  next-indexes!
-                  array-strictness
-                  array-size
-                  unsafe-array-proc
-                  array-shape
-                  array?
-                  ))
+         "type-interface.rkt")
 ;; --- from array-sequence.rkt
 
 (require (for-syntax racket/base syntax/parse))

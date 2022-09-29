@@ -1,14 +1,7 @@
 #lang racket/base
 
-(require (only-in "type-interface.rkt"
-                    array?
-                    array-shape
-                    array-default-strict!
-                    unsafe-array-proc
-                    unsafe-build-array)
-         (only-in racket/list first second rest)
-           (only-in "type-interface.rkt" array-broadcast array-shape-broadcast)
-         (only-in "type-interface.rkt" array-broadcasting))
+(require "type-interface.rkt"
+         (only-in racket/list first second rest))
 
 (provide mix)
 

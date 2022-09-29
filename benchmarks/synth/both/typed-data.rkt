@@ -6,20 +6,32 @@
   Weighted-Signal
   Drum-Symbol
   Pattern
-  (struct-out Array)
-  (struct-out Settable-Array)
-  (struct-out Mutable-Array))
+  ;; (struct-out Array)
+  ;; (struct-out Settable-Array)
+  ;; (struct-out Mutable-Array)
+  )
 
-(require require-typed-check)
+;; (require require-typed-check)
 
-(require/typed/check "data.rkt"
-  [#:struct Array ([shape : Indexes]
+;; (require/typed/check "data.rkt"
+;;   [#:struct Array ([shape : Indexes]
+;;                    [size : Integer]
+;;                    [strict? : (Boxof Boolean)]
+;;                    [strict! : (-> Void)]
+;;                    [unsafe-proc : (-> Indexes Float)])]
+;;   [#:struct (Settable-Array Array) ([set-proc : (Indexes Float -> Void)])]
+;;   [#:struct (Mutable-Array Settable-Array) ([data : (Vectorof Float)])])
+
+(struct Array ([shape : (Vectorof Integer)]
                    [size : Integer]
                    [strict? : (Boxof Boolean)]
                    [strict! : (-> Void)]
-                   [unsafe-proc : (-> Indexes Float)])]
-  [#:struct (Settable-Array Array) ([set-proc : (Indexes Float -> Void)])]
-  [#:struct (Mutable-Array Settable-Array) ([data : (Vectorof Float)])])
+                   [unsafe-proc : (-> (Vectorof Integer) Float)])
+    #:prefab)
+  (struct Settable-Array Array ([set-proc : ((Vectorof Integer) Float -> Void)])
+    #:prefab)
+  (struct Mutable-Array Settable-Array ([data : (Vectorof Float)])
+    #:prefab)
 
 (define-type Indexes (Vectorof Integer))
 (define-type In-Indexes Indexes)

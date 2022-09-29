@@ -12,8 +12,21 @@
          (only-in racket/vector vector-append)
          (only-in racket/string string-join)
          (only-in racket/list empty? first rest)
-         "data.rkt"
+         ;; "data.rkt"
          "../base/untyped.rkt")
+
+(struct Array (shape
+               size
+               strict?
+               strict!
+               unsafe-proc)
+  #:prefab)
+
+(struct Settable-Array Array (set-proc)
+  #:prefab)
+
+(struct Mutable-Array Settable-Array (data)
+  #:prefab)
 
 (provide array-broadcasting
          array-broadcast

@@ -13,9 +13,33 @@
 (require
   require-typed-check
   racket/match
-  "core-adapter.rkt"
-  "gregor-structs-adapter.rkt"
+  ;; "core-adapter.rkt"
+  ;; "gregor-structs-adapter.rkt"
+  "../base/types.rkt"
   (only-in racket/math exact-floor))
+(struct YMD ([y : Natural]
+             [m : Month]
+             [d : Natural]) #:prefab)
+(struct HMSN ([h : Integer]
+              [m : Integer]
+              [s : Integer]
+              [n : Integer]) #:prefab)
+(struct Date ([ymd : YMD]
+              [jdn : Integer])
+  #:prefab)
+
+(struct Time ([hmsn : HMSN] [ns : Natural])
+  #:prefab)
+
+(struct DateTime ([date : Date]
+                  [time : Time]
+                  [jd : Exact-Rational])
+  #:prefab)
+
+(struct Moment ([datetime/local : DateTime]
+                [utc-offset : Integer]
+                [zone : (U String #f)])
+  #:prefab)
 (require/typed/check
   "ymd.rkt"
     [days-in-month (-> Natural Month (U 28 29 30 31))]

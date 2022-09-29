@@ -24,6 +24,13 @@
   require-typed-check
   (only-in racket/list shuffle first rest))
 
+(struct card (
+ [face : Face]
+ [bulls : Bulls])
+  #:prefab
+  #:type-name Card)
+
+
 (require/typed/check "basics.rkt"
   (FACE  Natural)
   (HAND  Natural)

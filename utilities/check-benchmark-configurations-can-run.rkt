@@ -8,7 +8,7 @@
 (require racket/random)
 
 (define-runtime-paths
-  [racket "../../racket/bin/racket"])
+  [default-racket "../../racket/bin/racket"])
 
 (define (is-benchmark-dir? path)
   (match (map ~a (explode-path (simple-form-path path)))
@@ -29,7 +29,7 @@
 (define (sample-half-of l)
   (random-sample l (floor (/ (length l) 2))))
 
-(define (check-benchmark! bench-dir [save-failures-dir-name #f])
+(define (check-benchmark! bench-dir [save-failures-dir-name #f] [racket default-racket])
   (displayln @~a{
 
                  Checking @bench-dir ...
@@ -79,7 +79,8 @@
 
 (main
  #:arguments ({(hash-table ['auto? auto?]
-                           ['save-failures-dir save-failures-dir])
+                           ['save-failures-dir save-failures-dir]
+                           ['racket-path racket-path])
                bench-dirs}
               #:once-each
               [("-a" "--auto")
@@ -90,6 +91,11 @@
                'save-failures-dir
                "Save failure configurations in the given directory name under each failing benchmark."
                #:collect {"path" take-latest #f}]
+              [("-r" "--racket-path")
+               'racket-path
+               ("Path to the racket executable to run benchmarks with."
+                @~a{Default: @default-racket})
+               #:collect {"path" take-latest default-racket}]
               #:args benchmark-directories)
  #:check [(or auto?
               (empty? (filter-not is-benchmark-dir? bench-dirs)))
@@ -101,6 +107,7 @@
 
  (unless (if auto?
              (check-benchmark! (resolve-benchmark (current-directory))
-                               save-failures-dir)
-             (for-each (curryr check-benchmark! save-failures-dir) bench-dirs))
+                               save-failures-dir
+                               racket-path)
+             (for-each (curryr check-benchmark! save-failures-dir racket-path) bench-dirs))
    (exit 1)))

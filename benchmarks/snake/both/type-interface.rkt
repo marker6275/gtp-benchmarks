@@ -1,7 +1,28 @@
 #lang typed/racket/base
 
 (require "../../../utilities/require-typed-check-provide.rkt")
+
 (reprovide "data-adaptor.rkt")
+
+(struct: snake ([dir  : Dir]
+                [segs : (NEListof Posn)])
+  #:prefab
+  #:type-name Snake)
+(struct: world ([snake : Snake]
+                [food  : Posn])
+  #:prefab
+  #:type-name World)
+
+(struct: posn ([x : Real]
+               [y : Real])
+  #:prefab
+  #:type-name Posn)
+(provide (struct-out snake)
+         Snake
+         (struct-out world)
+         World
+         (struct-out posn)
+         Posn)
 
 (require/typed/check/provide "const.rkt"
                              [WORLD (-> World)])

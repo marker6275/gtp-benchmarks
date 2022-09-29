@@ -3,7 +3,19 @@
 (require racket/vector
          (only-in racket/fixnum fx+)
          require-typed-check
-         "typed-data.rkt")
+         "typed-data.rkt"
+         )
+
+(struct Array ([shape : (Vectorof Integer)]
+                   [size : Integer]
+                   [strict? : (Boxof Boolean)]
+                   [strict! : (-> Void)]
+                   [unsafe-proc : (-> (Vectorof Integer) Float)])
+    #:prefab)
+  (struct Settable-Array Array ([set-proc : ((Vectorof Integer) Float -> Void)])
+    #:prefab)
+  (struct Mutable-Array Settable-Array ([data : (Vectorof Float)])
+    #:prefab)
 
 (require/typed/check "array-struct.rkt"
   [array-shape (-> Array Indexes)]
@@ -27,7 +39,7 @@
                                                            (Listof Integer))))
 (define (array-broadcast-for-append arrs k)
   (: dss (Listof Indexes))
-  (define dss (map array-shape arrs))
+  (define dss ((inst map Indexes Array) array-shape arrs))
   (: dims Natural)
   (define dims (apply max (map vector-length dss)))
   (cond [(not (index? dims))  (error 'array-broadcast-for-append "can't happen")]

@@ -10,6 +10,15 @@
            "player-types.rkt"
            "stack-types.rkt")
 
+(struct card (
+ [face : Face]
+ [bulls : Bulls])
+  #:prefab
+  #:type-name Card)
+
+(provide (struct-out card)
+         Card)
+
 (require/typed/check/provide
  "dealer.rkt"
  [create-dealer (-> (Listof Player) Dealer)])

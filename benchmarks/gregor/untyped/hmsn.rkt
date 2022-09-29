@@ -17,8 +17,18 @@
 
 (require
   "../base/untyped.rkt"
-  "core-structs.rkt"
+  ;; "core-structs.rkt"
   racket/match)
+(struct YMD (y ;: Natural]
+             m ;: Month]
+             d ;: Natural])
+             )
+  #:prefab)
+(struct HMSN (h ;: Integer]
+              m ;: Integer]
+              s ;: Integer]
+              n ;: Integer])
+) #:prefab)
 
 ;; =============================================================================
 

@@ -21,6 +21,10 @@
   "../base/untyped.rkt"
   (only-in racket/list shuffle first rest))
 (require "card.rkt")
+(struct card (
+ face
+ bulls)
+#:prefab)
 (require (only-in "basics.rkt"
   FACE
   HAND

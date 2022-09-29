@@ -1,15 +1,8 @@
 #lang typed/racket/base
 
 (require require-typed-check
-         "typed-data.rkt"
-         (only-in "type-interface.rkt"
-                  array-size
-                  make-array
-                  build-array
-                  unsafe-vector->array
-                  array-shape-size
-                  check-array-shape
-                  array-append*))
+         ;; "typed-data.rkt"
+         "type-interface.rkt")
 
 (require/typed/check "synth.rkt"
   [fs Natural]

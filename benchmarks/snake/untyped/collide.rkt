@@ -1,6 +1,9 @@
 #lang racket  
 (require "data.rkt"
          "const.rkt")
+(struct snake (dir segs) #:prefab)
+(struct world (snake food) #:prefab)
+(struct posn (x y) #:prefab)
 
 ;; snake-wall-collide? : Snake -> Boolean
 ;; Is the snake colliding with any of the walls?

@@ -10,6 +10,12 @@
   "card-adapted.rkt"
   "stack-types.rkt"
   typed/racket/class)
+(struct card (
+ [face : Face]
+ [bulls : Bulls])
+  #:prefab
+  #:type-name Card)
+
 
 (define-type Player%
   (Class

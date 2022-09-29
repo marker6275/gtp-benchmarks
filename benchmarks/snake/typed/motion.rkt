@@ -3,6 +3,20 @@
 (require require-typed-check
          "data-adaptor.rkt")
 
+(struct: snake ([dir  : Dir]
+                [segs : (NEListof Posn)])
+  #:prefab
+  #:type-name Snake)
+(struct: world ([snake : Snake]
+                [food  : Posn])
+  #:prefab
+  #:type-name World)
+
+(struct: posn ([x : Real]
+               [y : Real])
+  #:prefab
+  #:type-name Posn)
+
 (require/typed/check "const.rkt"
                      [BOARD-WIDTH Integer]
                      [BOARD-HEIGHT Integer])

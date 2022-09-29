@@ -3,7 +3,19 @@
 (require (for-syntax racket/base syntax/parse)
          (only-in racket/fixnum fx+ fx*)
          require-typed-check
-         "typed-data.rkt")
+         "typed-data.rkt"
+         )
+
+(struct Array ([shape : (Vectorof Integer)]
+                   [size : Integer]
+                   [strict? : (Boxof Boolean)]
+                   [strict! : (-> Void)]
+                   [unsafe-proc : (-> (Vectorof Integer) Float)])
+    #:prefab)
+  (struct Settable-Array Array ([set-proc : ((Vectorof Integer) Float -> Void)])
+    #:prefab)
+  (struct Mutable-Array Settable-Array ([data : (Vectorof Float)])
+    #:prefab)
 
 (require/typed/check "array-utils.rkt"
   [unsafe-array-index->value-index (-> Indexes Indexes Integer)]

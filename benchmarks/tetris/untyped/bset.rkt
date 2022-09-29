@@ -3,6 +3,8 @@
 (require "data.rkt"
          "block.rkt"
          "consts.rkt")
+(struct posn (x y) #:prefab)
+(struct block (x y color) #:prefab)
 
 ;; blocks-contains? : BSet Block -> Boolean
 ;; Determine if the block is in the set of blocks.

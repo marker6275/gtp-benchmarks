@@ -1,7 +1,21 @@
 #lang typed/racket
 
 (require require-typed-check
-         "data-adaptor.rkt")
+         "data-adaptor.rkt"
+         )
+(struct: snake ([dir  : Dir]
+                [segs : (NEListof Posn)])
+  #:prefab
+  #:type-name Snake)
+(struct: world ([snake : Snake]
+                [food  : Posn])
+  #:prefab
+  #:type-name World)
+
+(struct: posn ([x : Real]
+               [y : Real])
+  #:prefab
+  #:type-name Posn)
 (require/typed/check "cut-tail.rkt"
                      [cut-tail ((NEListof Posn) . -> . (Listof Posn))])
 

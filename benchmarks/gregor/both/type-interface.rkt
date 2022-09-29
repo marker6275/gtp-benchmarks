@@ -1,11 +1,41 @@
 #lang typed/racket
 
-(require "../../../utilities/require-typed-check-provide.rkt")
+(require "../../../utilities/require-typed-check-provide.rkt"
+         "../base/types.rkt")
 
 (reprovide "../base/types.rkt"
-           "gregor-structs-adapter.rkt"
+           ;; "gregor-structs-adapter.rkt"
            "tzinfo-adapter.rkt"
 )
+(struct YMD ([y : Natural]
+             [m : Month]
+             [d : Natural]) #:prefab)
+(struct HMSN ([h : Integer]
+              [m : Integer]
+              [s : Integer]
+              [n : Integer]) #:prefab)
+(struct Date ([ymd : YMD]
+              [jdn : Integer])
+  #:prefab)
+
+(struct Time ([hmsn : HMSN] [ns : Natural])
+  #:prefab)
+
+(struct DateTime ([date : Date]
+                  [time : Time]
+                  [jd : Exact-Rational])
+  #:prefab)
+
+(struct Moment ([datetime/local : DateTime]
+                [utc-offset : Integer]
+                [zone : (U String #f)])
+  #:prefab)
+(provide (struct-out YMD)
+         (struct-out HMSN)
+         (struct-out Date)
+         (struct-out Time)
+         (struct-out DateTime)
+         (struct-out Moment))
 (require/typed/check/provide "date.rkt"
     [date=? (-> Date Date Boolean)]
     [date (->* (Natural) (Month Natural) Date)]

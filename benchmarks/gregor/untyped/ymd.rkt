@@ -23,9 +23,20 @@
 
 (require
   racket/match
-  "core-structs.rkt"
+  ;; "core-structs.rkt"
   "../base/untyped.rkt"
   (only-in racket/math exact-truncate exact-floor))
+
+(struct YMD (y ;: Natural]
+             m ;: Month]
+             d ;: Natural])
+             )
+  #:prefab)
+(struct HMSN (h ;: Integer]
+              m ;: Integer]
+              s ;: Integer]
+              n ;: Integer])
+) #:prefab)
 
 ;; =============================================================================
 

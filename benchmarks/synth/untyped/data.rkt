@@ -1,16 +1,19 @@
 #lang racket/base
 
-(provide
-  (struct-out Array)
-  (struct-out Settable-Array)
-  (struct-out Mutable-Array))
+;; (provide
+  ;; (struct-out Array)
+  ;; (struct-out Settable-Array)
+  ;; (struct-out Mutable-Array))
 
 (struct Array (shape
                size
                strict?
                strict!
-               unsafe-proc))
+               unsafe-proc)
+  #:prefab)
 
-(struct Settable-Array Array (set-proc))
+(struct Settable-Array Array (set-proc)
+  #:prefab)
 
-(struct Mutable-Array Settable-Array (data))
+(struct Mutable-Array Settable-Array (data)
+  #:prefab)

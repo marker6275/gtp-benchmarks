@@ -2,6 +2,9 @@
 (require "data.rkt"
          "const.rkt"
          "motion-help.rkt")
+(struct snake (dir segs) #:prefab)
+(struct world (snake food) #:prefab)
+(struct posn (x y) #:prefab)
 
 (provide reset!)
 (define r (make-pseudo-random-generator)) 

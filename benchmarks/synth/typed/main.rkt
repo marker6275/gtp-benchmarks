@@ -1,7 +1,7 @@
 #lang typed/racket/base
 
 (require require-typed-check
-         "typed-data.rkt")
+         "type-interface.rkt")
 
 (require/typed/check "sequencer.rkt"
   [note (-> Symbol Natural Natural (Pairof Natural Natural))]

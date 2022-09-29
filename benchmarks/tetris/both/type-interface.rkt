@@ -2,7 +2,38 @@
 
 (require "../../../utilities/require-typed-check-provide.rkt")
 
-(reprovide "data-adapter.rkt")
+;; (reprovide "data-adapter.rkt")
+
+(struct: posn ([x : Real]
+               [y : Real])
+  #:prefab
+  #:type-name Posn)
+(struct: block ([x : Real]
+                [y : Real]
+                [color : Symbol])
+  #:prefab
+  #:type-name Block)
+(struct: tetra ([center : Posn]
+                [blocks : (Listof Block)])
+  #:prefab
+  #:type-name Tetra)
+(struct: world ([tetra : Tetra]
+                [blocks : (Listof Block)])
+  #:prefab
+  #:type-name World)
+
+(define-type Color Symbol)
+(define-type BSet  (Listof Block))
+(provide (struct-out posn)
+         Posn
+         (struct-out block)
+         Block
+         (struct-out tetra)
+         Tetra
+         (struct-out world)
+         World
+         Color
+         BSet)
 
 (require/typed/check/provide "bset.rkt"
    [blocks-overflow? (-> BSet Boolean)]

@@ -15,8 +15,8 @@
 
 (struct YMD ([y : Natural]
              [m : Month]
-             [d : Natural]) #:transparent)
+             [d : Natural]) #:prefab)
 (struct HMSN ([h : Integer]
               [m : Integer]
               [s : Integer]
-              [n : Integer]) #:transparent)
+              [n : Integer]) #:prefab)

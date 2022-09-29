@@ -1,10 +1,7 @@
 #lang typed/racket/base
 
 (require require-typed-check
-         "typed-data.rkt"
-         (only-in "type-interface.rkt"
-                  build-array
-                  array-append*))
+         "type-interface.rkt")
 
 (require/typed/check "synth.rkt"
   [fs Natural])

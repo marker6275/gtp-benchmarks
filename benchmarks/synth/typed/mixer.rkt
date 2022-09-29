@@ -1,18 +1,10 @@
 #lang typed/racket/base
 
 (require require-typed-check
-         "typed-data.rkt"
+         ;; "typed-data.rkt"
          (for-syntax racket/base)
          (only-in racket/list first second rest)
-         (only-in "type-interface.rkt"
-                  array?
-                  array-shape
-                  array-default-strict!
-                  unsafe-array-proc
-                  unsafe-build-array
-                  array-broadcast
-                  array-shape-broadcast
-                  array-broadcasting))
+         "type-interface.rkt")
 
 
 (provide mix)

@@ -4,6 +4,21 @@
 
 (reprovide "typed-data.rkt")
 
+(struct Array ([shape : (Vectorof Integer)]
+                   [size : Integer]
+                   [strict? : (Boxof Boolean)]
+                   [strict! : (-> Void)]
+                   [unsafe-proc : (-> (Vectorof Integer) Float)])
+    #:prefab)
+  (struct Settable-Array Array ([set-proc : ((Vectorof Integer) Float -> Void)])
+    #:prefab)
+  (struct Mutable-Array Settable-Array ([data : (Vectorof Float)])
+    #:prefab)
+
+(provide (struct-out Array)
+         (struct-out Settable-Array)
+         (struct-out Mutable-Array))
+
 (require/typed/check/provide
  "array-broadcast.rkt"
  [array-broadcasting (Parameterof (U #f #t 'permissive))]

@@ -13,6 +13,10 @@
   require-typed-check
   racket/class)
 (require "card.rkt")
+(struct card (
+ face
+ bulls)
+#:prefab)
 (require (only-in "basics.rkt"
   FACE
   FIVE

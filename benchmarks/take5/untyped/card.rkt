@@ -3,7 +3,7 @@
 ;; a representation for game cards
 
 (provide
- (struct-out card)
+ ;; (struct-out card)
 
  ;; Card Card -> Boolean
  >-face
@@ -22,7 +22,7 @@
 (struct card (
  face
  bulls)
-#:transparent)
+#:prefab)
 
 (define (>-face c d)
   (> (card-face c) (card-face d)))

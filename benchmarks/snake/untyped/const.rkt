@@ -1,5 +1,8 @@
 #lang racket  
 (require "data.rkt")
+(struct snake (dir segs) #:prefab)
+(struct world (snake food) #:prefab)
+(struct posn (x y) #:prefab)
 
 (define GRID-SIZE 30)
 (define BOARD-HEIGHT 20)

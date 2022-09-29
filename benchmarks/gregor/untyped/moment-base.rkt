@@ -14,9 +14,30 @@
 (require
   require-typed-check
   racket/match
-  "gregor-structs.rkt"
+  ;; "gregor-structs.rkt"
   (only-in racket/format ~r)
 )
+(struct Date (ymd ;: YMD]
+              jdn ;: Integer]))
+              )
+  #:prefab)
+
+(struct Time (hmsn ;: HMSN]
+              ns ;: Natural]))
+)
+  #:prefab)
+
+(struct DateTime (date ;: Date]
+                  time ;: Time]
+                  jd ;: Exact-Rational]))
+)
+  #:prefab)
+
+(struct Moment (datetime/local ;: DateTime]
+                utc-offset ;: Integer]
+                zone ;: (U String #f)]))
+)
+  #:prefab)
 (require (only-in "datetime.rkt"
     datetime->iso8601 ;(-> DateTime String)]
 ))

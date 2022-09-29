@@ -21,6 +21,13 @@
   (only-in racket/list first rest)
 )
 
+(struct card (
+ [face : Face]
+ [bulls : Bulls])
+  #:prefab
+  #:type-name Card)
+
+
 ;; ---------------------------------------------------------------------------------------------------
 
 (: default-order (-> (Listof Card) (Listof Card)))

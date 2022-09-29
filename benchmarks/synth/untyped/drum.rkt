@@ -1,16 +1,9 @@
 #lang racket/base
 
-(require (only-in "type-interface.rkt"
-                  array-size
-                  make-array
-                  build-array
-                  unsafe-vector->array)
-         (only-in "type-interface.rkt"
-                  array-shape-size
-                  check-array-shape)
-         (only-in "type-interface.rkt" array-append*)
+(require "type-interface.rkt"
          (only-in "synth.rkt" fs seconds->samples)
-         "data.rkt")
+         ;; "data.rkt"
+         )
 
 (provide drum)
 

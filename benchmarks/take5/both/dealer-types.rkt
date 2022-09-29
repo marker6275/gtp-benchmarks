@@ -16,6 +16,13 @@
   "player-types.rkt"
 )
 
+(struct card (
+ [face : Face]
+ [bulls : Bulls])
+  #:prefab
+  #:type-name Card)
+
+
 ;; -----------------------------------------------------------------------------
 
 (define-type Result (List (List Symbol Natural) (Listof (List Name Natural))))

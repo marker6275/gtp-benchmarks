@@ -1,6 +1,21 @@
 #lang typed/racket
 
 (require "data-adapter.rkt")
+
+(struct: posn ([x : Real]
+               [y : Real])
+  #:prefab
+  #:type-name Posn)
+(struct: block ([x : Real]
+                [y : Real]
+                [color : Symbol])
+  #:prefab
+  #:type-name Block)
+(struct: tetra ([center : Posn]
+                [blocks : (Listof Block)])
+  #:prefab
+  #:type-name Tetra)
+
 (require require-typed-check)
 (require/typed/check "bset.rkt"
    [blocks-intersect (-> BSet BSet BSet)]

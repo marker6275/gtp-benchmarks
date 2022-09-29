@@ -7,11 +7,34 @@
 (require
   require-typed-check
   "../base/types.rkt"
-  "gregor-structs-adapter.rkt"
+  ;; "gregor-structs-adapter.rkt"
   racket/match
   (only-in racket/math exact-round)
   "tzinfo-adapter.rkt"
 )
+(struct YMD ([y : Natural]
+             [m : Month]
+             [d : Natural]) #:prefab)
+(struct HMSN ([h : Integer]
+              [m : Integer]
+              [s : Integer]
+              [n : Integer]) #:prefab)
+(struct Date ([ymd : YMD]
+              [jdn : Integer])
+  #:prefab)
+
+(struct Time ([hmsn : HMSN] [ns : Natural])
+  #:prefab)
+
+(struct DateTime ([date : Date]
+                  [time : Time]
+                  [jd : Exact-Rational])
+  #:prefab)
+
+(struct Moment ([datetime/local : DateTime]
+                [utc-offset : Integer]
+                [zone : (U String #f)])
+  #:prefab)
 (require/typed/check "hmsn.rkt"
     [NS/SECOND Natural]
 )
@@ -106,8 +129,11 @@
          (make-moment dt zone #f)]
         [else (error (format "datetime+tz->moment unknown zone ~a" zone))]))
 
+(: moment->datetime/local (-> Moment DateTime))
 (define moment->datetime/local Moment-datetime/local)
+(: moment->utc-offset (-> Moment Integer))
 (define moment->utc-offset     Moment-utc-offset)
+(: moment->tzid (-> Moment (U String #f)))
 (define moment->tzid           Moment-zone)
 
 (: moment->timezone (-> Moment tz))

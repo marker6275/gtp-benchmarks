@@ -19,6 +19,13 @@
   require-typed-check
 )
 
+(struct card (
+ [face : Face]
+ [bulls : Bulls])
+  #:prefab
+  #:type-name Card)
+
+
 (require/typed/check "basics.rkt"
   (FACE Natural)
   (STACKS Natural))

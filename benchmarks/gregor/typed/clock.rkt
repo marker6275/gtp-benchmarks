@@ -22,8 +22,32 @@
   require-typed-check
   "../base/types.rkt"
   "tzinfo-adapter.rkt"
-  "gregor-structs-adapter.rkt"
+  ;; "gregor-structs-adapter.rkt"
 )
+(struct YMD ([y : Natural]
+             [m : Month]
+             [d : Natural]) #:prefab)
+(struct HMSN ([h : Integer]
+              [m : Integer]
+              [s : Integer]
+              [n : Integer]) #:prefab)
+(struct Date ([ymd : YMD]
+              [jdn : Integer])
+  #:prefab)
+
+(struct Time ([hmsn : HMSN] [ns : Natural])
+  #:prefab)
+
+(struct DateTime ([date : Date]
+                  [time : Time]
+                  [jd : Exact-Rational])
+  #:prefab)
+
+(struct Moment ([datetime/local : DateTime]
+                [utc-offset : Integer]
+                [zone : (U String #f)])
+  #:prefab)
+
 (require/typed/check "moment.rkt"
     [current-timezone (Parameterof (U tz #f))]
     [posix->moment (-> Exact-Rational tz Moment)]

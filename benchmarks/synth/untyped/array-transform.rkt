@@ -9,8 +9,21 @@
                   array-default-strict!)
          (only-in "array-broadcast.rkt" array-broadcast array-shape-broadcast)
          (only-in "array-utils.rkt" unsafe-vector-remove vector-copy-all unsafe-vector-insert)
-         "data.rkt"
+         ;; "data.rkt"
          "../base/untyped.rkt")
+
+(struct Array (shape
+               size
+               strict?
+               strict!
+               unsafe-proc)
+  #:prefab)
+
+(struct Settable-Array Array (set-proc)
+  #:prefab)
+
+(struct Mutable-Array Settable-Array (data)
+  #:prefab)
 
 (provide array-append*)
 

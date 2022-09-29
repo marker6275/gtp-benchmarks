@@ -20,8 +20,8 @@
 (struct card (
  [face : Face]
  [bulls : Bulls])
-#:transparent)
-(define-type Card card)
+  #:prefab
+  #:type-name Card)
 
 (: >-face (-> Card Card Boolean))
 (define (>-face c d)

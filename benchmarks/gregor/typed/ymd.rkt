@@ -24,7 +24,16 @@
 (require
   racket/match
   (only-in racket/math exact-truncate exact-floor)
-  "core-adapter.rkt")
+  ;; "core-adapter.rkt"
+  "../base/types.rkt"
+  )
+(struct YMD ([y : Natural]
+             [m : Month]
+             [d : Natural]) #:prefab)
+(struct HMSN ([h : Integer]
+              [m : Integer]
+              [s : Integer]
+              [n : Integer]) #:prefab)
 
 ;; =============================================================================
 

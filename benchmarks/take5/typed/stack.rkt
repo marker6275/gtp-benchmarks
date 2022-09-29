@@ -20,7 +20,15 @@
  ;; sum up the bulls shown on the cards of the stack
  bulls)
 
-(require "card-adapted.rkt" "stack-types.rkt")
+(require "card-adapted.rkt"
+         "stack-types.rkt"
+         "basics-types.rkt")
+(struct card (
+ [face : Face]
+ [bulls : Bulls])
+  #:prefab
+  #:type-name Card)
+
 (require (prefix-in list: (only-in racket/base length)))
 (require (only-in racket/list first))
 
@@ -36,5 +44,5 @@
 (: length (-> Stack Natural))
 (define length list:length)
 (: bulls (-> Stack Natural))
-(define (bulls s) (foldr + 0 (map card-bulls s)))
+(define (bulls s) (foldr + 0 ((inst map Bulls Card) card-bulls s)))
 

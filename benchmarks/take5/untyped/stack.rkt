@@ -23,6 +23,10 @@
 (require
   "../base/untyped.rkt"
   "card.rkt")
+(struct card (
+ face
+ bulls)
+#:prefab)
 (require (prefix-in list: (only-in racket/base length)))
 (require (only-in racket/list first))
 

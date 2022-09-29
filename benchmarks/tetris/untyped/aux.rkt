@@ -3,6 +3,10 @@
 (require "data.rkt"
          "tetras.rkt")  
 
+(struct posn (x y) #:prefab)
+(struct block (x y color) #:prefab)
+(struct tetra (center blocks) #:prefab)
+
 (provide
  list-pick-random
  neg-1

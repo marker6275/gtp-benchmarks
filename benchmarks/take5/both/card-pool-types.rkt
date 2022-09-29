@@ -10,6 +10,13 @@
   "card-adapted.rkt"
   "basics-types.rkt")
 
+(struct card (
+ [face : Face]
+ [bulls : Bulls])
+  #:prefab
+  #:type-name Card)
+
+
 (define-type CardPool%
   (Class
     (init-field

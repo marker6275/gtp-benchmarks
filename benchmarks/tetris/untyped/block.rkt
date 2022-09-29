@@ -1,6 +1,8 @@
 #lang racket
 
 (require "data.rkt")
+(struct posn (x y) #:prefab)
+(struct block (x y color) #:prefab)
 
 ;; block=? : Block Block -> Boolean
 ;; Determines if two blocks are the same (ignoring color).

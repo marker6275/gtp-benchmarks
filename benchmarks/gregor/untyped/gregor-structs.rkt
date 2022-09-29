@@ -14,18 +14,22 @@
 
 (struct Date (ymd ;: YMD]
               jdn ;: Integer]))
-))
+              )
+  #:prefab)
 
 (struct Time (hmsn ;: HMSN]
               ns ;: Natural]))
-))
+)
+  #:prefab)
 
 (struct DateTime (date ;: Date]
                   time ;: Time]
                   jd ;: Exact-Rational]))
-))
+)
+  #:prefab)
 
 (struct Moment (datetime/local ;: DateTime]
                 utc-offset ;: Integer]
                 zone ;: (U String #f)]))
-))
+)
+  #:prefab)

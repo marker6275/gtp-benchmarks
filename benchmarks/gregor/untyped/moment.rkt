@@ -6,9 +6,30 @@
   require-typed-check
   racket/match
   "../base/untyped.rkt"
-  "gregor-structs.rkt"
+  ;; "gregor-structs.rkt"
   (only-in racket/math exact-round)
 )
+(struct Date (ymd ;: YMD]
+              jdn ;: Integer]))
+              )
+  #:prefab)
+
+(struct Time (hmsn ;: HMSN]
+              ns ;: Natural]))
+)
+  #:prefab)
+
+(struct DateTime (date ;: Date]
+                  time ;: Time]
+                  jd ;: Exact-Rational]))
+)
+  #:prefab)
+
+(struct Moment (datetime/local ;: DateTime]
+                utc-offset ;: Integer]
+                zone ;: (U String #f)]))
+)
+  #:prefab)
 (require (only-in "../base/tzinfo/main.rkt"
   system-tzid ;(-> (U tz #f))]
   tzoffset tzoffset? tzoffset-utc-seconds

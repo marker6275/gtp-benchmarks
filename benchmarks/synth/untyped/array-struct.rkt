@@ -8,7 +8,21 @@
            check-array-shape
            next-indexes!
            unsafe-array-index->value-index)
-         "data.rkt")
+         ;; "data.rkt"
+         )
+
+(struct Array (shape
+               size
+               strict?
+               strict!
+               unsafe-proc)
+  #:prefab)
+
+(struct Settable-Array Array (set-proc)
+  #:prefab)
+
+(struct Mutable-Array Settable-Array (data)
+  #:prefab)
 
 (provide
  (rename-out (Array? array?))
