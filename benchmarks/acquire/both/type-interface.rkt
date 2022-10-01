@@ -12,8 +12,16 @@
          RunResult
          Strategy)
 
-(reprovide "state-adapted.rkt"
-           "board-adapted.rkt")
+(reprovide (except-in "board-adapted.rkt"
+                      Board)
+           (except-in "state-adapted.rkt"
+                      Decisions
+                      Score
+                      Administrator%
+                      Turn%
+                      Player%
+                      RunResult
+                      Strategy))
 
 
 (define-type Board (HashTable Tile Content))
@@ -68,10 +76,12 @@
 (define-type RunResult (List (U 'done 'exhausted 'score 'IMPOSSIBLE) Any (Listof State)))
 (define-type Strategy (-> (Instance Turn%) (Values (Option Tile) (Option Hotel) (Listof Hotel))))
 
+;; Commented exports are unused by clients
+
 (require/typed/check/provide
  "admin.rkt"
  [administrator% Administrator%]
- [turn% Turn%])
+ #;[turn% Turn%])
 
 (require/typed/check/provide
  "auxiliaries.rkt"
@@ -79,14 +89,14 @@
 
 (require/typed/check/provide
  "basics.rkt"
- [player-shares0 Shares]
+ #;[player-shares0 Shares]
  [*combine-shares (-> (Listof Shares) Shares)]
- [shares-minus (-> Shares Shares Shares)]
- [banker-shares0 Shares]
+ #;[shares-minus (-> Shares Shares Shares)]
+ #;[banker-shares0 Shares]
  [ALL-HOTELS (Listof Hotel)]
  [SHARES-PER-TURN# Integer]
  [hotel<=? (-> Hotel Hotel Boolean)]
  [price-per-share (-> Hotel Natural (Option Cash))]
- [shares++ (-> Shares Hotel Shares)]
+ #;[shares++ (-> Shares Hotel Shares)]
  [shares-- (-> Shares Hotel Shares)]
  [shares-available (-> Shares Hotel Share)])

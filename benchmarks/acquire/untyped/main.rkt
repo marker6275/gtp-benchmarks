@@ -25,7 +25,7 @@
   (define-values (two-status _score two-run)
     (let ([r (run p 10 #:show show #:choice randomly-pick)])
       (values (car r) (cadr r) (caddr r))))
-  (displayln `(,(length two-run) ,two-status))
+  ;(displayln `(,(length two-run) ,two-status))
   (void))
 
 (define (run players turns# #:show (show show) #:choice (choose-next-tile first))
