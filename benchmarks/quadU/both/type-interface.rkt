@@ -53,8 +53,9 @@
   [world:max-quality Index]
   [world:total-lines-key Symbol]
   [world:draft-quality Index]
-  [world:quality-key Symbol]
-  [world:quality-key-default (Parameterof Integer)]
+  ;; Unused by client
+  ;; [world:quality-key Symbol]
+  ;; [world:quality-key-default (Parameterof Integer)]
   [world:paper-width-default (Parameterof Float)]
   [world:column-count-key Symbol]
   [world:column-count-key-default (Parameterof Integer)]

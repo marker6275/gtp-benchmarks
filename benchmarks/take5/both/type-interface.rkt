@@ -26,5 +26,6 @@
 (require/typed/check/provide
  "base-player.rkt"
  [player% Player%]
- [default-order (-> (Listof Card) (Listof Card))])
+ ;; Unused by client
+ #;[default-order (-> (Listof Card) (Listof Card))])
 

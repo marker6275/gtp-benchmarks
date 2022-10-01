@@ -61,8 +61,9 @@
   (split-last (All (A) ((Listof A) -> (values (Listof A) A))))
   (join-quads ((Listof Quad) -> (Listof Quad)))
   (hyphenate-quad (QuadListItem -> QuadListItem))
-  (quad-map ((QuadListItem -> QuadListItem) Quad -> Quad))
-  (group-quad-attr-set*
+  ;; Unused by client
+  #;(quad-map ((QuadListItem -> QuadListItem) Quad -> Quad))
+  #;(group-quad-attr-set*
    (GroupQuad HashableList -> GroupQuad))
   (quad-attr-set*
    (Quad HashableList -> Quad))
