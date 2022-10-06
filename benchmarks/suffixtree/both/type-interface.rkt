@@ -36,7 +36,7 @@
 (require/typed/check/provide
  "structs.rkt"
  ;; [tree? (Any -> Boolean)]
- [tree-root (Tree -> Node)]
+ [tree-root (-> Tree Node)]
  [make-tree (-> Tree)]
  ;; [new-suffix-tree (-> Tree)]
  ;; [node-find-child (-> Node Any (U Node #f))]

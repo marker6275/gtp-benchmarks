@@ -10,10 +10,10 @@
 (require/typed/check/provide "render.rkt"
   (pdf-renderer%
     (Class
-      [render-to-file (Quad Path-String -> Void)]
-      [render-element (Quad -> Any)]
-      [render-page ((Listof Quad) -> Void)]
-      [render-word (Quad -> Any)]
+      [render-to-file (-> Quad Path-String Void)]
+      [render-element (-> Quad Any)]
+      [render-page (-> (Listof Quad) Void)]
+      [render-word (-> Quad Any)]
       [render (-> Quad Any)]
       [finalize (-> Any Any)]
       [setup (-> Quad Quad)]))
@@ -76,14 +76,15 @@
   (add-vert-positions (-> Quad Quad))
   (attr-change (-> QuadAttrs (Listof Any) QuadAttrs))
   (compute-line-height (-> Quad Quad))
-  (hyphenate-quad (USQ -> USQ))
-  (join-quads ((Listof Quad) -> (Listof Quad)))
-  (merge-attrs (QuadAttrs * -> QuadAttrs))
-  (quad-attr-set* (Quad (Listof Any) -> Quad))
-  (split-last (All (A) ((Listof A) -> (values (Listof A) A))))
+  (hyphenate-quad (-> USQ USQ))
+  (join-quads (-> (Listof Quad) (Listof Quad)))
+  (merge-attrs (-> QuadAttrs * QuadAttrs))
+  (quad-attr-set* (-> Quad (Listof Any) Quad))
+  (split-last (All (A) (-> (Listof A) (values (Listof A) A))))
   (split-quad (-> Quad (Listof Quad)))
 )
 (require/typed/check/provide "sugar-list.rkt"
- (slice-at (All (A) (case-> ((Listof A) Positive-Integer -> (Listof (Listof A)))
-                   ((Listof A) Positive-Integer Boolean -> (Listof (Listof A))))))
+ (slice-at
+  (All (A) (case-> (-> (Listof A) Positive-Integer (Listof (Listof A)))
+                   (-> (Listof A) Positive-Integer Boolean (Listof (Listof A))))))
 )

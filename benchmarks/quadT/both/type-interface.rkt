@@ -14,9 +14,9 @@
   [quad-car (-> Quad QuadListItem)]
   [quad-name (-> Quad QuadName)]
   [quad-attr-ref (->* ((U Quad QuadAttrs) QuadAttrKey) (QuadAttrValue) QuadAttrValue)]
-  [group-quad-list (GroupQuad -> GroupQuadList)]
-  [quad-list (Quad -> QuadList)]
-  (quad-has-attr? (Quad QuadAttrKey -> Boolean))
+  [group-quad-list (-> GroupQuad GroupQuadList)]
+  [quad-list (-> Quad QuadList)]
+  (quad-has-attr? (-> Quad QuadAttrKey Boolean))
   (quads->column (-> (Listof Quad) ColumnQuad))
   [page (->* ((U QuadAttrs HashableList)) () #:rest GroupQuadListItem PageQuad)]
   [column (->* ((U QuadAttrs HashableList)) () #:rest GroupQuadListItem ColumnQuad)]
@@ -57,32 +57,33 @@
   [update-text-cache-file (-> Void)]
 )
 (require/typed/check/provide "utils.rkt"
-  (merge-attrs (JoinableType * -> QuadAttrs))
-  (split-last (All (A) ((Listof A) -> (values (Listof A) A))))
-  (join-quads ((Listof Quad) -> (Listof Quad)))
-  (hyphenate-quad (QuadListItem -> QuadListItem))
+  (merge-attrs (-> JoinableType * QuadAttrs))
+  (split-last (All (A) (-> (Listof A) (values (Listof A) A))))
+  (join-quads (-> (Listof Quad) (Listof Quad)))
+  (hyphenate-quad (-> QuadListItem QuadListItem))
   ;; Unused by client
-  #;(quad-map ((QuadListItem -> QuadListItem) Quad -> Quad))
+  #;(quad-map (-> (-> QuadListItem QuadListItem) Quad Quad))
   #;(group-quad-attr-set*
-   (GroupQuad HashableList -> GroupQuad))
+   (-> GroupQuad HashableList GroupQuad))
   (quad-attr-set*
-   (Quad HashableList -> Quad))
+   (-> Quad HashableList Quad))
   [attr-change (-> QuadAttrs HashableList QuadAttrs)]
   [compute-line-height (-> Quad Quad)]
   [add-vert-positions (-> GroupQuad GroupQuad)]
   [split-quad (-> Quad (Listof Quad))])
 (require/typed/check/provide "sugar-list.rkt"
- (slice-at (All (A) (case-> ((Listof A) Positive-Integer -> (Listof (Listof A)))
-                   ((Listof A) Positive-Integer Boolean -> (Listof (Listof A)))))))
+ (slice-at
+  (All (A) (case-> (-> (Listof A) Positive-Integer (Listof (Listof A)))
+                   (-> (Listof A) Positive-Integer Boolean (Listof (Listof A)))))))
 (require/typed/check/provide "quick-sample.rkt"
   [quick-sample (-> Quad)])
 (require/typed/check/provide "render.rkt"
   [pdf-renderer%
     (Class
-      [render-to-file (Quad Path-String -> Void)]
-      [render-element (Quad -> Any)]
-      [render-page ((Listof Quad) -> Void)]
-      [render-word (Quad -> Any)]
+      [render-to-file (-> Quad Path-String Void)]
+      [render-element (-> Quad Any)]
+      [render-page (-> (Listof Quad) Void)]
+      [render-word (-> Quad Any)]
       [render (-> Quad Any)]
       [finalize (-> Any Any)]
       [setup (-> Quad Quad)]
