@@ -2,7 +2,18 @@
 
 (require "../../../utilities/require-typed-check-provide.rkt")
 
-(reprovide "../base/core-adapter.rkt")
+(reprovide (except-in "../base/core-adapter.rkt"
+                      USQ
+                      QuadAttrs
+                      Quad))
+
+(provide USQ
+         QuadAttrs
+         Quad)
+
+(define-type USQ (U String Quad))
+(define-type QuadAttrs (Listof (Pairof Symbol Any)))
+(define-type Quad (List* Symbol QuadAttrs (Listof Any)))
 
 (require/typed/check/provide "quick-sample.rkt"
   (quick-sample (-> Quad))

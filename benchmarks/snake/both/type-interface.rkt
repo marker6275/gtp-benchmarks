@@ -2,7 +2,11 @@
 
 (require "../../../utilities/require-typed-check-provide.rkt")
 
-(reprovide "data-adaptor.rkt")
+(provide NEListof
+         Dir)
+
+(define-type (NEListof A) (Pairof A (Listof A)))
+(define-type Dir (U "up" "down" "left" "right"))
 
 (struct: snake ([dir  : Dir]
                 [segs : (NEListof Posn)])

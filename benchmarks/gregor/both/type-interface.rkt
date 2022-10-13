@@ -3,10 +3,18 @@
 (require "../../../utilities/require-typed-check-provide.rkt"
          "../base/types.rkt")
 
-(reprovide "../base/types.rkt"
+(reprovide ;; "../base/types.rkt"
            ;; "gregor-structs-adapter.rkt"
-           "tzinfo-adapter.rkt"
+           (except-in "tzinfo-adapter.rkt"
+                      tz)
 )
+
+(provide Month)
+(define-type Month (U 1 2 3 4 5 6 7 8 9 10 11 12))
+
+(provide tz)
+(define-type tz (U String Integer))
+
 (struct YMD ([y : Natural]
              [m : Month]
              [d : Natural]) #:prefab)

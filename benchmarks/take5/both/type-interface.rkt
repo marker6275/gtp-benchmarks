@@ -2,13 +2,128 @@
 
 (require "../../../utilities/require-typed-check-provide.rkt")
 
-(reprovide "basics-types.rkt"
+(reprovide ;; "basics-types.rkt"
            "card-adapted.rkt"
-           "card-pool-types.rkt"
-           "dealer-types.rkt"
-           "deck-types.rkt"
-           "player-types.rkt"
-           "stack-types.rkt")
+           ;; "card-pool-types.rkt"
+           ;; "dealer-types.rkt"
+           ;; "deck-types.rkt"
+           ;; "player-types.rkt"
+           ;; "stack-types.rkt"
+           )
+
+(provide Name
+         Face
+         Bulls)
+(define-type Name Natural)
+(define-type Face Natural)
+(define-type Bulls Natural)
+
+(provide CardPool%
+         CardPool
+         Hand)
+(define-type CardPool%
+  (Class
+    (init-field
+      (shuffle (-> (Listof Card) (Listof Card)) #:optional)
+      (random-bulls (-> Bulls) #:optional))
+    (draw-card
+     ;; effect: pick and return one card from the pool of cards
+     (-> Card))
+    (draw-hand
+     ;; effect: pick and return HAND cards from the pool of cards
+     (-> Hand))))
+(define-type CardPool (Instance CardPool%))
+(define-type Hand (Listof Card))
+
+
+(provide Stack)
+(define-type Stack
+  (Listof Card))
+
+(provide BaseDeck%
+         PlayerDeck%
+         DealerDeck%
+         Deck%
+         BaseDeck
+         PlayerDeck
+         DealerDeck
+         Deck)
+
+(define-type BaseDeck%
+    (Class
+      (init-field (cards0 (Listof Card)))
+      (field (my-stacks (Listof Stack)))))
+(define-type PlayerDeck%
+    (Class ;; for player
+      #:implements/inits BaseDeck%
+      (fewest-bulls (-> Stack))))
+(define-type DealerDeck%
+    (Class ;; for dealer
+      #:implements/inits BaseDeck%
+      (fit (-> Card Stack))
+      (push (-> Card Void))
+      (replace (-> Stack Card Natural))
+      (replace-stack (-> Card (U Card (Listof Card)) Natural))
+      (larger-than-some-top-of-stacks? (-> Card Boolean))))
+(define-type Deck%
+    (Class
+      #:implements/inits BaseDeck%
+      (fewest-bulls (-> Stack))
+      (fit (-> Card Stack))
+      (push (-> Card Void))
+      (replace (-> Stack Card Natural))
+      (replace-stack (-> Card (U Card (Listof Card)) Natural))
+      (larger-than-some-top-of-stacks? (-> Card Boolean))))
+
+(define-type BaseDeck (Instance BaseDeck%))
+(define-type PlayerDeck (Instance PlayerDeck%))
+(define-type DealerDeck (Instance DealerDeck%))
+(define-type Deck (Instance Deck%))
+
+
+(provide Result
+         Internal%
+         Internal
+         Dealer%
+         Dealer)
+(define-type Result (List (List Symbol Natural) (Listof (List Name Natural))))
+
+;; (sad face)
+(define-type Internal%
+  (Class
+    #:implements Player%
+    (init-field [player Player])
+    (field [my-bulls Natural])
+    (bulls (-> Natural))
+    (add-score (-> Natural Void))))
+(define-type Internal (Instance Internal%))
+
+(define-type Dealer%
+  (Class
+    (init-field (players (Listof Player)))
+    (field
+     (internal% Internal%)
+     (internals (Listof Internal)))
+    (present-results (-> Natural Result))
+    (any-player-done? (-> Boolean))
+    (play-round (-> (-> (Listof Card) (Listof Card)) (-> Bulls) Void))
+    (play-game (->* ()  ((-> (Listof Card) (Listof Card)) (-> Bulls)) Result))))
+(define-type Dealer (Instance Dealer%))
+
+
+(provide Player%
+         Player)
+(define-type Player%
+  (Class
+    (init-field
+      (n Name)
+      (order (-> (Listof Card) (Listof Card)) #:optional))
+    (field [my-cards [Listof Card]])
+    (name (-> Name))
+    (start-round (-> (Listof Card) Void))
+    (start-turn (-> Deck Card))
+    (choose (-> Deck Stack))))
+(define-type Player (Instance Player%))
 
 (struct card (
  [face : Face]

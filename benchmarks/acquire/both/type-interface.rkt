@@ -1,7 +1,19 @@
 #lang typed/racket
 
 (require "../../../utilities/require-typed-check-provide.rkt"
-         "../base/types.rkt")
+         #;"../base/types.rkt")
+
+(define-type Hotel String)
+(define-type Share Integer)
+(define-type Shares (HashTable Hotel Share))
+(define-type Color Symbol)
+(define-type Cash Natural)
+(define-type M*ority (U 'majority 'minority))
+(define-type Column Natural)
+(define-type Row Symbol)
+(define-type SpotType (U 'FOUNDING 'GROWING 'MERGING 'SINGLETON 'IMPOSSIBLE))
+(define-type Kind (U 'FOUNDING 'GROWING 'MERGING 'SINGLETON))
+(define-type Content (U Hotel 'UNTAKEN 'taken-no-hotel))
 
 (provide Board
          Decisions
