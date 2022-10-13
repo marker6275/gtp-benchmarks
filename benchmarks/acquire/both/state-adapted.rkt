@@ -37,8 +37,8 @@
 (require/typed/check "state.rkt"
   (score? (-> Any Boolean))
   ;; --
-  (*create-player (-> String Cash Shares (Listof Tile) Any #;Player))
-  (player0 (-> String Tile Tile Tile Tile Tile Tile (Instance Player%) Any #;Player))
+  (*create-player (-> String Cash Shares (Listof Tile) Player))
+  (player0 (-> String Tile Tile Tile Tile Tile Tile (Instance Player%) Player))
   (state0 (-> Player * State))
   (state-sub-shares (-> State Shares State))
   (*cs0 (-> String * State))
