@@ -14,6 +14,14 @@
 ;; purposes.
 ;; (http://download.plt-scheme.org/doc/299.400/html/mzscheme/mzscheme-Z-H-11.html#node_sec_11.2.10)
 
+(struct label (datum i j)
+  #:mutable
+  #:prefab)
+(struct suffix-tree (root)
+  #:prefab)
+(struct node (up-label parent children suffix-link)
+  #:mutable
+  #:prefab)
 
 ;; label-element? object -> true
 ;; Every value is considered to be a possible label-element.

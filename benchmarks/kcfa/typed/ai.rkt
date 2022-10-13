@@ -11,6 +11,44 @@
   (only-in racket/match match-define)
 )
 
+(struct Stx
+  ([label : Symbol])
+  #:prefab)
+
+(struct exp Stx ()
+  #:prefab)
+
+(struct Ref exp
+ ([var : Symbol])
+  #:prefab)
+
+(struct Lam exp
+ ([formals : (Listof Symbol)]
+  [call : (U exp Ref Lam Call)])
+  #:prefab)
+
+(struct Call Stx
+ ([fun : (U exp Ref Lam Call)]
+  [args : (Listof (U exp Ref Lam Call))])
+  #:prefab)
+
+(struct Closure
+ ([lam : Lam]
+  [benv : BEnv])
+  #:prefab)
+
+(struct Binding
+ ([var : Var]
+  [time : Time])
+  #:prefab)
+
+(struct State
+ ([call : Exp]
+  [benv : BEnv]
+  [store : Store]
+  [time : Time])
+  #:prefab)
+
 ;; ---
 
 (provide
@@ -25,9 +63,9 @@
 (define ((atom-eval benv store) id)
   (cond
     [(Ref? id)
-     (store-lookup store (benv-lookup benv (Ref-var id)))]
+     (store-lookup store (benv-lookup benv (Ref-var (cast id Ref))))]
     [(Lam? id)
-     (set (Closure id benv))]
+     (set (Closure (cast id Lam) benv))]
     [else
      (error "atom-eval got a plain Exp")]))
 

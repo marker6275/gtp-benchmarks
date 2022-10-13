@@ -9,7 +9,6 @@
 (provide
  score?
 
- (struct-out player)
  ; player?
  ; ;; (-> Any Boolean)
  ; player-money
@@ -31,7 +30,6 @@
  ;; Precondition: distinct tiles
  ;; Precondition: (<= STARTER-TILES# (length tiles))
 
- (struct-out state)
  ;; state?
  ;; ;; (-> Any Boolean)
  ;; state-hotels
@@ -176,7 +174,7 @@
   money
   shares
   external
-) #:transparent)
+) #:prefab)
 ;; Player = (player String [Listof Tile] Amount Shares)
 ;; Amount = Nat
 ;; (player t a s) is the represetation of a player 
@@ -236,7 +234,7 @@
   hotels
   shares
   bad
-) #:transparent)
+) #:prefab)
 ;; State  = (state Board [Listof Player] [Listof Hotel] Shares [Listof Player])
 ;; (state b p t h s bad) is a representation of a game state: 
 ;; -- b is the current board 

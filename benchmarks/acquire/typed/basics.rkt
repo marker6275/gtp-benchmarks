@@ -194,12 +194,13 @@
 
 (: player-shares0 Shares)
 (define player-shares0
-  (make-hash (for/list : (Listof (Pairof Hotel Share))
+  (make-immutable-hash (for/list : (Listof (Pairof Hotel Share))
                        ([h (in-list ALL-HOTELS)])
                (cons h 0))))
 
+(: banker-shares0 Shares)
 (define banker-shares0
-  (make-hash (for/list : (Listof (Pairof Hotel Share))
+  (make-immutable-hash (for/list : (Listof (Pairof Hotel Share))
                        ([h (in-list ALL-HOTELS)])
                (cons h SHARES0))))
 

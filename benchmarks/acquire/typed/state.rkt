@@ -9,7 +9,6 @@
 (provide
  score?
 
- (struct-out player)
  ; player?
  ; ;; (-> Any Boolean)
  ; player-money
@@ -31,7 +30,6 @@
  ;; Precondition: distinct tiles
  ;; Precondition: (<= STARTER-TILES# (length tiles))
 
- (struct-out state)
  ;; state?
  ;; ;; (-> Any Boolean)
  ;; state-hotels
@@ -171,6 +169,20 @@
 ;; -----------------------------------------------------------------------------
 ;;bg; duplicated in state-adapted.rkt
 
+(struct tile
+    ([column : Column]
+     [row : Row])
+    #:prefab
+    #:type-name Tile)
+(struct player (
+  [name : String]
+  [tiles : (Listof Tile)]
+  [money : Cash]
+  [shares : Shares]
+  [external : (Option (Instance Player%))])
+  #:prefab
+  #:type-name Player)
+
 (define-type Decisions (Listof (List Player (Listof (List Hotel Boolean)))))
 
 (define-type Administrator%
@@ -223,14 +235,7 @@
 
 ;; ---------------------------------------------------------------------------------------------------
 ;; DATA: 
-(define-type Player player)
-(struct player (
-  [name : String]
-  [tiles : (Listof Tile)]
-  [money : Cash]
-  [shares : Shares]
-  [external : (Option (Instance Player%))]
-) #:transparent)
+
 ;; Player = (player String [Listof Tile] Amount Shares)
 ;; Amount = Nat
 ;; (player t a s) is the represetation of a player 
@@ -297,9 +302,9 @@
   [tiles : (Listof Tile)]
   [hotels : (Listof Hotel)]
   [shares : Shares]
-  [bad : (Listof Player)]
-) #:transparent)
-(define-type State state)
+  [bad : (Listof Player)])
+  #:prefab
+  #:type-name State)
 ;; State  = (state Board [Listof Player] [Listof Hotel] Shares [Listof Player])
 ;; (state b p t h s bad) is a representation of a game state: 
 ;; -- b is the current board 
@@ -316,13 +321,15 @@
 
 (: ext:state0 (-> Player * State))
 (define (ext:state0 . p)
-  (unless (distinct (apply append (map player-tiles p)))
+  (unless (distinct (apply (inst append Tile)
+                           ((inst map (Listof Tile) Player) player-tiles p)))
     (error 'state0 (format "Precondition: distinct tiles for players ~a" p)))
   (apply state0 p))
 
 (: state0 (-> Player * State))
 (define (state0 . p)
-  (define tiles-owned-by-players (apply append (map player-tiles p)))
+  (define tiles-owned-by-players (apply (inst append Tile)
+                                        ((inst map (Listof Tile) Player) player-tiles p)))
   (define tiles-in-pool (remove* tiles-owned-by-players ALL-TILES))
   (state (make-board) p tiles-in-pool ALL-HOTELS banker-shares0 '()))
 
@@ -355,9 +362,9 @@
 
 (: ext:*create-state (-> Board (Listof Player) State))
 (define (ext:*create-state b lp)
-  (unless (shares-combinable? (map player-shares lp))
+  (unless (shares-combinable? ((inst map Shares Player) player-shares lp))
     (error 'create-state))
-  (unless (distinct (apply append (board-tiles b) (map player-tiles lp)))
+  (unless (distinct (apply (inst append Tile) (board-tiles b) ((inst map (Listof Tile) Player) player-tiles lp)))
     (error 'create-state "precond"))
   (*create-state b lp))
 
@@ -373,7 +380,7 @@
       (player-shares p)))
   (define remaining-shares 
     (for/fold : Shares
-              ((remaining-shares banker-shares0))
+              ((remaining-shares : Shares banker-shares0))
               [(s : Shares (in-list players-shares))]
       (shares-minus remaining-shares s)))
   (define remaining-hotels 
@@ -382,7 +389,7 @@
                #:when (= (size-of-hotel board h) 0))
       h))
   (define remaining-tiles 
-    (remove* (apply append (board-tiles board) (map player-tiles players)) ALL-TILES))
+    (remove* (apply (inst append Tile) (board-tiles board) ((inst map (Listof Tile) Player) player-tiles players)) ALL-TILES))
   (state board players remaining-tiles remaining-hotels remaining-shares '()))
 
 (: ext:state-place-tile (->* (State Tile) ((Option Hotel)) State))

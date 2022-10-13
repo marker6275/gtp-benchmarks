@@ -15,7 +15,7 @@
 ;; -----------------------------------------------------------------------------
 
 (provide
-  (struct-out State)
+  ;; (struct-out State)
   d-bot
   d-join
   empty-store
@@ -37,7 +37,8 @@
  ([call : Exp]
   [benv : BEnv]
   [store : Store]
-  [time : Time]))
+  [time : Time])
+  #:prefab)
 
 ;; -- public
 

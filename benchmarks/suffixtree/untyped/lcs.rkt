@@ -7,6 +7,14 @@
 
 (define false-thunk (lambda () #f))
 
+(struct label (datum i j)
+  #:mutable
+  #:prefab)
+(struct suffix-tree (root)
+  #:prefab)
+(struct node (up-label parent children suffix-link)
+  #:mutable
+  #:prefab)
 
 ;; longest-common-substring: string string -> string
 ;; Returns the longest common substring between the two strings.

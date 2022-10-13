@@ -5,6 +5,31 @@
 (reprovide (except-in "typed-data.rkt" make-label))
 
 ;; Commented exports unused by client.
+(struct label ([datum : (Vectorof (U Char Symbol))] [i : Natural] [j : Natural])
+  #:mutable
+  #:prefab
+  #:type-name Label)
+
+;; A suffix tree consists of a root node.
+(struct suffix-tree ([root : Node])
+  #:prefab
+  #:type-name Tree)
+
+;; up-label: label
+;; parent: (union #f node)
+;; children: (listof node)
+;; suffix-link: (union #f node)
+(struct node ([up-label : Label] [parent : (U #f Node)] [children : (Listof Node)] [suffix-link : (U #f Node)])
+  #:mutable
+  #:prefab
+  #:type-name Node)
+
+(provide (struct-out label)
+         Label
+         (struct-out suffix-tree)
+         Tree
+         (struct-out node)
+         Node)
 
 (require/typed/check/provide
  "label.rkt"

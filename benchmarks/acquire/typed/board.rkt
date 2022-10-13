@@ -11,7 +11,6 @@
 ;; ---------------------------------------------------------------------------------------------------
 (provide
 
- (struct-out tile)
  ; tile?
  ; ;; (-> Any Boolean)
 
@@ -117,7 +116,7 @@
   (randomly-pick (All (A) (-> (Listof A) A)))
 )
 
-(define-type Board (HashTable Tile Content))
+(define-type Board (Immutable-HashTable Tile Content))
 (define-type HT (Listof Tile)) ;; Should have at least 2 members
 
 ;; =============================================================================
@@ -251,11 +250,11 @@
   (define CELL-SIZE 66)
   
   ;; ---------------------------------------------------------------------------------------------------
-  (define-type Tile tile)
   (struct tile
     ([column : Column]
-     [row : Row]
-     ) #:transparent)
+     [row : Row])
+    #:prefab
+    #:type-name Tile)
 
   (: TILE-SIZE Natural)
   (define TILE-SIZE (assert (- CELL-SIZE 3) exact-nonnegative-integer?))

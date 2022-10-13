@@ -11,7 +11,6 @@
 ;; ---------------------------------------------------------------------------------------------------
 (provide
 
- (struct-out tile)
  ; tile?
  ; ;; (-> Any Boolean)
 
@@ -224,7 +223,7 @@
   (struct tile
     (column
      row
-     ) #:transparent)
+     ) #:prefab)
 
   (define TILE-SIZE (assert (- CELL-SIZE 3) exact-nonnegative-integer?))
   (define TILE-COLOR 'gray)

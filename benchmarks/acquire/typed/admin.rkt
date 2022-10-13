@@ -31,6 +31,29 @@
   (shares-order? (-> Any Boolean))
 )
 
+(struct tile
+    ([column : Column]
+     [row : Row])
+    #:prefab
+    #:type-name Tile)
+(struct player (
+  [name : String]
+  [tiles : (Listof Tile)]
+  [money : Cash]
+  [shares : Shares]
+  [external : (Option (Instance Player%))])
+  #:prefab
+  #:type-name Player)
+(struct state (
+  [board : Board]
+  [players : (Listof Player)]
+  [tiles : (Listof Tile)]
+  [hotels : (Listof Hotel)]
+  [shares : Shares]
+  [bad : (Listof Player)])
+  #:prefab
+  #:type-name State)
+
 ;; =============================================================================
 ;; from sandbox.rkt
 

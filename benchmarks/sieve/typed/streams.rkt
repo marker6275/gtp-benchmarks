@@ -3,14 +3,14 @@
 ;; Simple streams library.
 ;; For building and using infinite lists.
 
-(provide (struct-out stream)
-         make-stream
+(provide make-stream
          stream-unfold
          stream-get
          stream-take)
 
 ;; ;; A stream is a cons of a value and a thunk that computes the next value when applied
-(struct: stream ([first : Natural] [rest : (-> stream)]))
+(struct: stream ([first : Natural] [rest : (-> stream)])
+  #:prefab)
 
 ;;--------------------------------------------------------------------------------------------------
 

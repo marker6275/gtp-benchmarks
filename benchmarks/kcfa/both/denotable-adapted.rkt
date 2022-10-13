@@ -8,11 +8,11 @@
 )
 
 (require/typed/check "denotable.rkt"
-  [#:struct State
-    ([call : Exp]
-     [benv : BEnv]
-     [store : Store]
-     [time : Time])]
+  ;; [#:struct State
+  ;;   ([call : Exp]
+  ;;    [benv : BEnv]
+  ;;    [store : Store]
+  ;;    [time : Time])]
    [d-bot Denotable]
    [d-join (-> Denotable Denotable Denotable)]
    [empty-store Store]
@@ -27,7 +27,7 @@
 (provide
   Denotable
   Store
-  (struct-out State)
+  ;; (struct-out State)
   d-bot
   d-join
   empty-store

@@ -89,7 +89,7 @@
     ;; effect: reduce the turn's banker-shares by the shares of this.*bad players
     (: reconcile (-> (Instance Turn%) (Instance Turn%)))
     (define/private (reconcile turn)
-      (define bad-shares (*combine-shares (map player-shares *bad)))
+      (define bad-shares (*combine-shares ((inst map Shares Player) player-shares *bad)))
       (send turn reconcile-shares bad-shares)
       turn)))
 

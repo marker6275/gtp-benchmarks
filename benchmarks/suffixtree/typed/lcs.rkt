@@ -17,7 +17,7 @@
   (label->string (longest-common-sublabel (string->label/with-sentinel s1)
                                           (string->label/with-sentinel s2))))
 
-;; longest-common-sublabel: label label -> label
+;; longest-common-sublabel: Label label -> label
 ;;
 ;; Naive use of suffix trees to find longest common sublabel between
 ;; two labels.  Note that there's a better way to do this with

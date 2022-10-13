@@ -3,8 +3,7 @@
 ;; Simple streams library.
 ;; For building and using infinite lists.
 
-(provide (struct-out stream)
-         make-stream
+(provide make-stream
          stream-unfold
          stream-get
          stream-take)

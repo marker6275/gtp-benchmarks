@@ -17,6 +17,14 @@
  node-up-splice-leaf!
  node-follow/k)
 
+(struct label (datum i j)
+  #:mutable
+  #:prefab)
+(struct suffix-tree (root)
+  #:prefab)
+(struct node (up-label parent children suffix-link)
+  #:mutable
+  #:prefab)
 
 ;; new-suffix-tree: void -> suffix-tree
 ;; Builds a new empty suffix-tree.

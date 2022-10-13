@@ -2,8 +2,6 @@
 
 (provide
  Board
- Tile
- tile?
  tile<=?
  tile->string
  ALL-TILES
@@ -34,11 +32,14 @@
  require-typed-check
  "../base/types.rkt")
 
-(define-type Board (HashTable Tile Content))
-(define-type Tile tile)
+(struct tile
+    ([column : Column]
+     [row : Row])
+    #:prefab
+    #:type-name Tile)
+(define-type Board (Immutable-HashTable Tile Content))
 (define board? hash?)
 (require/typed/check "board.rkt"
-  (#:struct tile ([column : Column] [row : Row]))
   (tile<=? (-> Tile Tile Boolean))
   (tile->string (-> Tile String))
   (ALL-TILES (Listof Tile))

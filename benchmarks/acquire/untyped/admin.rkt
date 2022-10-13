@@ -27,6 +27,25 @@
   shares?
   shares-order?
 ))
+(struct tile
+    (column
+     row
+     ) #:prefab)
+(struct player (
+  name
+  tiles
+  money
+  shares
+  external
+  ) #:prefab)
+(struct state (
+  board
+  players
+  tiles
+  hotels
+  shares
+  bad
+) #:prefab)
 
 ;; =============================================================================
 ;; from sandbox.rkt

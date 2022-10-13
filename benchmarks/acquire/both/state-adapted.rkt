@@ -12,24 +12,33 @@
  "../base/types.rkt"
  typed/racket/class)
 
+(struct tile
+    ([column : Column]
+     [row : Row])
+    #:prefab
+    #:type-name Tile)
+(struct player (
+  [name : String]
+  [tiles : (Listof Tile)]
+  [money : Cash]
+  [shares : Shares]
+  [external : (Option (Instance Player%))])
+  #:prefab
+  #:type-name Player)
+(struct state (
+  [board : Board]
+  [players : (Listof Player)]
+  [tiles : (Listof Tile)]
+  [hotels : (Listof Hotel)]
+  [shares : Shares]
+  [bad : (Listof Player)])
+  #:prefab
+  #:type-name State)
 (require/typed/check "state.rkt"
   (score? (-> Any Boolean))
-  (#:struct player (
-    [name : String]
-    [tiles : (Listof Tile)]
-    [money : Cash]
-    [shares : Shares]
-    [external : (Option (Instance Player%))]))
-  (#:struct state
-   ([board : Board]
-    [players : (Listof Player)]
-    [tiles : (Listof Tile)]
-    [hotels : (Listof Hotel)]
-    [shares : Shares]
-    [bad : (Listof Player)]))
   ;; --
-  (*create-player (-> String Cash Shares (Listof Tile) Player))
-  (player0 (-> String Tile Tile Tile Tile Tile Tile (Instance Player%) Player))
+  (*create-player (-> String Cash Shares (Listof Tile) Any #;Player))
+  (player0 (-> String Tile Tile Tile Tile Tile Tile (Instance Player%) Any #;Player))
   (state0 (-> Player * State))
   (state-sub-shares (-> State Shares State))
   (*cs0 (-> String * State))
@@ -46,8 +55,6 @@
   (state-final? (-> State Boolean))
 )
 
-(define-type State state)
-(define-type Player player)
 
 ;; -----------------------------------------------------------------------------
 
@@ -104,21 +111,9 @@
 ;; -----------------------------------------------------------------------------
 
 (provide
- player?
- player-money
- player-tiles
- player-shares
- player-external
- player-name
  player0
  *create-player
- state?
- state-hotels
- state-shares
  state-sub-shares
- state-tiles
- state-board
- state-players
  state-current-player
  state0
  state-place-tile
@@ -134,8 +129,6 @@
  *cs0
  ;; --
  Score
- Player
- State
  Decisions
  ;; --
  Administrator%

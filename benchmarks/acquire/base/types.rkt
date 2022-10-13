@@ -16,7 +16,7 @@
 
 (define-type Hotel String)
 (define-type Share Integer)
-(define-type Shares (HashTable Hotel Share))
+(define-type Shares (Immutable-HashTable Hotel Share))
 (define-type Color Symbol)
 (define-type Cash Natural)
 (define-type M*ority (U 'majority 'minority))

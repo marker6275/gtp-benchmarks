@@ -23,8 +23,37 @@
                       RunResult
                       Strategy))
 
+(struct tile
+    ([column : Column]
+     [row : Row])
+    #:prefab
+    #:type-name Tile)
+(struct player (
+  [name : String]
+  [tiles : (Listof Tile)]
+  [money : Cash]
+  [shares : Shares]
+  [external : (Option (Instance Player%))])
+  #:prefab
+  #:type-name Player)
+(struct state (
+  [board : Board]
+  [players : (Listof Player)]
+  [tiles : (Listof Tile)]
+  [hotels : (Listof Hotel)]
+  [shares : Shares]
+  [bad : (Listof Player)])
+  #:prefab
+  #:type-name State)
+(provide (struct-out tile)
+         Tile
+         (struct-out player)
+         Player
+         (struct-out state)
+         State)
 
-(define-type Board (HashTable Tile Content))
+
+(define-type Board (Immutable-HashTable Tile Content))
 
 (define-type Decisions (Listof (List Player (Listof (List Hotel Boolean)))))
 (define-type Score (Listof (List String Cash)))

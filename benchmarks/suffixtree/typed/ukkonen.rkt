@@ -8,6 +8,26 @@
  (except-in "typed-data.rkt" make-label)
  require-typed-check
 )
+
+(struct label ([datum : (Vectorof (U Char Symbol))] [i : Natural] [j : Natural])
+  #:mutable
+  #:prefab
+  #:type-name Label)
+
+;; A suffix tree consists of a root node.
+(struct suffix-tree ([root : Node])
+  #:prefab
+  #:type-name Tree)
+
+;; up-label: label
+;; parent: (union #f node)
+;; children: (listof node)
+;; suffix-link: (union #f node)
+(struct node ([up-label : Label] [parent : (U #f Node)] [children : (Listof Node)] [suffix-link : (U #f Node)])
+  #:mutable
+  #:prefab
+  #:type-name Node)
+
 (require/typed/check "label.rkt"
   [label-length (-> Label Index)]
   [label-ref (-> Label Integer (U Symbol Char))]

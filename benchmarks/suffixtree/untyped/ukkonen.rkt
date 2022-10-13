@@ -9,6 +9,15 @@
   (except-in "data.rkt" make-label)
   "label.rkt")
 
+(struct label (datum i j)
+  #:mutable
+  #:prefab)
+(struct suffix-tree (root)
+  #:prefab)
+(struct node (up-label parent children suffix-link)
+  #:mutable
+  #:prefab)
+
 (define dummy-node (make-node (make-label "dummy") #f '() #f))
 
 
