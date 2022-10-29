@@ -15,6 +15,18 @@
 (define-type Kind (U 'FOUNDING 'GROWING 'MERGING 'SINGLETON))
 (define-type Content (U Hotel 'UNTAKEN 'taken-no-hotel))
 
+(provide Hotel
+         Share
+         Shares
+         Color
+         Cash
+         M*ority
+         Column
+         Row
+         SpotType
+         Kind
+         Content)
+
 (provide Board
          Decisions
          Score

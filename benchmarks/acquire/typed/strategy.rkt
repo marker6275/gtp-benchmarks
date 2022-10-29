@@ -13,7 +13,7 @@
 
 (require
  require-typed-check
- "../base/types.rkt"
+ ;; "../base/types.rkt"
  "type-interface.rkt"
  )
 
