@@ -21,7 +21,11 @@
 (define-type BaseDeck%
     (Class
       (init-field (cards0 (Listof Card)))
-      (field (my-stacks (Listof Stack)))))
+      (field (my-stacks (Listof Stack)))
+      (get-field:cards0 (-> (Listof Card)))
+      (get-field:my-stacks (-> (Listof Stack)))
+      (set-field:cards0 (-> (Listof Card) Void))
+      (set-field:my-stacks (-> (Listof Stack) Void))))
 (define-type PlayerDeck%
     (Class ;; for player
       #:implements/inits BaseDeck%

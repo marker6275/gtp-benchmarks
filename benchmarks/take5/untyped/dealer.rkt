@@ -64,18 +64,29 @@
         (init-field player)
         (super-new [n (send player name)] [order default-order])
         (field [my-bulls 0])
-        (define/public (bulls) (get-field my-bulls this))
+        (define/public (get-field:player) player)
+        (define/public (get-field:my-bulls) my-bulls)
+        (define/public (set-field:player v) (set! player v))
+        (define/public (set-field:my-bulls v) (set! my-bulls v))
+        (define/public (bulls) (send this get-field:my-bulls))
         (define/public (add-score n)
-          (set-field! my-bulls this (+ n (get-field my-bulls this)))))]
+          (send this set-field:my-bulls (+ n (send this get-field:my-bulls)))))]
      [internals (for/list
-                          ([p (in-list (get-field players this))])
+                          ([p (in-list (send this get-field:players))])
                   (new internal% [player p]))])
+
+    (define/public (get-field:players) players)
+    (define/public (get-field:internal%) internal%)
+    (define/public (get-field:internals) internals)
+    (define/public (set-field:players v) (set! players v))
+    (define/public (set-field:internal% v) (set! internal% v))
+    (define/public (set-field:internals v) (set! internals v))
 
     ;; ---------------------------------------------------------------------------------------------
     ;; running a game 
 
     (define/public (play-game (shuffle values) (faces default-faces))
-      (define n (length (get-field internals this)))
+      (define n (length (send this get-field:internals)))
       (when (> (+ (* n HAND) STACKS) FACE)
         (error 'play-game "cannot play with ~a players; more cards needed" n))
 
@@ -88,7 +99,7 @@
     (define/public (present-results i)
       (define sorted
         (sort
-         (get-field internals this) < #:key (lambda (i ) (send i bulls))))
+         (send this get-field:internals) < #:key (lambda (i ) (send i bulls))))
       `((after-round ,i)
         ,(for/list
             ([p  (in-list sorted)])
@@ -96,7 +107,7 @@
 
     (define/public (any-player-done?)
       (for/or
-              ((p  (in-list (get-field internals this))))
+              ((p  (in-list (send this get-field:internals))))
         (> (send p bulls) SIXTYSIX)))
 
     (define/public (play-round shuffle faces)
@@ -107,13 +118,13 @@
         (play-turn deck)))
 
     (define/private (deal-cards card-pool)
-      (for ((p  (in-list (get-field internals this))))
+      (for ((p  (in-list (send this get-field:internals))))
         (send p start-round (send card-pool draw-hand))))
 
     (define/private (play-turn deck)
       (define played-cards
         (for/list
-                  ((p  (in-list (get-field internals this))))
+                  ((p  (in-list (send this get-field:internals))))
           (list p (send p start-turn deck))))
       (define sorted-played-cards
         (sort played-cards < #:key (lambda (x) (card-face (second x)))))

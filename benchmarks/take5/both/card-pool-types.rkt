@@ -22,6 +22,11 @@
     (init-field
       (shuffle (-> (Listof Card) (Listof Card)) #:optional)
       (random-bulls (-> Bulls) #:optional))
+    (get-field:shuffle (-> (-> (Listof Card) (Listof Card))))
+    (get-field:random-bulls (-> (-> Bulls)))
+    (set-field:shuffle (-> (-> (Listof Card) (Listof Card)) Void))
+    (set-field:random-bulls (-> (-> Bulls) Void))
+
     (draw-card
      ;; effect: pick and return one card from the pool of cards
      (-> Card))

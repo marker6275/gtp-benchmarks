@@ -51,7 +51,7 @@
     (super-new)
 
     ;; [Listof Stack]
-    (set-field! my-stacks this (map (lambda (c) (list c)) cards0))
+    (send this set-field:my-stacks (map (lambda (c) (list c)) cards0))
     ;(field [my-stacks
 
     (define/public (fit c)
@@ -93,5 +93,10 @@
      cards0)
 
     (field (my-stacks '()))
+
+    (define/public (get-field:cards0) cards0)
+    (define/public (get-field:my-stacks) my-stacks)
+    (define/public (set-field:cards0 v) (set! cards0 v))
+    (define/public (set-field:my-stacks v) (set! my-stacks v))
 
     (super-new)))

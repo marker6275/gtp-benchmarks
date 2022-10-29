@@ -46,6 +46,10 @@
 (define card-pool%
   (class object%
     (init-field (shuffle shuffle) (random-bulls random-bulls))
+    (define/public (get-field:shuffle) shuffle)
+    (define/public (get-field:random-bulls) random-bulls)
+    (define/public (set-field:shuffle v) (set! shuffle v))
+    (define/public (set-field:random-bulls v) (set! random-bulls v))
     (super-new)
 
     (define my-cards

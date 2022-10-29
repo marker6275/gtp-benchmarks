@@ -26,6 +26,11 @@
     (init-field
       (shuffle (-> (Listof Card) (Listof Card)) #:optional)
       (random-bulls (-> Bulls) #:optional))
+    (get-field:shuffle (-> (-> (Listof Card) (Listof Card))))
+    (get-field:random-bulls (-> (-> Bulls)))
+    (set-field:shuffle (-> (-> (Listof Card) (Listof Card)) Void))
+    (set-field:random-bulls (-> (-> Bulls) Void))
+
     (draw-card
      ;; effect: pick and return one card from the pool of cards
      (-> Card))
@@ -52,7 +57,11 @@
 (define-type BaseDeck%
     (Class
       (init-field (cards0 (Listof Card)))
-      (field (my-stacks (Listof Stack)))))
+      (field (my-stacks (Listof Stack)))
+      (get-field:cards0 (-> (Listof Card)))
+      (get-field:my-stacks (-> (Listof Stack)))
+      (set-field:cards0 (-> (Listof Card) Void))
+      (set-field:my-stacks (-> (Listof Stack) Void))))
 (define-type PlayerDeck%
     (Class ;; for player
       #:implements/inits BaseDeck%
@@ -94,6 +103,11 @@
     #:implements Player%
     (init-field [player Player])
     (field [my-bulls Natural])
+    (get-field:player (-> Player))
+    (get-field:my-bulls (-> Natural))
+    (set-field:player (-> Player Void))
+    (set-field:my-bulls (-> Natural Void))
+
     (bulls (-> Natural))
     (add-score (-> Natural Void))))
 (define-type Internal (Instance Internal%))
@@ -104,6 +118,13 @@
     (field
      (internal% Internal%)
      (internals (Listof Internal)))
+    (get-field:players (-> (Listof Player)))
+    (get-field:internal% (-> Internal%))
+    (get-field:internals (-> (Listof Internal)))
+    (set-field:players (-> (Listof Player) Void))
+    (set-field:internal% (-> Internal% Void))
+    (set-field:internals (-> (Listof Internal) Void))
+
     (present-results (-> Natural Result))
     (any-player-done? (-> Boolean))
     (play-round (-> (-> (Listof Card) (Listof Card)) (-> Bulls) Void))
@@ -119,6 +140,13 @@
       (n Name)
       (order (-> (Listof Card) (Listof Card)) #:optional))
     (field [my-cards [Listof Card]])
+    (get-field:n (-> Name))
+    (get-field:order (-> (-> (Listof Card) (Listof Card))))
+    (get-field:my-cards (-> [Listof Card]))
+    (set-field:n (-> Name Void))
+    (set-field:order (-> (-> (Listof Card) (Listof Card)) Void))
+    (set-field:my-cards (-> [Listof Card] Void))
+
     (name (-> Name))
     (start-round (-> (Listof Card) Void))
     (start-turn (-> Deck Card))

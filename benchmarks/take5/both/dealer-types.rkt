@@ -33,6 +33,11 @@
     #:implements Player%
     (init-field [player Player])
     (field [my-bulls Natural])
+    (get-field:player (-> Player))
+    (get-field:my-bulls (-> Natural))
+    (set-field:player (-> Player Void))
+    (set-field:my-bulls (-> Natural Void))
+
     (bulls (-> Natural))
     (add-score (-> Natural Void))))
 (define-type Internal (Instance Internal%))
@@ -43,6 +48,13 @@
     (field
      (internal% Internal%)
      (internals (Listof Internal)))
+    (get-field:players (-> (Listof Player)))
+    (get-field:internal% (-> Internal%))
+    (get-field:internals (-> (Listof Internal)))
+    (set-field:players (-> (Listof Player) Void))
+    (set-field:internal% (-> Internal% Void))
+    (set-field:internals (-> (Listof Internal) Void))
+
     (present-results (-> Natural Result))
     (any-player-done? (-> Boolean))
     (play-round (-> (-> (Listof Card) (Listof Card)) (-> Bulls) Void))
