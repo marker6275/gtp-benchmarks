@@ -1,4 +1,4 @@
-#lang typed/racket/base
+#lang racket/base
 
 (provide
   min-entry
@@ -10,8 +10,8 @@
 ;; -----------------------------------------------------------------------------
 
 (require
- require-typed-check
- "ocm-struct-adapted.rkt"
+  "../base/untyped.rkt"
+ "ocm-struct.rkt"
  (only-in racket/list argmin)
  (only-in racket/sequence sequence->list)
  (only-in racket/vector vector-drop vector-append)
@@ -19,26 +19,21 @@
 
 ;; =============================================================================
 
-(: index-type? (-> Any Boolean : Index-Type))
 (define (index-type? x)
   (and (exact-integer? x) (<= 0 x)))
 
 (define-logger ocm)
 
-(: select-elements ((Listof Any) (Listof Index-Type) -> (Listof Any)))
 (define (select-elements xs is)
-  (map (λ([i : Index-Type]) ((inst list-ref Any) xs i)) is))
+  (map (λ(i) (list-ref xs i)) is))
 
-(: odd-elements ((Listof Any) -> (Listof Any)))
 (define (odd-elements xs)
   (select-elements xs (sequence->list (in-range 1 (length xs) 2))))
 
-(: vector-odd-elements ((Vectorof Index-Type) -> (Vectorof Index-Type)))
 (define (vector-odd-elements xs)
-  (for/vector : (Vectorof Index-Type) ([i (in-range (vector-length xs))] #:when (odd? i))
+  (for/vector ([i (in-range (vector-length xs))] #:when (odd? i))
     (vector-ref xs i)))
 
-(: even-elements ((Listof Any) -> (Listof Any)))
 (define (even-elements xs)
   (select-elements xs (sequence->list (in-range 0 (length xs) 2))))
 
@@ -51,13 +46,12 @@
 
 
 (define-syntax-rule (vector-append-entry xs value)
-  ((inst vector-append Entry-Type) xs (vector value)))
+  (vector-append xs (vector value)))
 
 (define-syntax-rule (vector-append-index xs value)
-  ((inst vector-append (U Index-Type No-Value-Type)) xs (vector value)))
+  (vector-append xs (vector value)))
 
 
-(: vector-set (All (a) ((Vectorof a) Integer a -> (Vectorof a))))
 (define (vector-set vec idx val)
   (vector-set! vec idx val)
   vec)
@@ -66,11 +60,10 @@
   (vector-drop vec 1))
 
 
-(: reduce2 ((Vectorof Index-Type) (Vectorof Index-Type) Matrix-Proc-Type Entry->Value-Type -> (Vectorof Index-Type)))
 (define (reduce2 row-indices col-indices matrix-proc entry->value)
-  (let find-survivors ([rows row-indices][survivors : (Listof Index-Type) '()])
+  (let find-survivors ([rows row-indices][survivors '()])
     (cond
-      [(= 0 (vector-length rows)) ((inst list->vector Index-Type) (reverse survivors))]
+      [(= 0 (vector-length rows)) (list->vector (reverse survivors))]
       [else
        (define challenger-row (vector-ref rows 0))
        (cond
@@ -100,10 +93,8 @@
 (define minima-idx-key 'row-idx)
 (define minima-payload-key 'entry)
 
-(define-type Make-Minimum-Input (Pair Any Index-Type))
-(: make-minimum (Make-Minimum-Input -> (HashTable Symbol Any)))
 (define (make-minimum value-rowidx-pair)
-  (define ht (ann (make-hash) (HashTable Symbol Any)))
+  (define ht (make-hash))
   (! ht minima-payload-key (car value-rowidx-pair))
   (! ht minima-idx-key (cdr value-rowidx-pair))
   ht)
@@ -114,15 +105,14 @@
 (define-syntax-rule (vector-last v)
   (vector-ref v (sub1 (vector-length v))))
 
-(: interpolate2 ((HashTable Index-Type (HashTable Symbol Any)) (Vectorof Index-Type) (Vectorof Index-Type) Matrix-Proc-Type Entry->Value-Type -> (HashTable Index-Type (HashTable Symbol Any))))
 (define (interpolate2 minima row-indices col-indices matrix-proc entry->value)
   (define idx-of-last-col (sub1 (vector-length col-indices)))
-  (define (smallest-value-entry [col : Index-Type] [idx-of-last-row : Index-Type])
-    ((inst argmin Make-Minimum-Input) (λ(x) (entry->value (car x)))
+  (define (smallest-value-entry col idx-of-last-row)
+    (argmin (λ(x) (entry->value (car x)))
                                       (for/list ([row-idx (stop-after (in-vector row-indices) (λ(x) (= idx-of-last-row x)))])
                                         (cons (matrix-proc row-idx col) row-idx))))
 
-  (for ([([col : Index-Type] col-idx) (in-indexed col-indices)] #:when (even? col-idx))
+  (for ([(col col-idx) (in-indexed col-indices)] #:when (even? col-idx))
     (define idx-of-last-row (assert (if (= col-idx idx-of-last-col)
                                       (vector-last row-indices)
                                       (hash-ref (assert (hash-ref minima (vector-ref col-indices (add1 col-idx))) hash?) minima-idx-key))
@@ -134,13 +124,12 @@
 ;; The return value `minima` is a hash:
 ;; the keys are col-indices (integers)
 ;; the values are pairs of (value row-index).
-(: concave-minima ((Vectorof Index-Type) (Vectorof Index-Type) Matrix-Proc-Type Entry->Value-Type -> (HashTable Index-Type (HashTable Symbol Any))))
 (define (concave-minima row-indices col-indices matrix-proc entry->value)
   ;((vector?) ((or/c #f vector?) procedure? procedure?) . ->* . hash?)
   (define reduce-proc reduce2)
   (define interpolate-proc interpolate2)
   (if (= 0 (vector-length col-indices))
-      (ann (make-hash) (HashTable Index-Type (HashTable Symbol Any)))
+      (make-hash)
       (let ([row-indices (reduce-proc row-indices col-indices matrix-proc entry->value)])
         (define odd-column-minima (concave-minima row-indices (vector-odd-elements col-indices) matrix-proc entry->value))
         (interpolate-proc odd-column-minima row-indices col-indices matrix-proc entry->value))))
@@ -154,13 +143,11 @@
 (define-syntax-rule (! hashtable key value)
   (hash-set! hashtable key value))
 
-(: make-ocm ((Matrix-Proc-Type Entry->Value-Type) (Entry-Type) . ->* . OCM-Type))
 (define (make-ocm matrix-proc entry->value [initial-entry 0.0])
   ;(log-ocm-debug "making new ocm")
   ($ocm (vector initial-entry) (vector no-value) 0 matrix-proc entry->value 0 0))
 
 ;; Return min { Matrix(i,j) | i < j }.
-(: min-entry (OCM-Type Index-Type -> Entry-Type))
 (define (min-entry ocm j)
   (if (< (assert ($ocm-finished ocm) real?) j)
       (begin (advance! ocm) (min-entry ocm j))
@@ -172,14 +159,12 @@
 ;;   (($ocm-entry->value ocm) (min-entry ocm j)))
 
 ;; Return argmin { Matrix(i,j) | i < j }.
-(: min-index (OCM-Type Index-Type -> (U Index-Type No-Value-Type)))
 (define (min-index ocm j)
   (if (< (assert ($ocm-finished ocm) real?) j)
       (begin (advance! ocm) (min-index ocm j))
-      ((inst vector-ref (U Index-Type No-Value-Type)) ($ocm-min-row-indices ocm) j)))
+      (vector-ref ($ocm-min-row-indices ocm) j)))
 
 ;; Finish another value,index pair.
-(: advance! (OCM-Type -> Void))
 (define (advance! ocm)
   (define next (add1 ($ocm-finished ocm)))
   (log-ocm-debug "advance! ocm to next = ~a" (add1 ($ocm-finished ocm)))
@@ -189,19 +174,19 @@
     ;; to the largest square submatrix that fits under the base.
     [(> next ($ocm-tentative ocm))
      (log-ocm-debug "advance: first case because next (~a) > tentative (~a)" next ($ocm-tentative ocm))
-     (define rows : (Vectorof Index-Type) (list->vector (sequence->list (in-range ($ocm-base ocm) next))))
+     (define rows (list->vector (sequence->list (in-range ($ocm-base ocm) next))))
           (set-$ocm-tentative! ocm (+ ($ocm-finished ocm) (vector-length rows)))
-     (define cols : (Vectorof Index-Type) (list->vector (sequence->list (in-range next (add1 ($ocm-tentative ocm))))))
+     (define cols (list->vector (sequence->list (in-range next (add1 ($ocm-tentative ocm))))))
      (define minima (concave-minima rows cols ($ocm-matrix-proc ocm) ($ocm-entry->value ocm)))
 
      (for ([col (in-vector cols)])
        (cond
          [(>= col (vector-length ($ocm-min-entrys ocm)))
-          (set-$ocm-min-entrys! ocm (vector-append-entry ($ocm-min-entrys ocm) (@ (ann (@ minima col) (HashTable Symbol Entry-Type)) minima-payload-key)))
-          (set-$ocm-min-row-indices! ocm (vector-append-index ($ocm-min-row-indices ocm) (assert (@ (ann (@ minima col) (HashTable Symbol Any)) minima-idx-key) index-type?)))]
-         [(< (($ocm-entry->value ocm) (@ (ann (@ minima col) (HashTable Symbol Entry-Type)) minima-payload-key)) (($ocm-entry->value ocm) (vector-ref ($ocm-min-entrys ocm) col)))
-          (set-$ocm-min-entrys! ocm ((inst vector-set Entry-Type) ($ocm-min-entrys ocm) col (@ (ann (@ minima col) (HashTable Symbol Entry-Type)) minima-payload-key)))
-          (set-$ocm-min-row-indices! ocm ((inst vector-set (U Index-Type No-Value-Type)) ($ocm-min-row-indices ocm) col (assert (@ (ann (@ minima col) (HashTable Symbol Any)) minima-idx-key) index-type?)))]))
+          (set-$ocm-min-entrys! ocm (vector-append-entry ($ocm-min-entrys ocm) (@ (@ minima col) minima-payload-key)))
+          (set-$ocm-min-row-indices! ocm (vector-append-index ($ocm-min-row-indices ocm) (assert (@ (@ minima col) minima-idx-key) index-type?)))]
+         [(< (($ocm-entry->value ocm) (@ (@ minima col) minima-payload-key)) (($ocm-entry->value ocm) (vector-ref ($ocm-min-entrys ocm) col)))
+          (set-$ocm-min-entrys! ocm (vector-set ($ocm-min-entrys ocm) col (@ (@ minima col) minima-payload-key)))
+          (set-$ocm-min-row-indices! ocm (vector-set ($ocm-min-row-indices ocm) col (assert (@ (@ minima col) minima-idx-key) index-type?)))]))
 
      (set-$ocm-finished! ocm next)]
 
