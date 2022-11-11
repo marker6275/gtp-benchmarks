@@ -2,14 +2,15 @@
 
 (require "../../../utilities/require-typed-check-provide.rkt")
 
-(provide NEListof
+(provide NEListof-Posn
          Dir)
 
-(define-type (NEListof A) (Pairof A (Listof A)))
+;; (define-type (NEListof A) (Pairof A (Listof A)))
+(define-type NEListof-Posn (Pairof Posn (Listof Posn)))
 (define-type Dir (U "up" "down" "left" "right"))
 
 (struct: snake ([dir  : Dir]
-                [segs : (NEListof Posn)])
+                [segs : NEListof-Posn])
   #:prefab
   #:type-name Snake)
 (struct: world ([snake : Snake]

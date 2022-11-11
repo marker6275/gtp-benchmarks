@@ -3,7 +3,7 @@
 (require "data-adaptor.rkt")
 
 (struct: snake ([dir  : Dir]
-                [segs : (NEListof Posn)])
+                [segs : NEListof-Posn])
   #:prefab
   #:type-name Snake)
 (struct: world ([snake : Snake]
@@ -22,7 +22,7 @@
 
 ;; cut-tail : NeSegs -> Segs
 ;; Cut off the tail.
-(: cut-tail : ((NEListof Posn) . -> . (Listof Posn)))
+(: cut-tail : (NEListof-Posn . -> . (Listof Posn)))
 (define (cut-tail segs)
   (let ([r (cdr segs)])
     (cond [(empty? r) empty]

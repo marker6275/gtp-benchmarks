@@ -4,7 +4,7 @@
          "data-adaptor.rkt")
 
 (struct: snake ([dir  : Dir]
-                [segs : (NEListof Posn)])
+                [segs : NEListof-Posn])
   #:prefab
   #:type-name Snake)
 (struct: world ([snake : Snake]

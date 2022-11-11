@@ -6,11 +6,17 @@
   [#:struct posn ([x : Real]
                   [y : Real])]
   [#:struct snake ([dir : Dir]
-                   [segs : (NEListof Posn)])]
+                   [segs : NEListof-Posn])]
   [#:struct world ([snake : Snake]
                    [food  : Posn])])
 
-(define-type (NEListof A) (Pairof A (Listof A)))
+(struct: posn ([x : Real]
+               [y : Real])
+  #:prefab
+  #:type-name Posn)
+
+;;(define-type (NEListof A) (Pairof A (Listof A)))
+(define-type NEListof-Posn (Pairof Posn (Listof Posn)))
 (define-type Dir (U "up" "down" "left" "right"))
 ;; (define-type Snake snake)
 ;; (define-type World world)
@@ -24,4 +30,4 @@
  ;; Snake
  ;; World
  ;; Posn
- NEListof)
+ NEListof-Posn)

@@ -4,7 +4,7 @@
          "data-adaptor.rkt"
          )
 (struct: snake ([dir  : Dir]
-                [segs : (NEListof Posn)])
+                [segs : NEListof-Posn])
   #:prefab
   #:type-name Snake)
 (struct: world ([snake : Snake]
@@ -17,7 +17,7 @@
   #:prefab
   #:type-name Posn)
 (require/typed/check "cut-tail.rkt"
-                     [cut-tail ((NEListof Posn) . -> . (Listof Posn))])
+                     [cut-tail (NEListof-Posn . -> . (Listof Posn))])
 
 ;; next-head : Posn Direction -> Posn
 ;; Compute next position for head.
