@@ -4,7 +4,10 @@
          file/glob)
 
 (define (grep path pattern)
-  (regexp-match* pattern (file->string path)))
+  (regexp-match* pattern
+                 (regexp-replace* #px"(?m:^;.*$)"
+                                  (file->string path)
+                                  "")))
 
 (define (find-unused-exports bench-dir)
   (define interface-path (build-path bench-dir "both" "type-interface.rkt"))

@@ -43,8 +43,9 @@
 (define-type Time (Listof Label))
 
 (require/typed/check/provide "ai.rkt"
-  (atom-eval (-> BEnv Store (-> Exp Denotable)))
-  (next (-> State (Setof State)))
+                             ;; Unused in client
+  ;; (atom-eval (-> BEnv Store (-> Exp Denotable)))
+  ;; (next (-> State (Setof State)))
   (explore (-> (Setof State) (Listof State) (Setof State)))
   )
 
