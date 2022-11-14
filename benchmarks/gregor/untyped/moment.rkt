@@ -46,11 +46,11 @@
     datetime->jd ;(-> DateTime Exact-Rational)]
     datetime-add-seconds ;(-> DateTime Integer DateTime)]
 ))
-(require (only-in "moment-base.rkt"
+(require (prefix-in : (only-in "moment-base.rkt"
     make-moment ;(-> DateTime Integer (U String #f) Moment)]
     moment->iso8601 ;(-> Moment String)]
     moment->iso8601/tzid ;(-> Moment String)]
-))
+)))
 (require (only-in "offset-resolvers.rkt"
     resolve-offset/raise ;(-> (U tzgap tzoverlap) DateTime (U String #f) (U Moment #f) Moment)]
 ))
@@ -93,6 +93,10 @@
 )
 
 ;; =============================================================================
+
+(define make-moment :make-moment)
+(define moment->iso8601 :moment->iso8601)
+(define moment->iso8601/tzid :moment->iso8601/tzid)
 
 ;(: current-timezone (Parameterof (U tz #f)))
 (define current-timezone (make-parameter (system-tzid)))
