@@ -5,7 +5,7 @@
          reprovide)
 
 (require syntax/parse/define
-         require-typed-check
+         "require-typed-check-transient.rkt"
          (only-in "require-typed-check-provide.rkt"
                   reprovide))
 
