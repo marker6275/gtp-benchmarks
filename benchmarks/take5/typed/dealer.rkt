@@ -73,17 +73,34 @@
 
     (field
      [internal% : Internal%
-      (class player%
+      (class object%
+        (super-new)
         (init-field player)
-        (super-new [n (send player name)] [order default-order])
-        (field [my-bulls 0])
+        (field [n (send player name)]
+               [order default-order]
+               [my-cards empty]
+
+               [my-bulls 0])
+        (define/public (name) n)
+        (define/public (start-round cs) (send player start-round cs))
+        (define/public (start-turn d) (send player start-turn d))
+        (define/public (choose d) (send player choose d))
+
+        (define/public (bulls) (send this get-field:my-bulls))
+        (define/public (add-score n)
+          (send this set-field:my-bulls (+ n (send this get-field:my-bulls))))
+
+        (define/public (get-field:n) (send player get-field:n))
+        (define/public (set-field:n v) (send player set-field:n v))
+        (define/public (get-field:order) (send player get-field:order))
+        (define/public (set-field:order v) (send player set-field:order v))
+        (define/public (get-field:my-cards) (send player get-field:my-cards))
+        (define/public (set-field:my-cards v) (send player set-field:my-cards v))
+
         (define/public (get-field:player) player)
         (define/public (get-field:my-bulls) my-bulls)
         (define/public (set-field:player v) (set! player v))
-        (define/public (set-field:my-bulls v) (set! my-bulls v))
-        (define/public (bulls) (send this get-field:my-bulls))
-        (define/public (add-score n)
-          (send this set-field:my-bulls (+ n (send this get-field:my-bulls)))))]
+        (define/public (set-field:my-bulls v) (set! my-bulls v)))]
      [internals (for/list : (Listof Internal)
                           ([p : Player (in-list (send this get-field:players))])
                   (new internal% [player p]))])
