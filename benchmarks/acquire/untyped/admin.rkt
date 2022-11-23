@@ -43,7 +43,7 @@
                         (lambda (x)
                           (fail
                            (lambda () (failure 'R)))));`(R ,(exn-message x)))))))
-                       (exn:fail?
+                       #;(exn:fail?
                         (lambda (x)
                           (fail
                            (lambda () (failure 'X)))))) ;`(X ,(exn-message x))))))))
@@ -119,8 +119,6 @@
                 [(boolean? tile) 
                  (finish state)
                  (list IMPOSSIBLE (state-score state) (reverse (cons state states)))]
-                [(not hotel-involved)
-                 (error "bad hotel")]
                 [else 
                  (define merger? (eq? (what-kind-of-spot (state-board state) tile) MERGING))
                  (cond
