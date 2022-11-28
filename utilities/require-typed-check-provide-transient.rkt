@@ -1,11 +1,11 @@
 #lang racket
 
 (provide require/typed/check/provide
-         require/typed/check
+         (rename-out [require/typed/check/shallow require/typed/check])
          reprovide)
 
 (require syntax/parse/define
-         "require-typed-check-transient.rkt"
+         require-typed-check/shallow
          (only-in "require-typed-check-provide.rkt"
                   reprovide))
 
@@ -17,7 +17,7 @@
                                                                             (struct-name:id _)} . _]}}
                                                   ...)
   (begin
-    (require/typed/check mod-path clause ...)
+    (require/typed/check/shallow mod-path clause ...)
     (provide {~? name {~@}} ...
              {~? (struct-out struct-name) {~@}} ...)))
 
