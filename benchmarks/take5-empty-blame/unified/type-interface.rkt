@@ -5,9 +5,8 @@
               (path-up "blame-evaluation-gt/mutation-adapter/mutation-adapter.rkt"))
      (require "original-type-interface.rkt")
      (provide (except-out (all-from-out "original-type-interface.rkt") create-dealer player%))
-     (provide (contract-out
-               (create-dealer
-                (delegating->
+     (define create-dealer*
+       (contract (delegating->
                  1
                  (list (cons 0 (delegating-listof (delegating-instanceof (delegating-class/c (list (cons 'order (sealing-adapter))) (list) (list))))))
                  (any/c-adapter)
@@ -150,8 +149,17 @@
                                 (delegating-> 1 (list (cons 0 (delegating-instanceof (delegating-class/c (list (cons 'order (sealing-adapter))) (list) (list))))) (any/c-adapter) (list)))))
                              (delegating-class/c (list (cons 'order (sealing-adapter))) (list) (list)))))))
                         (any/c-adapter)
-                        (list))))))))))
-               (player% (delegating-class/c (list (cons 'order (sealing-adapter))) (list) (list))))))
+                        (list)))))))))
+                 create-dealer
+                 #f
+                 #f))
+     (define player%*
+       (contract (delegating-class/c (list (cons 'order (sealing-adapter))) (list) (list))
+                 player%
+                 #f
+                 #f))
+     (provide (rename-out [create-dealer* create-dealer]
+                          [player%* player%])))
    (require "../../../utilities/require-typed-check-provide-transient.rkt")
    (require "../../../utilities/require-typed-check-provide-transient.rkt")
    (reprovide "card-adapted.rkt")
