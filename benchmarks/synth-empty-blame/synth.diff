@@ -1,0 +1,4 @@
+     (make-array (-> (Vectorof Integer) Float Array))
+-    (unsafe-vector->array (-> Indexes (Vectorof Float) Mutable-Array)))
++    (unsafe-vector->array (-> (Vectorof Float) Indexes Mutable-Array)))
+    (require/typed/check/provide
