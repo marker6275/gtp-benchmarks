@@ -1,0 +1,4 @@
+    (provide Stack)
+-   (define-type Stack (Listof Card))
++   (define-type Stack Any)
+    (provide BaseDeck% PlayerDeck% DealerDeck% Deck% BaseDeck PlayerDeck DealerDeck Deck)
