@@ -1,0 +1,1609 @@
+adaptation: adapted #<procedure:ext:*combine-shares> (357149) to #<procedure:ext:*combine-shares> (357151)
+adaptation: adapted "American" (357155) to '#s(sealed "American") (357154)
+adaptation: adapted "Continental" (357157) to '#s(sealed "Continental") (357156)
+adaptation: adapted "Festival" (357159) to '#s(sealed "Festival") (357158)
+adaptation: adapted "Imperial" (357161) to '#s(sealed "Imperial") (357160)
+adaptation: adapted "Sackson" (357163) to '#s(sealed "Sackson") (357162)
+adaptation: adapted "Tower" (357165) to '#s(sealed "Tower") (357164)
+adaptation: adapted "Worldwide" (357167) to '#s(sealed "Worldwide") (357166)
+adaptation: adapted '("American" "Continental" "Festival" "Imperial" "Sackson" "Tower" "Worldwide") (357002) to '(#s(sealed "American") #s(sealed "Continental") #s(sealed "Festival") #s(sealed "Imperial") #s(sealed "Sackson") #s(sealed "Tower") #s(sealed "Worldwide")) (357168)
+adaptation: adapted #<procedure:string<=?> (357150) to #<procedure:string<=?> (357169)
+adaptation: adapted #<procedure:price-per-share> (357007) to #<procedure:price-per-share> (357170)
+adaptation: adapted #<procedure:ext:shares--> (357009) to #<procedure:ext:shares--> (357171)
+adaptation: adapted #<procedure:shares-available> (357011) to #<procedure:shares-available> (357172)
+adaptation: adapted #<procedure:sign-up method in administrator%> (357174) to #<procedure:sign-up method in administrator%> (357173)
+adaptation: adapted #<class:administrator%> (357147) to #<class:administrator%> (357175)
+adaptation: adapted #<procedure:go method in player%> (357210) to #<procedure:go method in player%> (357209)
+adaptation: adapted #<procedure:take-turn method in player%> (357212) to #<procedure:take-turn method in player%> (357211)
+adaptation: adapted #<procedure:keep method in player%> (357214) to #<procedure:keep method in player%> (357213)
+adaptation: adapted #<class:player%> (357216) to #<class:player%> (357215)
+adaptation: adapted (object:player% ...) (357196) to (object:player% ...) (357224)
+adaptation: adapted #<procedure:go method in player%> (357210) to #<procedure:go method in player%> (357225)
+adaptation: adapted #<procedure:take-turn method in player%> (357212) to #<procedure:take-turn method in player%> (357226)
+adaptation: adapted #<procedure:keep method in player%> (357214) to #<procedure:keep method in player%> (357227)
+adaptation: adapted #<class:player%> (357216) to #<class:player%> (357228)
+adaptation: adapted (object:player% ...) (357230) to (object:player% ...) (357229)
+adaptation: adapted #<procedure:go method in player%> (357210) to #<procedure:go method in player%> (357231)
+adaptation: adapted #<procedure:take-turn method in player%> (357212) to #<procedure:take-turn method in player%> (357232)
+adaptation: adapted #<procedure:keep method in player%> (357214) to #<procedure:keep method in player%> (357233)
+adaptation: adapted #<class:player%> (357216) to #<class:player%> (357234)
+adaptation: adapted (object:player% ...) (357236) to (object:player% ...) (357235)
+adaptation: adapted #<procedure:go method in player%> (357210) to #<procedure:go method in player%> (357237)
+adaptation: adapted #<procedure:take-turn method in player%> (357212) to #<procedure:take-turn method in player%> (357238)
+adaptation: adapted #<procedure:keep method in player%> (357214) to #<procedure:keep method in player%> (357239)
+adaptation: adapted #<class:player%> (357216) to #<class:player%> (357240)
+adaptation: adapted (object:player% ...) (357242) to (object:player% ...) (357241)
+adaptation: adapted #<procedure:go method in player%> (357210) to #<procedure:go method in player%> (357243)
+adaptation: adapted #<procedure:take-turn method in player%> (357212) to #<procedure:take-turn method in player%> (357244)
+adaptation: adapted #<procedure:keep method in player%> (357214) to #<procedure:keep method in player%> (357245)
+adaptation: adapted #<class:player%> (357216) to #<class:player%> (357246)
+adaptation: adapted (object:player% ...) (357248) to (object:player% ...) (357247)
+adaptation: adapted #<procedure:go method in player%> (357210) to #<procedure:go method in player%> (357249)
+adaptation: adapted #<procedure:take-turn method in player%> (357212) to #<procedure:take-turn method in player%> (357250)
+adaptation: adapted #<procedure:keep method in player%> (357214) to #<procedure:keep method in player%> (357251)
+adaptation: adapted #<class:player%> (357216) to #<class:player%> (357252)
+adaptation: adapted (object:player% ...) (357254) to (object:player% ...) (357253)
+adaptation: adapted #<procedure:go method in player%> (357210) to #<procedure:go method in player%> (357255)
+adaptation: adapted #<procedure:take-turn method in player%> (357212) to #<procedure:take-turn method in player%> (357256)
+adaptation: adapted #<procedure:keep method in player%> (357214) to #<procedure:keep method in player%> (357257)
+adaptation: adapted #<class:player%> (357216) to #<class:player%> (357258)
+adaptation: adapted (object:player% ...) (357260) to (object:player% ...) (357259)
+adaptation: adapted #<procedure:go method in player%> (357210) to #<procedure:go method in player%> (357261)
+adaptation: adapted #<procedure:take-turn method in player%> (357212) to #<procedure:take-turn method in player%> (357262)
+adaptation: adapted #<procedure:keep method in player%> (357214) to #<procedure:keep method in player%> (357263)
+adaptation: adapted #<class:player%> (357216) to #<class:player%> (357264)
+adaptation: adapted (object:player% ...) (357266) to (object:player% ...) (357265)
+adaptation: adapted #<procedure:go method in player%> (357210) to #<procedure:go method in player%> (357267)
+adaptation: adapted #<procedure:take-turn method in player%> (357212) to #<procedure:take-turn method in player%> (357268)
+adaptation: adapted #<procedure:keep method in player%> (357214) to #<procedure:keep method in player%> (357269)
+adaptation: adapted #<class:player%> (357216) to #<class:player%> (357270)
+adaptation: adapted (object:player% ...) (357272) to (object:player% ...) (357271)
+adaptation: adapted #<procedure:go method in player%> (357210) to #<procedure:go method in player%> (357273)
+adaptation: adapted #<procedure:take-turn method in player%> (357212) to #<procedure:take-turn method in player%> (357274)
+adaptation: adapted #<procedure:keep method in player%> (357214) to #<procedure:keep method in player%> (357275)
+adaptation: adapted #<class:player%> (357216) to #<class:player%> (357276)
+adaptation: adapted (object:player% ...) (357278) to (object:player% ...) (357277)
+adaptation: adapted #<procedure:go method in player%> (357210) to #<procedure:go method in player%> (357279)
+adaptation: adapted #<procedure:take-turn method in player%> (357212) to #<procedure:take-turn method in player%> (357280)
+adaptation: adapted #<procedure:keep method in player%> (357214) to #<procedure:keep method in player%> (357281)
+adaptation: adapted #<class:player%> (357216) to #<class:player%> (357282)
+adaptation: adapted (object:player% ...) (357284) to (object:player% ...) (357283)
+adaptation: adapted #<procedure:go method in player%> (357210) to #<procedure:go method in player%> (357285)
+adaptation: adapted #<procedure:take-turn method in player%> (357212) to #<procedure:take-turn method in player%> (357286)
+adaptation: adapted #<procedure:keep method in player%> (357214) to #<procedure:keep method in player%> (357287)
+adaptation: adapted #<class:player%> (357216) to #<class:player%> (357288)
+adaptation: adapted (object:player% ...) (357290) to (object:player% ...) (357289)
+adaptation: adapted #<procedure:go method in player%> (357210) to #<procedure:go method in player%> (357291)
+adaptation: adapted #<procedure:take-turn method in player%> (357212) to #<procedure:take-turn method in player%> (357292)
+adaptation: adapted #<procedure:keep method in player%> (357214) to #<procedure:keep method in player%> (357293)
+adaptation: adapted #<class:player%> (357216) to #<class:player%> (357294)
+adaptation: adapted (object:player% ...) (357296) to (object:player% ...) (357295)
+adaptation: adapted '() (357205) to '() (357205)
+adaptation: adapted "Imperial" (357161) to '#s(sealed "Imperial") (357592)
+adaptation: adapted 0 (0) to 0 (0)
+adaptation: adapted "Tower" (357165) to '#s(sealed "Tower") (357593)
+adaptation: adapted "Festival" (357159) to '#s(sealed "Festival") (357594)
+adaptation: adapted "Worldwide" (357167) to '#s(sealed "Worldwide") (357595)
+adaptation: adapted "American" (357155) to '#s(sealed "American") (357596)
+adaptation: adapted "Sackson" (357163) to '#s(sealed "Sackson") (357597)
+adaptation: adapted "Continental" (357157) to '#s(sealed "Continental") (357598)
+adaptation: adapted '#hash(("American" . 0) ("Continental" . 0) ("Festival" . 0) ("Imperial" . 0) ("Sackson" . 0) ("Tower" . 0) ("Worldwide" . 0)) (357006) to '#hash((#s(sealed "Imperial") . 0) (#s(sealed "Tower") . 0) (#s(sealed "Festival") . 0) (#s(sealed "Worldwide") . 0) (#s(sealed "American") . 0) (#s(sealed "Sackson") . 0) (#s(sealed "Continental") . 0)) (357599)
+357168
+transient: blame map
+transient:  (356983 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list (-lst -String)) (-lst -String) #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 16)
+transient:  )
+transient:  (356982 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed g26595 (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 10)
+transient:  )
+transient:  (356981 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g26594) -String #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 9)
+transient:  )
+transient:  (356980 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g26594 g26594) -Boolean #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 8)
+transient:  )
+transient:  (356979 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g26594) -Symbol #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 7)
+transient:  )
+transient:  (356978 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g26594) -Nat #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 6)
+transient:  )
+transient:  (356977 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed g26594 (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 5)
+transient:  )
+transient:  (356991 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g26602 g26594 -String) g26602 #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 24)
+transient:  )
+transient:  (356990 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g26602 g26594) -Boolean #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 23)
+transient:  )
+transient:  (356989 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g26602 -String) -Nat #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 22)
+transient:  )
+transient:  (356988 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (make-Fun (list (-Arrow (list g26602 g26594) (make-Values (list (-result (-ne-lst -String)) (-result (-lst -String)))) #:T+ #f))) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 21)
+transient:  )
+transient:  (357501 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:   #s((check-info blame-entry 1) (struct-elem . 1) 357470)
+transient:  )
+transient:  (356987 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g26602 g26594) (make-BaseUnion 65 0) #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 20)
+transient:  )
+transient:  (356986 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g26602 g26594) (one-of/c (quote FOUNDING) (quote GROWING) (quote MERGING) (quote SINGLETON) (quote IMPOSSIBLE)) #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 19)
+transient:  )
+transient:  (357503 (
+transient:   #s((check-info blame-entry 1) (object-field . tiles) 357600)
+transient:   #s((check-info blame-entry 1) (struct-elem . 1) 357502)
+transient:  )
+transient:  (356985 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g26602) g26595 #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 18)
+transient:  )
+transient:  (13370 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list Univ) -Boolean #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt>) 35)
+transient:  )
+transient:  (357502 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357189)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357142)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357516)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357133)
+transient:   #s((check-info blame-entry 1) (rng . 0) 357126)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357124)
+transient:   #s((check-info blame-entry 1) (rng . 0) 357181)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357143)
+transient:  )
+transient:  (356984 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list) g26602 #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 17)
+transient:  )
+transient:  (775080105548494993 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (make-Value (quote MERGING)) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 13)
+transient:  )
+transient:  (356975 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (make-Value (quote "(-> Any Boolean)")) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 4)
+transient:  )
+transient:  (356973 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (make-Poly (list (quote A) (quote B)) (simple-> (list (-lst (make-F (quote A))) (simple-> (list (make-F (quote A))) -Real #:T+ #f) (simple-> (list (make-F (quote A))) (make-F (quote B)) #:T+ #f)) (-lst (-lst (make-F (quote B)))) #:T+ #f)) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/auxiliaries.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board.rkt>) 3)
+transient:  )
+transient:  (356972 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (simple-> (list (-lst Univ)) -Boolean #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/auxiliaries.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board.rkt>) 2)
+transient:  )
+transient:  (356969 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (make-Poly (list (quote A)) (simple-> (list (-lst (make-F (quote A)))) (make-F (quote A)) #:T+ #f)) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/auxiliaries.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/basics.rkt>) 0)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357182)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357182)
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (make-Poly (list (quote A)) (simple-> (list (-lst (make-F (quote A)))) (make-F (quote A)) #:T+ #f)) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/auxiliaries.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board.rkt>) 1)
+transient:   #s((check-info blame-entry 1) (dom . 3) 357201)
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (make-Poly (list (quote A)) (simple-> (list (-lst (make-F (quote A)))) (make-F (quote A)) #:T+ #f)) (#<variable-reference> (quote contracted) #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/type-interface.rkt>) 77)
+transient:  )
+transient:  (357457 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357456 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357459 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357458 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357461 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357460 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357463 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357462 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357465 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357464 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357466 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357467)
+transient:  )
+transient:  (357469 (
+transient:   #s((check-info blame-entry 1) (struct-elem . 0) 357470)
+transient:   #s((check-info blame-entry 1) (object-field . board) 357600)
+transient:   #s((check-info blame-entry 1) (dom . 0) 356986)
+transient:   #s((check-info blame-entry 1) (dom . 0) 356989)
+transient:   #s((check-info blame-entry 1) (dom . 0) 356994)
+transient:   #s((check-info blame-entry 1) (rng . 0) 356984)
+transient:   #s((check-info blame-entry 1) (dom . 0) 356995)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357603)
+transient:  )
+transient:  (357468 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 357467)
+transient:  )
+transient:  (357470 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357564)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357565)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357552)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357553)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357509)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357541)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357510)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357526)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357542)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357574)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357126)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357511)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357527)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357543)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357575)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357528)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357576)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357128)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357144)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357513)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357529)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357577)
+transient:   #s((check-info blame-entry 1) (object-field . state) 357586)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357129)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357145)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357514)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357530)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357562)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357578)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357499)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357515)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357531)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357563)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357579)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357550)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357566)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357519)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357551)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357567)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357506)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357538)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357554)
+transient:   #s((check-info blame-entry 1) (object-method-rng to-state . 0) 357586)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357507)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357539)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357555)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357139)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357508)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357540)
+transient:   #s((check-info blame-entry 1) (rng . 0) 357466)
+transient:  )
+transient:  (357441 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357440 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357443 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357442 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357445 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357444 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357447 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357446 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357449 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357448 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357451 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357450 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357453 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357452 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357455 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357454 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357425 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357424 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357427 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357426 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357429 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357428 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357431 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357430 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357433 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357432 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357435 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357434 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357437 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357436 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357439 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357438 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357409 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357408 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357411 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357410 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357413 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (1143259636972271212 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (make-Value (quote GROWING)) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 12)
+transient:  )
+transient:  (357412 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357415 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357414 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357417 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357416 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357419 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357418 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357421 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357420 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357423 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357422 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357393 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357392 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357395 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357394 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357397 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357396 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (27883283613632471 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357587)
+transient:  )
+transient:  (357399 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357398 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357401 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (335518341079719772 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (make-Value (quote SINGLETON)) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 14)
+transient:   #s((check-info blame-entry 1) cadr 357601)
+transient:   #s((check-info blame-entry 1) (rng . 0) 356986)
+transient:   #s((check-info blame-entry 1) (dom . 2) 357603)
+transient:   #s((check-info blame-entry 1) (dom . 2) 356995)
+transient:  )
+transient:  (357400 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357403 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357402 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357405 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357404 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357407 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357406 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357377 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357135)
+transient:  )
+transient:  (357376 (
+transient:   #s((check-info blame-entry 1) (dom . 2) 357135)
+transient:  )
+transient:  (357379 (
+transient:   #s((check-info blame-entry 1) (dom . 5) 357135)
+transient:  )
+transient:  (357378 (
+transient:   #s((check-info blame-entry 1) (dom . 4) 357135)
+transient:  )
+transient:  (357381 (
+transient:   #s((check-info blame-entry 1) (struct-elem . 0) 357502)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357135)
+transient:  )
+transient:  (357380 (
+transient:   #s((check-info blame-entry 1) (dom . 6) 357135)
+transient:  )
+transient:  (357383 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 356986)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357516)
+transient:   #s((check-info blame-entry 1) (dom . 2) 357135)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357507)
+transient:   #s((check-info blame-entry 1) (dom . 1) 356994)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357506)
+transient:  )
+transient:  (357382 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 356986)
+transient:   #s((check-info blame-entry 1) car 357601)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357516)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357135)
+transient:   #s((check-info blame-entry 1) (dom . 1) 356994)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357506)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357603)
+transient:   #s((check-info blame-entry 1) (dom . 1) 356995)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357507)
+transient:  )
+transient:  (357385 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 356986)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357516)
+transient:   #s((check-info blame-entry 1) (dom . 4) 357135)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357507)
+transient:   #s((check-info blame-entry 1) (dom . 1) 356994)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357506)
+transient:  )
+transient:  (357384 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 356986)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357516)
+transient:   #s((check-info blame-entry 1) (dom . 3) 357135)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357507)
+transient:   #s((check-info blame-entry 1) (dom . 1) 356994)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357506)
+transient:  )
+transient:  (357387 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 356986)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357507)
+transient:   #s((check-info blame-entry 1) (dom . 6) 357135)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357516)
+transient:   #s((check-info blame-entry 1) (dom . 1) 356994)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357506)
+transient:  )
+transient:  (357386 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 356986)
+transient:   #s((check-info blame-entry 1) (dom . 5) 357135)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357516)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357507)
+transient:   #s((check-info blame-entry 1) (dom . 1) 356994)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357506)
+transient:  )
+transient:  (357389 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357388 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357391 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357390 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:  )
+transient:  (357601 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357505)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357602)
+transient:  )
+transient:  (357600 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 357587)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357185)
+transient:  )
+transient:  (357604 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357605)
+transient:   #s((check-info blame-entry 1) (rng . 0) 356995)
+transient:  )
+transient:  (599272785488936225 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357587)
+transient:  )
+transient:  (257266696762916976 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357587)
+transient:  )
+transient:  (357585 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357204)
+transient:  )
+transient:  (357584 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357204)
+transient:  )
+transient:  (357586 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357132)
+transient:   #s((check-info blame-entry 1) (rng . 0) 357204)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357587)
+transient:   #s((check-info blame-entry 1) (dom . 0) 357588)
+transient:  )
+transient:  (357589 (
+transient:   #s((check-info blame-entry 1) (object-field . lplaced) 357586)
+transient:  )
+transient:  (357593 (
+transient:   #s((check-info blame-entry 1) noop 357165)
+transient:  )
+transient:  (357592 (
+transient:   #s((check-info blame-entry 1) noop 357161)
+transient:  )
+transient:  (357595 (
+transient:   #s((check-info blame-entry 1) noop 357167)
+transient:  )
+transient:  (357594 (
+transient:   #s((check-info blame-entry 1) noop 357159)
+transient:  )
+transient:  (357597 (
+transient:   #s((check-info blame-entry 1) noop 357163)
+transient:  )
+transient:  (357596 (
+transient:   #s((check-info blame-entry 1) noop 357155)
+transient:  )
+transient:  (357599 (
+transient:   #s((check-info blame-entry 1) noop 357006)
+transient:  )
+transient:  (357598 (
+transient:   #s((check-info blame-entry 1) noop 357157)
+transient:  )
+transient:  (357569 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 356994)
+transient:  )
+transient:  (357568 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357516)
+transient:  )
+transient:  (357571 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357204)
+transient:  )
+transient:  (357570 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357506)
+transient:   #s((check-info blame-entry 1) (rng . 0) 357507)
+transient:  )
+transient:  (357573 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357505)
+transient:  )
+transient:  (357572 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357204)
+transient:  )
+transient:  (357581 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 356994)
+transient:  )
+transient:  (357580 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357516)
+transient:  )
+transient:  (357583 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357204)
+transient:  )
+transient:  (357582 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357506)
+transient:   #s((check-info blame-entry 1) (rng . 0) 357507)
+transient:  )
+transient:  (357557 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 356994)
+transient:  )
+transient:  (357556 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357516)
+transient:  )
+transient:  (357559 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357204)
+transient:  )
+transient:  (357558 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357506)
+transient:   #s((check-info blame-entry 1) (rng . 0) 357507)
+transient:  )
+transient:  (357561 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357505)
+transient:  )
+transient:  (357560 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357204)
+transient:  )
+transient:  (357537 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357505)
+transient:  )
+transient:  (357536 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357204)
+transient:  )
+transient:  (357545 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 356994)
+transient:  )
+transient:  (357544 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357516)
+transient:  )
+transient:  (357547 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357204)
+transient:  )
+transient:  (357546 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357506)
+transient:   #s((check-info blame-entry 1) (rng . 0) 357507)
+transient:  )
+transient:  (357549 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357505)
+transient:  )
+transient:  (357548 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357204)
+transient:  )
+transient:  (357521 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357204)
+transient:  )
+transient:  (357015 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g34488 g34488) g34488 #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt>) 45)
+transient:  )
+transient:  (357520 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357506)
+transient:   #s((check-info blame-entry 1) (rng . 0) 357507)
+transient:  )
+transient:  (357014 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g46656) -Boolean #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/tree.rkt>) 48)
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g34501) -Boolean #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt>) 44)
+transient:  )
+transient:  (357523 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357204)
+transient:  )
+transient:  (357013 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list (-lst g34488)) -Boolean #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt>) 43)
+transient:  )
+transient:  (357522 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 357204)
+transient:  )
+transient:  (357012 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g34488 g34501) -Boolean #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt>) 42)
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list (Un (make-Mutable-HashTable -String -Int) (make-Immutable-HashTable -String -Int) (make-Weak-HashTable -String -Int)) g46656) -Boolean #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/tree.rkt>) 47)
+transient:  )
+transient:  (357525 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357505)
+transient:  )
+transient:  (357011 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g53530 Univ) -Int #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/original-type-interface.rkt>) 75)
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g34488 -String) -Int #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt>) 41)
+transient:  )
+transient:  (357524 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357204)
+transient:  )
+transient:  (357010 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g34488) -String #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt>) 40)
+transient:  )
+transient:  (357009 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g53530 Univ) g53530 #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/original-type-interface.rkt>) 74)
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g34488 -String) g34488 #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt>) 39)
+transient:  )
+transient:  (357008 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g34488 -String) g34488 #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt>) 38)
+transient:  )
+transient:  (357533 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 356994)
+transient:  )
+transient:  (357532 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357516)
+transient:  )
+transient:  (357535 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357204)
+transient:  )
+transient:  (357534 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357506)
+transient:   #s((check-info blame-entry 1) (rng . 0) 357507)
+transient:  )
+transient:  (357016 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g34488 g34488) g34488 #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt>) 46)
+transient:  )
+transient:  (357504 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357505)
+transient:  )
+transient:  (356998 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g26595) (simple-> (list (-lst (make-Pair -String g26595))) -Boolean #:T+ #f) #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 31)
+transient:  )
+transient:  (356997 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g26595 (-lst (make-Pair -String g26595))) g26602 #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 30)
+transient:  )
+transient:  (356996 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g26602 (-lst -String) -Nat) -Boolean #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 29)
+transient:  )
+transient:  (356995 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g26602 g26594 (one-of/c (quote FOUNDING) (quote GROWING) (quote MERGING) (quote SINGLETON)) (make-BaseUnion 65 0)) g26602 #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 28)
+transient:  )
+transient:  (356994 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g26602 g26594) g26602 #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 27)
+transient:  )
+transient:  (356993 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g26602 g26594) g26602 #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 26)
+transient:  )
+transient:  (356992 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g26602 g26594 -String) g26602 #:T+ #f) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 25)
+transient:  )
+transient:  (357007 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list -String -Nat) (make-BaseUnion 1 95) #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt>) 37)
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list Univ -Nat) (make-BaseUnion 1 95) #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/original-type-interface.rkt>) 73)
+transient:  )
+transient:  (357512 (
+transient:   #s((check-info blame-entry 1) (struct-elem . 2) 357470)
+transient:  )
+transient:  (357006 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed g34488 (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt>) 36)
+transient:   #s((check-info blame-entry 1) (struct-elem . 3) 357502)
+transient:  )
+transient:  (357005 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list (one-of/c (quote majority) (quote minority)) -String -Nat) -Nat #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt>) 34)
+transient:  )
+transient:  (357004 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed g34488 (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt>) 33)
+transient:   #s((check-info blame-entry 1) (object-field . shares) 357600)
+transient:   #s((check-info blame-entry 1) (struct-elem . 4) 357470)
+transient:   #s((check-info blame-entry 1) (dom . 2) 357605)
+transient:  )
+transient:  (357517 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357516)
+transient:  )
+transient:  (357002 (
+transient:   #s((check-info blame-entry 1) (object-field . hotels) 357600)
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed g53531 (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/original-type-interface.rkt>) 71)
+transient:   #s((check-info blame-entry 1) (struct-elem . 3) 357470)
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed g34501 (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt>) 32)
+transient:   #s((check-info blame-entry 1) (dom . 3) 357603)
+transient:  )
+transient:  (357518 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 356994)
+transient:  )
+transient:  (357238 (
+transient:   #s((check-info blame-entry 1) noop 357212)
+transient:  )
+transient:  (357239 (
+transient:   #s((check-info blame-entry 1) noop 357214)
+transient:  )
+transient:  (357237 (
+transient:   #s((check-info blame-entry 1) noop 357210)
+transient:  )
+transient:  (357234 (
+transient:   #s((check-info blame-entry 1) noop 357216)
+transient:  )
+transient:  (357235 (
+transient:   #s((check-info blame-entry 1) (dom . 7) 357135)
+transient:   #s((check-info blame-entry 1) noop 357236)
+transient:  )
+transient:  (357232 (
+transient:   #s((check-info blame-entry 1) noop 357212)
+transient:  )
+transient:  (357233 (
+transient:   #s((check-info blame-entry 1) noop 357214)
+transient:  )
+transient:  (608328583552378126 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357587)
+transient:  )
+transient:  (357246 (
+transient:   #s((check-info blame-entry 1) noop 357216)
+transient:  )
+transient:  (357247 (
+transient:   #s((check-info blame-entry 1) (dom . 7) 357135)
+transient:   #s((check-info blame-entry 1) noop 357248)
+transient:  )
+transient:  (357244 (
+transient:   #s((check-info blame-entry 1) noop 357212)
+transient:  )
+transient:  (357245 (
+transient:   #s((check-info blame-entry 1) noop 357214)
+transient:  )
+transient:  (357243 (
+transient:   #s((check-info blame-entry 1) noop 357210)
+transient:  )
+transient:  (357240 (
+transient:   #s((check-info blame-entry 1) noop 357216)
+transient:  )
+transient:  (357241 (
+transient:   #s((check-info blame-entry 1) (dom . 7) 357135)
+transient:   #s((check-info blame-entry 1) noop 357242)
+transient:  )
+transient:  (357231 (
+transient:   #s((check-info blame-entry 1) noop 357210)
+transient:  )
+transient:  (357228 (
+transient:   #s((check-info blame-entry 1) noop 357216)
+transient:  )
+transient:  (357229 (
+transient:   #s((check-info blame-entry 1) noop 357230)
+transient:   #s((check-info blame-entry 1) (dom . 7) 357135)
+transient:  )
+transient:  (357226 (
+transient:   #s((check-info blame-entry 1) noop 357212)
+transient:  )
+transient:  (357227 (
+transient:   #s((check-info blame-entry 1) noop 357214)
+transient:  )
+transient:  (357224 (
+transient:   #s((check-info blame-entry 1) (dom . 7) 357135)
+transient:   #s((check-info blame-entry 1) (struct-elem . 4) 357502)
+transient:   #s((check-info blame-entry 1) noop 357196)
+transient:  )
+transient:  (357225 (
+transient:   #s((check-info blame-entry 1) noop 357210)
+transient:  )
+transient:  (357207 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357204)
+transient:  )
+transient:  (357205 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357206)
+transient:   #s((check-info blame-entry 1) (dom . 2) 357204)
+transient:   #s((check-info blame-entry 1) (struct-elem . 5) 357470)
+transient:   #s((check-info blame-entry 1) (dom . 0) 356972)
+transient:   #s((check-info blame-entry 1) noop 357205)
+transient:  )
+transient:  (357202 (
+transient:   #s((check-info blame-entry 1) (object-method-dom run . 1) 357208)
+transient:   #s((check-info blame-entry 1) (dom . 2) 357201)
+transient:  )
+transient:  (357203 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357204)
+transient:  )
+transient:  (357200 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357201)
+transient:  )
+transient:  (357215 (
+transient:   #s((check-info blame-entry 1) noop 357216)
+transient:  )
+transient:  (357213 (
+transient:   #s((check-info blame-entry 1) noop 357214)
+transient:  )
+transient:  (357211 (
+transient:   #s((check-info blame-entry 1) noop 357212)
+transient:  )
+transient:  (357208 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357204)
+transient:  )
+transient:  (357209 (
+transient:   #s((check-info blame-entry 1) noop 357210)
+transient:  )
+transient:  (357191 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list -Nat) (-lst (make-Instance (make-Name (quote-syntax Player%) 0 #f))) #:T+ #f) (#<variable-reference> "player.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/main.rkt>) 89)
+transient:  )
+transient:  (357189 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (->acc (list g34491) g34488 (list (make-StructPE g34491 3)) #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/player.rkt>) 85)
+transient:  )
+transient:  (357186 (
+transient:   #s((check-info blame-entry 1) (dom . 2) 357182)
+transient:  )
+transient:  (357187 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357182)
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (make-Fun (list (-Arrow (list (make-Instance (make-Class #f (list (list (quote current-state) g64731 #f)) (list (list (quote board) (Un (make-Weak-HashTable g64732 g64735) (make-Immutable-HashTable g64732 g64735) (make-Mutable-HashTable g64732 g64735))) (list (quote cash) -Nat) (list (quote current) g64736) (list (quote current-state) g64731) (list (quote hotels) g64730) (list (quote players) g64737) (list (quote shares) g64741) (list (quote tiles) (-lst g64732))) (list (list (quote decisions) (make-Fun (list (-Arrow (list) (make-Values (list (-result g64742) (-result g64743) (-result (-lst (make-Pair g64736 (make-Pair (-lst (make-Pair -String (make-Pair -Boolean -Null))) -Null)))))) #:T+ #f)))) (list (quote eliminated) (simple-> (list) g64737 #:T+ #f)) (list (quote place) (simple-> (list g64732 -String) (Un -Void g64737) #:T+ #f)) (list (quote place-called) (simple-> (list) -Boolean #:T+ #f)) (list (quote reconcile-shares) (simple-> (list g64741) g64741 #:T+ #f))) (list) #f))) (make-Values (list (-result g64742) (-result g64743) (-result g64730))) #:T+ #f))) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/strategy.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/player.rkt>) 87)
+transient:  )
+transient:  (357184 (
+transient:   #s((check-info blame-entry 1) (dom . 2) 357182)
+transient:  )
+transient:  (357185 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357182)
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (make-Fun (list (-Arrow (list (make-Instance (make-Class #f (list (list (quote current-state) g64731 #f)) (list (list (quote board) (Un (make-Weak-HashTable g64732 g64735) (make-Immutable-HashTable g64732 g64735) (make-Mutable-HashTable g64732 g64735))) (list (quote cash) -Nat) (list (quote current) g64736) (list (quote current-state) g64731) (list (quote hotels) g64730) (list (quote players) g64737) (list (quote shares) g64741) (list (quote tiles) (-lst g64732))) (list (list (quote decisions) (make-Fun (list (-Arrow (list) (make-Values (list (-result g64742) (-result g64743) (-result (-lst (make-Pair g64736 (make-Pair (-lst (make-Pair -String (make-Pair -Boolean -Null))) -Null)))))) #:T+ #f)))) (list (quote eliminated) (simple-> (list) g64737 #:T+ #f)) (list (quote place) (simple-> (list g64732 -String) (Un -Void g64737) #:T+ #f)) (list (quote place-called) (simple-> (list) -Boolean #:T+ #f)) (list (quote reconcile-shares) (simple-> (list g64741) g64741 #:T+ #f))) (list) #f))) (make-Values (list (-result g64742) (-result g64743) (-result g64730))) #:T+ #f))) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/strategy.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/player.rkt>) 88)
+transient:  )
+transient:  (357198 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357193)
+transient:  )
+transient:  (357199 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357191)
+transient:  )
+transient:  (357196 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357197)
+transient:   #s((check-info blame-entry 1) (rng . 0) 357194)
+transient:  )
+transient:  (357194 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list -Nat) (make-Instance (make-Name (quote-syntax Player%) 0 #f)) #:T+ #f) (#<variable-reference> "player.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/main.rkt>) 91)
+transient:  )
+transient:  (357193 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list -Nat) (-lst (make-Instance (make-Name (quote-syntax Player%) 0 #f))) #:T+ #f) (#<variable-reference> "player.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/main.rkt>) 90)
+transient:  )
+transient:  (357175 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (make-Name (quote-syntax Administrator%) 0 #f) (#<variable-reference> (quote contracted) #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/type-interface.rkt>) 76)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357204)
+transient:   #s((check-info blame-entry 1) noop 357147)
+transient:  )
+transient:  (357172 (
+transient:   #s((check-info blame-entry 1) noop 357011)
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g57602 -String) -Int #:T+ #f) (#<variable-reference> (quote contracted) #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/type-interface.rkt>) 83)
+transient:  )
+transient:  (357173 (
+transient:   #s((check-info blame-entry 1) noop 357174)
+transient:  )
+transient:  (357170 (
+transient:   #s((check-info blame-entry 1) noop 357007)
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list -String -Nat) (make-BaseUnion 1 95) #:T+ #f) (#<variable-reference> (quote contracted) #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/type-interface.rkt>) 81)
+transient:  )
+transient:  (357171 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list g57602 -String) g57602 #:T+ #f) (#<variable-reference> (quote contracted) #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/type-interface.rkt>) 82)
+transient:   #s((check-info blame-entry 1) noop 357009)
+transient:  )
+transient:  (357168 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357181)
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed g57603 (#<variable-reference> (quote contracted) #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/type-interface.rkt>) 79)
+transient:   #s((check-info blame-entry 1) noop 357002)
+transient:  )
+transient:  (357169 (
+transient:   #s((check-info blame-entry 1) noop 357150)
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list -String -String) -Boolean #:T+ #f) (#<variable-reference> (quote contracted) #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/type-interface.rkt>) 80)
+transient:  )
+transient:  (357183 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 357182)
+transient:   #s((check-info blame-entry 1) (dom . 5) 357603)
+transient:  )
+transient:  (357181 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357182)
+transient:   #s((check-info blame-entry 1) (dom . 4) 357603)
+transient:  )
+transient:  (16654 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357499)
+transient:   #s((check-info blame-entry 1) (rng . 0) 357500)
+transient:   #s((check-info blame-entry 1) car 357504)
+transient:   #s((check-info blame-entry 1) car 357537)
+transient:   #s((check-info blame-entry 1) (rng . 0) 357603)
+transient:   #s((check-info blame-entry 1) (dom . 3) 356995)
+transient:   #s((check-info blame-entry 1) (dom . 2) 357507)
+transient:   #s((check-info blame-entry 1) car 357549)
+transient:   #s((check-info blame-entry 1) car 357525)
+transient:   #s((check-info blame-entry 1) car 357573)
+transient:   #s((check-info blame-entry 1) (rng . 0) 357606)
+transient:   #s((check-info blame-entry 1) car 357561)
+transient:   #s((check-info blame-entry 1) (dom . 2) 357506)
+transient:  )
+transient:  (357158 (
+transient:   #s((check-info blame-entry 1) noop 357159)
+transient:  )
+transient:  (357159 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 356989)
+transient:  )
+transient:  (357156 (
+transient:   #s((check-info blame-entry 1) noop 357157)
+transient:  )
+transient:  (357157 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 356989)
+transient:  )
+transient:  (357154 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357181)
+transient:   #s((check-info blame-entry 1) noop 357155)
+transient:  )
+transient:  (357155 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 356989)
+transient:  )
+transient:  (357166 (
+transient:   #s((check-info blame-entry 1) noop 357167)
+transient:  )
+transient:  (357167 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 356989)
+transient:  )
+transient:  (357164 (
+transient:   #s((check-info blame-entry 1) noop 357165)
+transient:  )
+transient:  (357165 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 356989)
+transient:  )
+transient:  (1032973376164944096 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (make-Value (quote IMPOSSIBLE)) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 15)
+transient:  )
+transient:  (357162 (
+transient:   #s((check-info blame-entry 1) noop 357163)
+transient:  )
+transient:  (357163 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 356989)
+transient:  )
+transient:  (357160 (
+transient:   #s((check-info blame-entry 1) noop 357161)
+transient:  )
+transient:  (357161 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 356989)
+transient:  )
+transient:  (357142 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (->acc (list g34491) -Nat (list (make-StructPE g34491 2)) #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 65)
+transient:  )
+transient:  (357143 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (->acc (list g34491) g34490 (list (make-StructPE g34491 1)) #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 66)
+transient:  )
+transient:  (357140 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (->acc (list g34500) g34490 (list (make-StructPE g34500 2)) #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 63)
+transient:  )
+transient:  (357141 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (opt-fn (list g34500 g34508) (list g34498) (make-Values (list (-result g34500))) #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 64)
+transient:  )
+transient:  (357138 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (make-Name (quote-syntax LPlaced%) 0 #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/tree.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 61)
+transient:   #s((check-info blame-entry 1) (dom . 1) 357204)
+transient:  )
+transient:  (357139 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (->acc (list g34500) g34498 (list (make-StructPE g34500 0)) #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 62)
+transient:  )
+transient:  (357136 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (simple-> (list g34500) (-lst (make-Pair -String (make-Pair -Nat -Null))) #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 59)
+transient:  )
+transient:  (357137 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (make-Fun (list (make-Arrow (list) (make-Rest (list g34491)) (list) (make-Values (list (-result g34500))) #f))) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 60)
+transient:  )
+transient:  (357150 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list Univ Univ) -Boolean #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/original-type-interface.rkt>) 72)
+transient:  )
+transient:  (357151 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list (-lst g57602)) g57602 #:T+ #f) (#<variable-reference> (quote contracted) #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/type-interface.rkt>) 78)
+transient:   #s((check-info blame-entry 1) noop 357149)
+transient:  )
+transient:  (357149 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (simple-> (list (-lst g53530)) g53530 #:T+ #f) (#<variable-reference> "basics.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/original-type-interface.rkt>) 70)
+transient:  )
+transient:  (357147 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (make-Name (quote-syntax Administrator%) 0 #f) (#<variable-reference> "admin.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/original-type-interface.rkt>) 69)
+transient:  )
+transient:  (357144 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (->acc (list g34500) g34488 (list (make-StructPE g34500 4)) #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 67)
+transient:  )
+transient:  (357145 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (->acc (list g34500) g34501 (list (make-StructPE g34500 3)) #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 68)
+transient:  )
+transient:  (357126 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (simple-> (list g34500) g34491 #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 50)
+transient:  )
+transient:  (357127 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (simple-> (list g34500) g34500 #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 51)
+transient:  )
+transient:  (357124 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (->acc (list g34491) -String (list (make-StructPE g34491 0)) #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 49)
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (->acc (list g34491) -String (list (make-StructPE g34491 0)) #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/player.rkt>) 84)
+transient:  )
+transient:  (357134 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (simple-> (list g34500 g34499) g34500 #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 57)
+transient:  )
+transient:  (357135 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (simple-> (list -String g34489 g34489 g34489 g34489 g34489 g34489 g34510) g34491 #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 58)
+transient:  )
+transient:  (357132 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (simple-> (list g46650) g46649 #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/tree.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 55)
+transient:  )
+transient:  (357133 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (->acc (list g34491) (Un -False g34510) (list (make-StructPE g34491 4)) #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 56)
+transient:  )
+transient:  (357131 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (make-Fun (list (-Arrow (list g46650 g46651 g46655 g46663 g46656 g46665) (make-Values (list (-result g46666) (-result g46650))) #:T+ #f))) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/tree.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 54)
+transient:  )
+transient:  (357128 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (->acc (list g34500) g34499 (list (make-StructPE g34500 1)) #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/player.rkt>) 86)
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (->acc (list g34500) g34499 (list (make-StructPE g34500 1)) #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/state.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 52)
+transient:  )
+transient:  (357129 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) provide (simple-> (list g46649) g46650 #:T+ #f) (#<variable-reference> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/tree.rkt> #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt>) 53)
+transient:  )
+transient:  (357366 (
+transient:   #s((check-info blame-entry 1) (dom . 6) 357135)
+transient:  )
+transient:  (357367 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357135)
+transient:  )
+transient:  (357364 (
+transient:   #s((check-info blame-entry 1) (dom . 4) 357135)
+transient:  )
+transient:  (357365 (
+transient:   #s((check-info blame-entry 1) (dom . 5) 357135)
+transient:  )
+transient:  (357362 (
+transient:   #s((check-info blame-entry 1) (dom . 2) 357135)
+transient:  )
+transient:  (357363 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357135)
+transient:  )
+transient:  (357360 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357135)
+transient:  )
+transient:  (357361 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 357135)
+transient:  )
+transient:  (357374 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357135)
+transient:  )
+transient:  (357375 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 357135)
+transient:  )
+transient:  (357372 (
+transient:   #s((check-info blame-entry 1) (dom . 5) 357135)
+transient:  )
+transient:  (357373 (
+transient:   #s((check-info blame-entry 1) (dom . 6) 357135)
+transient:  )
+transient:  (357370 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357135)
+transient:  )
+transient:  (357371 (
+transient:   #s((check-info blame-entry 1) (dom . 4) 357135)
+transient:  )
+transient:  (357368 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 357135)
+transient:  )
+transient:  (357369 (
+transient:   #s((check-info blame-entry 1) (dom . 2) 357135)
+transient:  )
+transient:  (357350 (
+transient:   #s((check-info blame-entry 1) (dom . 4) 357135)
+transient:  )
+transient:  (357351 (
+transient:   #s((check-info blame-entry 1) (dom . 5) 357135)
+transient:  )
+transient:  (357348 (
+transient:   #s((check-info blame-entry 1) (dom . 2) 357135)
+transient:  )
+transient:  (357349 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357135)
+transient:  )
+transient:  (357346 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357135)
+transient:  )
+transient:  (357347 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 357135)
+transient:  )
+transient:  (607637303924315572 (
+transient:   #s((ts-cast-info cast-info 2 blame-entry 1) require/typed (make-Value (quote FOUNDING)) (#<variable-reference> "board.rkt" #<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/board-adapted.rkt>) 11)
+transient:  )
+transient:  (357344 (
+transient:   #s((check-info blame-entry 1) (dom . 5) 357135)
+transient:  )
+transient:  (357345 (
+transient:   #s((check-info blame-entry 1) (dom . 6) 357135)
+transient:  )
+transient:  (357358 (
+transient:   #s((check-info blame-entry 1) (dom . 5) 357135)
+transient:  )
+transient:  (357359 (
+transient:   #s((check-info blame-entry 1) (dom . 6) 357135)
+transient:  )
+transient:  (357356 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357135)
+transient:  )
+transient:  (357357 (
+transient:   #s((check-info blame-entry 1) (dom . 4) 357135)
+transient:  )
+transient:  (357354 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 357135)
+transient:  )
+transient:  (357355 (
+transient:   #s((check-info blame-entry 1) (dom . 2) 357135)
+transient:  )
+transient:  (357352 (
+transient:   #s((check-info blame-entry 1) (dom . 6) 357135)
+transient:  )
+transient:  (357353 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357135)
+transient:  )
+transient:  (357334 (
+transient:   #s((check-info blame-entry 1) (dom . 2) 357135)
+transient:  )
+transient:  (1130625478095768208 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357587)
+transient:  )
+transient:  (357335 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357135)
+transient:  )
+transient:  (357332 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357135)
+transient:  )
+transient:  (357333 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 357135)
+transient:  )
+transient:  (357330 (
+transient:   #s((check-info blame-entry 1) (dom . 5) 357135)
+transient:  )
+transient:  (357331 (
+transient:   #s((check-info blame-entry 1) (dom . 6) 357135)
+transient:  )
+transient:  (357328 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357135)
+transient:  )
+transient:  (357329 (
+transient:   #s((check-info blame-entry 1) (dom . 4) 357135)
+transient:  )
+transient:  (357342 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357135)
+transient:  )
+transient:  (357343 (
+transient:   #s((check-info blame-entry 1) (dom . 4) 357135)
+transient:  )
+transient:  (357340 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 357135)
+transient:  )
+transient:  (357341 (
+transient:   #s((check-info blame-entry 1) (dom . 2) 357135)
+transient:  )
+transient:  (357338 (
+transient:   #s((check-info blame-entry 1) (dom . 6) 357135)
+transient:  )
+transient:  (357339 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357135)
+transient:  )
+transient:  (357336 (
+transient:   #s((check-info blame-entry 1) (dom . 4) 357135)
+transient:  )
+transient:  (357337 (
+transient:   #s((check-info blame-entry 1) (dom . 5) 357135)
+transient:  )
+transient:  (357318 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357135)
+transient:  )
+transient:  (357319 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 357135)
+transient:  )
+transient:  (357316 (
+transient:   #s((check-info blame-entry 1) (dom . 5) 357135)
+transient:  )
+transient:  (357317 (
+transient:   #s((check-info blame-entry 1) (dom . 6) 357135)
+transient:  )
+transient:  (357314 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357135)
+transient:  )
+transient:  (357315 (
+transient:   #s((check-info blame-entry 1) (dom . 4) 357135)
+transient:  )
+transient:  (357312 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 357135)
+transient:  )
+transient:  (357313 (
+transient:   #s((check-info blame-entry 1) (dom . 2) 357135)
+transient:  )
+transient:  (357326 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 357135)
+transient:  )
+transient:  (357327 (
+transient:   #s((check-info blame-entry 1) (dom . 2) 357135)
+transient:  )
+transient:  (357324 (
+transient:   #s((check-info blame-entry 1) (dom . 6) 357135)
+transient:  )
+transient:  (357325 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357135)
+transient:  )
+transient:  (357322 (
+transient:   #s((check-info blame-entry 1) (dom . 4) 357135)
+transient:  )
+transient:  (357323 (
+transient:   #s((check-info blame-entry 1) (dom . 5) 357135)
+transient:  )
+transient:  (357320 (
+transient:   #s((check-info blame-entry 1) (dom . 2) 357135)
+transient:  )
+transient:  (357321 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357135)
+transient:  )
+transient:  (357302 (
+transient:   #s((check-info blame-entry 1) (dom . 5) 357135)
+transient:  )
+transient:  (357303 (
+transient:   #s((check-info blame-entry 1) (dom . 6) 357135)
+transient:  )
+transient:  (357300 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357135)
+transient:  )
+transient:  (357301 (
+transient:   #s((check-info blame-entry 1) (dom . 4) 357135)
+transient:  )
+transient:  (357298 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 357135)
+transient:  )
+transient:  (357299 (
+transient:   #s((check-info blame-entry 1) (dom . 2) 357135)
+transient:  )
+transient:  (357297 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357135)
+transient:  )
+transient:  (357310 (
+transient:   #s((check-info blame-entry 1) (dom . 6) 357135)
+transient:  )
+transient:  (357311 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357135)
+transient:  )
+transient:  (357308 (
+transient:   #s((check-info blame-entry 1) (dom . 4) 357135)
+transient:  )
+transient:  (357309 (
+transient:   #s((check-info blame-entry 1) (dom . 5) 357135)
+transient:  )
+transient:  (991054909998500891 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357587)
+transient:  )
+transient:  (357306 (
+transient:   #s((check-info blame-entry 1) (dom . 2) 357135)
+transient:  )
+transient:  (357307 (
+transient:   #s((check-info blame-entry 1) (dom . 3) 357135)
+transient:  )
+transient:  (33103 (
+transient:   #s((check-info blame-entry 1) (rng . 0) 357195)
+transient:   #s((check-info blame-entry 1) (rng . 0) 356972)
+transient:  )
+transient:  (357304 (
+transient:   #s((check-info blame-entry 1) (dom . 0) 357135)
+transient:  )
+transient:  (357305 (
+transient:   #s((check-info blame-entry 1) (dom . 1) 357135)
+transient:  )
+transient:  (357286 (
+transient:   #s((check-info blame-entry 1) noop 357212)
+transient:  )
+transient:  (357287 (
+transient:   #s((check-info blame-entry 1) noop 357214)
+transient:  )
+transient:  (357285 (
+transient:   #s((check-info blame-entry 1) noop 357210)
+transient:  )
+transient:  (357282 (
+transient:   #s((check-info blame-entry 1) noop 357216)
+transient:  )
+transient:  (357283 (
+transient:   #s((check-info blame-entry 1) (dom . 7) 357135)
+transient:   #s((check-info blame-entry 1) noop 357284)
+transient:  )
+transient:  (357280 (
+transient:   #s((check-info blame-entry 1) noop 357212)
+transient:  )
+transient:  (357281 (
+transient:   #s((check-info blame-entry 1) noop 357214)
+transient:  )
+transient:  (357294 (
+transient:   #s((check-info blame-entry 1) noop 357216)
+transient:  )
+transient:  (357295 (
+transient:   #s((check-info blame-entry 1) (dom . 7) 357135)
+transient:   #s((check-info blame-entry 1) noop 357296)
+transient:  )
+transient:  (357292 (
+transient:   #s((check-info blame-entry 1) noop 357212)
+transient:  )
+transient:  (357293 (
+transient:   #s((check-info blame-entry 1) noop 357214)
+transient:  )
+transient:  (357291 (
+transient:   #s((check-info blame-entry 1) noop 357210)
+transient:  )
+transient:  (357288 (
+transient:   #s((check-info blame-entry 1) noop 357216)
+transient:  )
+transient:  (357289 (
+transient:   #s((check-info blame-entry 1) (dom . 7) 357135)
+transient:   #s((check-info blame-entry 1) noop 357290)
+transient:  )
+transient:  (357270 (
+transient:   #s((check-info blame-entry 1) noop 357216)
+transient:  )
+transient:  (357271 (
+transient:   #s((check-info blame-entry 1) (dom . 7) 357135)
+transient:   #s((check-info blame-entry 1) noop 357272)
+transient:  )
+transient:  (357268 (
+transient:   #s((check-info blame-entry 1) noop 357212)
+transient:  )
+transient:  (357269 (
+transient:   #s((check-info blame-entry 1) noop 357214)
+transient:  )
+transient:  (357267 (
+transient:   #s((check-info blame-entry 1) noop 357210)
+transient:  )
+transient:  (357264 (
+transient:   #s((check-info blame-entry 1) noop 357216)
+transient:  )
+transient:  (357265 (
+transient:   #s((check-info blame-entry 1) (dom . 7) 357135)
+transient:   #s((check-info blame-entry 1) noop 357266)
+transient:  )
+transient:  (357279 (
+transient:   #s((check-info blame-entry 1) noop 357210)
+transient:  )
+transient:  (357276 (
+transient:   #s((check-info blame-entry 1) noop 357216)
+transient:  )
+transient:  (357277 (
+transient:   #s((check-info blame-entry 1) noop 357278)
+transient:   #s((check-info blame-entry 1) (dom . 7) 357135)
+transient:  )
+transient:  (357274 (
+transient:   #s((check-info blame-entry 1) noop 357212)
+transient:  )
+transient:  (357275 (
+transient:   #s((check-info blame-entry 1) noop 357214)
+transient:  )
+transient:  (357273 (
+transient:   #s((check-info blame-entry 1) noop 357210)
+transient:  )
+transient:  (357255 (
+transient:   #s((check-info blame-entry 1) noop 357210)
+transient:  )
+transient:  (357252 (
+transient:   #s((check-info blame-entry 1) noop 357216)
+transient:  )
+transient:  (357253 (
+transient:   #s((check-info blame-entry 1) (dom . 7) 357135)
+transient:   #s((check-info blame-entry 1) noop 357254)
+transient:  )
+transient:  (357250 (
+transient:   #s((check-info blame-entry 1) noop 357212)
+transient:  )
+transient:  (357251 (
+transient:   #s((check-info blame-entry 1) noop 357214)
+transient:  )
+transient:  (357249 (
+transient:   #s((check-info blame-entry 1) noop 357210)
+transient:  )
+transient:  (357262 (
+transient:   #s((check-info blame-entry 1) noop 357212)
+transient:  )
+transient:  (357263 (
+transient:   #s((check-info blame-entry 1) noop 357214)
+transient:  )
+transient:  (357261 (
+transient:   #s((check-info blame-entry 1) noop 357210)
+transient:  )
+transient:  (357258 (
+transient:   #s((check-info blame-entry 1) noop 357216)
+transient:  )
+transient:  (357259 (
+transient:   #s((check-info blame-entry 1) (dom . 7) 357135)
+transient:   #s((check-info blame-entry 1) noop 357260)
+transient:  )
+transient:  (357256 (
+transient:   #s((check-info blame-entry 1) noop 357212)
+transient:  )
+transient:  (357257 (
+transient:   #s((check-info blame-entry 1) noop 357214)
+transient:  )
+transient: blame tracing (#<procedure:first> rng . 0) (357181)
+
+transient: blaming 0 boundaries
+shape-check: value does not match expected type
+  value: #s(sealed "American")
+  type: -String
+  lang: typed/racket/shallow
+  src: (#<path:/home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/strategy.rkt> 24 19 1308 14)
+  errortrace...:
+   /home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/strategy.rkt:24:19: (first hotels)
+   /home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/strategy.rkt:20:7: (cond ((or (empty? hotels) (= BUY-N n)) (reverse to-buy)) (else (displayln (eq-hash-code hotels)) (define h (first ....)) (define available-h (....)) (cond (....) ....)))
+   /home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/strategy.rkt:46:21: (to-buy board my-cash shares nat-SHARES-PER-TURN#)
+   /home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/strategy.rkt:39:7: (cond (tile-kind (define-values (to-place kind) (values (car ....) (....))) (define hotel (pick-hotel b ....)) (define board (set-board ....)) (define shares (....)) (when (....) ....) (define ....) (....)) (else (define buy (to-buy b ....)) (values #f ...
+   /home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt:47:46: (send external take-turn turn)
+   /home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt:47:24: (let-values (((a b c) (send external take-turn turn))) (list a b c))
+  context...:
+   /home/lukas/github_sync/grad/projects/blame-gradual-typing/src/typed-racket/typed-racket-lib/typed-racket/utils/shallow-contract.rkt:89:0: raise-shallow-check-error
+   /home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/strategy.rkt:17:5: Slam64762
+   /home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/strategy.rkt:33:5: Slam64781
+   /home/lukas/github_sync/grad/projects/blame-gradual-typing/src/gtp-benchmarks/benchmarks/debug/unified/admin.rkt:47:13

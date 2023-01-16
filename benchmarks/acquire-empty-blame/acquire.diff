@@ -1,0 +1,4 @@
+    (require "../../../utilities/require-typed-check-provide.rkt")
+-   (define-type Hotel String)
++   (define-type Hotel Any)
+    (define-type Share Integer)

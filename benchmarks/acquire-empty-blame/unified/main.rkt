@@ -1,0 +1,26 @@
+(module main typed/racket/shallow
+  (#%module-begin
+   (random-seed 5)
+   (require "../../../utilities/require-typed-check-provide-transient.rkt" racket/list typed/racket/class "type-interface.rkt")
+   (require/typed/check
+    "player.rkt"
+    (random-players (-> Natural (Listof (Instance Player%))))
+    (ordered-players (-> Natural (Listof (Instance Player%))))
+    (inf-loop-player (-> Natural (Instance Player%))))
+   (: go (-> (Instance Player%) Void))
+   (define (go extra)
+     (define p0 (ordered-players 10))
+     (define p1 (random-players 10))
+     (define p (cons extra (append p0 p1)))
+     (define-values (two-status _score two-run) (let ((r (run p 100 #:show show #:choice randomly-pick))) (values (car r) (cadr r) (caddr r))))
+     (void))
+   (: run (->* ((Listof (Instance Player%)) Natural) (#:show (-> Void) #:choice (-> (Listof Tile) Tile)) RunResult))
+   (define (run players turns# #:show (show show) #:choice (choose-next-tile first))
+     (define a (new administrator% (next-tile choose-next-tile)))
+     (for ((p players)) (send p go a))
+     (send a run turns# #:show show))
+   (: show (-> Void))
+   (define (show) (void))
+   (: main (-> Natural Void))
+   (define (main n) (for ((i (in-range n))) (go (inf-loop-player 99))))
+   (time (main 1))))
