@@ -1,5 +1,0 @@
-     (unsafe-build-array (-> Indexes (-> Indexes Float) Array))
-     (array-strictness (Parameterof (U #f #t)))
--    (build-array (-> (Vectorof Integer) (-> (Vectorof Integer) Float) Array))
-+    (build-array (-> (Vectorof Integer) (-> (Vectorof Any) Float) Array))
-     (make-array (-> (Vectorof Integer) Float Array))

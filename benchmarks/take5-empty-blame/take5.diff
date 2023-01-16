@@ -1,5 +1,0 @@
-    (define-type Player%
-     (Class
--     (init-field (n Name) (order (-> (Listof Card) (Listof Card)) #:optional))
-+     (init-field (n Name) (order Any #:optional))
-      (field (my-cards (Listof Card)))
