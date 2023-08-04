@@ -8,9 +8,11 @@
          (for-syntax syntax/parse
                      racket/format
                      racket/list
+                     racket/set
                      racket/syntax))
 
 (begin-for-syntax
+  (define files-with-provide-configurable (mutable-set))
   (define enabled-ctc-levels '(none types max))
   (define-syntax-class ctc-map-clause
     #:attributes [level ctc]
@@ -42,16 +44,33 @@
                                })
                           'none))))
 
-(define-simple-macro (provide/configurable-contract [name:id cmap:ctc-map] ...)
-  #:do [(define current-level (contract-level-for-expansion-context-of this-syntax))]
-  #:with [ctc ...] (for/list ([m (in-list (attribute cmap.map))])
-                     (hash-ref m current-level))
-  #:with [ctc-map-stx ...] (map (lower-ctc-map #'here) (attribute cmap.map))
-  (begin (provide (contract-out [name ctc] ...))
-         (module+ contract-maps
-           (provide contract-maps)
-           (define contract-maps
-             (hash {~@ 'name ctc-map-stx} ...)))))
+(define-syntax (provide/configurable-contract stx)
+  (syntax-parse stx
+    [(_ [name:id cmap:ctc-map] ...)
+     #:do [(define current-level (contract-level-for-expansion-context-of this-syntax))
+           (define filename (syntax-source stx))
+           ;; (print filename)
+           (define first-provide-in-this-module? (not (set-member? files-with-provide-configurable
+                                                                   filename)))
+           (when first-provide-in-this-module?
+             (set-add! files-with-provide-configurable filename))]
+     #:with [ctc ...] (for/list ([m (in-list (attribute cmap.map))])
+                        (hash-ref m current-level))
+     #:with [ctc-map-stx ...] (map (lower-ctc-map #'here) (attribute cmap.map))
+     #:with syntax-for-contract-maps-id (datum->syntax this-syntax 'contract-maps
+                                                       this-syntax
+                                                       this-syntax)
+     #:with [maybe-define/provide-contract-maps ...] (if first-provide-in-this-module?
+                                                         #'{(provide syntax-for-contract-maps-id)
+                                                            (define syntax-for-contract-maps-id
+                                                              (make-hash))}
+                                                         #'{})
+     #'(begin (provide (contract-out [name ctc] ...))
+              (module+ syntax-for-contract-maps-id
+                maybe-define/provide-contract-maps ...
+                (hash-set*! syntax-for-contract-maps-id {~@ 'name ctc-map-stx} ...)))
+     ]))
+
 
 ;; lltodo: this still doesn't work due to some binding issues
 (define-simple-macro (require/configurable-contract mod:str name:id ...)
