@@ -1,30 +1,12 @@
 #lang racket
 
-(provide
-  left
-  right
-  up
-  down
-  grid-ref
-  grid-height
-  grid-width
-  show-grid
-  array-set!
-  build-array
-  array-coord?
-  direction?
-  arrayof
-  grid?
-  within-grid?
-  within-grid/c
-)
-
 (require
   "../base/un-types.rkt"
   require-typed-check
   ;math/array ;; TODO it'd be nice to use this
  racket/contract
  (only-in "../../../ctcs/common.rkt" or-#f/c)
+ "../../../ctcs/configurable.rkt"
  "../../../ctcs/precision-config.rkt"
 )
 (require (only-in "cell.rkt"
@@ -34,21 +16,116 @@
   class-equal?
 ))
 
+(provide/configurable-contract
+ [array-set! ([max (->i ([g (arrayof cell%?)]
+                         [p array-coord?]
+                         [v cell%?])
+                        [result void?]
+                        #:post (g p v) (equal? v (grid-ref g p)))]
+              [types ((arrayof cell%?) array-coord? cell%? . -> . void?)])]
+ [build-array ([max (->i ([p array-coord?]
+                          [f (array-coord? . -> . cell%?)])
+                         [result (p)
+                                 (and/c (arrayof cell%?)
+                                        (array-size=/c p))]
+                         #:post (p f result)
+                         (for*/and ([x (in-range (vector-ref p 0))]
+                                    [y (in-range (vector-ref p 1))])
+                           (define xy (vector x y))
+                           (equal? (f xy)
+                                   (grid-ref result xy))))]
+               [types (array-coord? (array-coord? . -> . cell%?) . -> . (arrayof cell%?))])]
+ [parse-grid ([max ((listof string?) . -> . grid?)]
+              [types ((listof string?) . -> . grid?)])]
+ [show-grid ([max (grid? . -> . string?)]
+             [types (grid? . -> . string?)])]
+ [grid-height ([max (->i ([g grid?])
+                         [result (g) (and/c index?
+                                            (curry equal? (vector-length g)))])]
+               [types (grid? . -> . index?)])]
+ [grid-width ([max (->i ([g grid?])
+                        [result (g) (and/c index?
+                                           (curry equal? 
+                                                  (vector-length (vector-ref g 0))))])]
+              [types (grid? . -> . index?)])]
+ [within-grid? ([max (->i ([g grid?]
+                           [pos array-coord?])
+                          [result 
+                           (g pos)
+                           (curry equal? 
+                                  (and (<= 0 (vector-ref pos 0) (sub1 (grid-height g)))
+                                       (<= 0 (vector-ref pos 1) (sub1 (grid-width  g)))))])]
+                [types (grid? array-coord? . -> . boolean?)])]
+ [grid-ref ([max (->i ([g grid?]
+                       [pos array-coord?])
+                      [result 
+                       (g pos)
+                       (or-#f/c
+                        (and/c cell%?
+                               (curry equal?
+                                      (when (within-grid? g pos)
+                                        (vector-ref (vector-ref g (vector-ref pos 0))
+                                                    (vector-ref pos 1))))))])]
+            [types (grid? array-coord? . -> . (or-#f/c cell%?))])]
+ [left ([max (and/c direction?
+                    (->i ([pos array-coord?])
+                         ([n exact-nonnegative-integer?])
+                         [result
+                          (pos n)
+                          (vector/c (vector-ref pos 0)
+                                    (max (- (vector-ref pos 1) (if (unsupplied-arg? n) 1 n)) 0))]))]
+        [types direction?])]
+ [right ([max (and/c direction?
+                     (->i ([pos array-coord?])
+                          ([n exact-nonnegative-integer?])
+                          [result
+                           (pos n)
+                           (vector/c (vector-ref pos 0)
+                                     (max (+ (vector-ref pos 1) (if (unsupplied-arg? n) 1 n)) 0))]))]
+         [types direction?])]
+ [up ([max (and/c direction?
+                  (->i ([pos array-coord?])
+                       ([n exact-nonnegative-integer?])
+                       [result (pos n) (vector/c (max (- (vector-ref pos 0)
+                                                         (if (unsupplied-arg? n) 1 n))
+                                                      0)
+                                                 (vector-ref pos 1))]))]
+      [types direction?])]
+ [down ([max (and/c direction?
+                    (->i ([pos array-coord?])
+                         ([n exact-nonnegative-integer?])
+                         [result (pos n) (vector/c (max (+ (vector-ref pos 0)
+                                                           (if (unsupplied-arg? n) 1 n))
+                                                        0)
+                                                   (vector-ref pos 1))]))]
+        [types direction?])])
+
+(provide
+;;   left
+;;   right
+;;   up
+;;   down
+;;   grid-ref
+;;   grid-height
+;;   grid-width
+;;   show-grid
+;;   array-set!
+;;   build-array
+  array-coord?
+  direction?
+  arrayof
+  grid?
+;; within-grid?
+  within-grid/c
+)
+
 ;; =============================================================================
 
 (define/ctc-helper array-coord? (vector/c index? index?))
 (define/ctc-helper (arrayof val-ctc)
   (vectorof (vectorof val-ctc)))
 
-(define/contract (array-set! g p v)
-  (configurable-ctc
-   [max (->i ([g (arrayof cell%?)]
-              [p array-coord?]
-              [v cell%?])
-             [result void?]
-             #:post (g p v) (equal? v (grid-ref g p)))]
-   [types ((arrayof cell%?) array-coord? cell%? . -> . void?)])
-
+(define (array-set! g p v)
   (vector-set! (vector-ref g (vector-ref p 0)) (vector-ref p 1) v))
 
 (define/ctc-helper ((array-size=/c dims) array)
@@ -58,21 +135,7 @@
            (= (vector-length (vector-ref array 0)) y)
            #t)))
 
-(define/contract (build-array p f)
-  (configurable-ctc
-   [max (->i ([p array-coord?]
-              [f (array-coord? . -> . cell%?)])
-             [result (p)
-                     (and/c (arrayof cell%?)
-                            (array-size=/c p))]
-             #:post (p f result)
-             (for*/and ([x (in-range (vector-ref p 0))]
-                        [y (in-range (vector-ref p 1))])
-               (define xy (vector x y))
-               (equal? (f xy)
-                       (grid-ref result xy))))]
-   [types (array-coord? (array-coord? . -> . cell%?) . -> . (arrayof cell%?))])
-
+(define (build-array p f)
   (for/vector ([x (in-range (vector-ref p 0))])
     (for/vector ([y (in-range (vector-ref p 1))])
       (f (vector (assert x index?) (assert y index?))))))
@@ -84,11 +147,7 @@
 
 ;; parses a list of strings into a grid, based on the printed representation
 ;; of each cell
-(define/contract (parse-grid los)
-  (configurable-ctc
-   [max ((listof string?) . -> . grid?)]
-   [types ((listof string?) . -> . grid?)])
-
+(define (parse-grid los)
   (for/vector
               ; #:shape (vector (length los)
               ;                (apply max (map string-length los)))
@@ -98,10 +157,7 @@
                ([c (in-string s)])
      (new (char->cell% c)))))
 
-(define/contract (show-grid g)
-  (configurable-ctc
-   [max (grid? . -> . string?)]
-   [types (grid? . -> . string?)])
+(define (show-grid g)
   (with-output-to-string
     (lambda ()
       (for ([r (in-vector g)])
@@ -109,37 +165,14 @@
           (display (send c show)))
         (newline)))))
 
-(define/contract (grid-height g)
-  (configurable-ctc
-   [max (->i ([g grid?])
-             [result (g) (and/c index?
-                                (curry equal? (vector-length g)))])]
-   [types (grid? . -> . index?)])
-
+(define (grid-height g)
   (vector-length g))
 
-(define/contract (grid-width g)
-  (configurable-ctc
-   [max (->i ([g grid?])
-             [result (g) (and/c index?
-                                (curry equal? 
-                                       (vector-length (vector-ref g 0))))])]
-   [types (grid? . -> . index?)])
-
+(define (grid-width g)
   (vector-length (vector-ref g 0)))
 
 ;; lltodo: can be more precise
-(define/contract (within-grid? g pos)
-  (configurable-ctc
-   [max (->i ([g grid?]
-              [pos array-coord?])
-             [result 
-              (g pos)
-              (curry equal? 
-                     (and (<= 0 (vector-ref pos 0) (sub1 (grid-height g)))
-                          (<= 0 (vector-ref pos 1) (sub1 (grid-width  g)))))])]
-   [types (grid? array-coord? . -> . boolean?)])
-
+(define (within-grid? g pos)
   (and (<= 0 (vector-ref pos 0) (sub1 (grid-height g)))
        (<= 0 (vector-ref pos 1) (sub1 (grid-width  g)))))
 
@@ -148,79 +181,26 @@
 
 
 
-(define/contract (grid-ref g pos)
-  (configurable-ctc
-   [max (->i ([g grid?]
-              [pos array-coord?])
-             [result 
-              (g pos)
-              (or-#f/c
-               (and/c cell%?
-                      (curry equal?
-                             (when (within-grid? g pos)
-                               (vector-ref (vector-ref g (vector-ref pos 0))
-                                           (vector-ref pos 1))))))])]
-   [types (grid? array-coord? . -> . (or-#f/c cell%?))])
-
+(define (grid-ref g pos)
   (and (within-grid? g pos)
        (vector-ref (vector-ref g (vector-ref pos 0)) (vector-ref pos 1))))
 
 (define/ctc-helper direction? (->* (array-coord?) [index?]
                         array-coord?))
 
-(define/contract (left pos [n 1])
-  (configurable-ctc
-   [max (and/c direction?
-               (->i ([pos array-coord?])
-                    ([n exact-nonnegative-integer?])
-                    [result
-                     (pos n)
-                     (vector/c (vector-ref pos 0)
-                               (max (- (vector-ref pos 1) (if (unsupplied-arg? n) 1 n)) 0))]))]
-   [types direction?])
-
+(define (left pos [n 1])
   (vector (vector-ref pos 0)
           (max (- (vector-ref pos 1) n) 0)))
 
-(define/contract (right pos [n 1])
-  (configurable-ctc
-   [max (and/c direction?
-               (->i ([pos array-coord?])
-                    ([n exact-nonnegative-integer?])
-                    [result
-                     (pos n)
-                     (vector/c (vector-ref pos 0)
-                               (max (+ (vector-ref pos 1) (if (unsupplied-arg? n) 1 n)) 0))]))]
-   [types direction?])
-
+(define (right pos [n 1])
   (vector (vector-ref pos 0)
           (max (+ (vector-ref pos 1) n) 0)))
 
-(define/contract (up pos [n 1])
-  (configurable-ctc
-   [max (and/c direction?
-               (->i ([pos array-coord?])
-                    ([n exact-nonnegative-integer?])
-                    [result (pos n) (vector/c (max (- (vector-ref pos 0)
-                                                      (if (unsupplied-arg? n) 1 n))
-                                                   0)
-                                              (vector-ref pos 1))]))]
-   [types direction?])
-
+(define (up pos [n 1])
   (vector (max (- (vector-ref pos 0) n) 0)
           (vector-ref pos 1)))
 
-(define/contract (down pos [n 1])
-  (configurable-ctc
-   [max (and/c direction?
-               (->i ([pos array-coord?])
-                    ([n exact-nonnegative-integer?])
-                    [result (pos n) (vector/c (max (+ (vector-ref pos 0)
-                                                      (if (unsupplied-arg? n) 1 n))
-                                                   0)
-                                              (vector-ref pos 1))]))]
-   [types direction?])
-
+(define (down pos [n 1])
   (vector (max (+ (vector-ref pos 0) n) 0)
           (vector-ref pos 1)))
 

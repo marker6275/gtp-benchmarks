@@ -49,7 +49,6 @@
     [(_ [name:id cmap:ctc-map] ...)
      #:do [(define current-level (contract-level-for-expansion-context-of this-syntax))
            (define filename (syntax-source stx))
-           ;; (print filename)
            (define first-provide-in-this-module? (not (set-member? files-with-provide-configurable
                                                                    filename)))
            (when first-provide-in-this-module?
