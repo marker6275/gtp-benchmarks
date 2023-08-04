@@ -1,8 +1,20 @@
 #lang racket
 
+
 (require "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt"
+         "../../../ctcs/configurable.rkt"
          "data.rkt")
+
+(provide/configurable-contract)
+
+(provide substring?
+         ordered-substrings?
+         count-strs-in-lst
+         sublist?
+         check-station-pairs?
+         lines-in-color-file?)
+
 
 (define/ctc-helper (substring? maybe-substr str)
   (string-contains? str maybe-substr)
@@ -69,9 +81,3 @@
               (lines-in-color-file? (rest lines) (rest color-file))
               (lines-in-color-file? lines (rest color-file)))]))
 
-(provide substring?
-         ordered-substrings?
-         count-strs-in-lst
-         sublist?
-         check-station-pairs?
-         lines-in-color-file?)

@@ -26,7 +26,12 @@
          Lam?
          Call?)
 
-(require "../../../ctcs/precision-config.rkt")
+(require "../../../ctcs/precision-config.rkt"
+         "../../../ctcs/common.rkt"
+           "../../../ctcs/configurable.rkt")
+
+(provide/configurable-contract)
+
 
 ;; =============================================================================
 

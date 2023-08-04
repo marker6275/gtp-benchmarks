@@ -1,7 +1,16 @@
 #lang racket
 
+
 (require "../../../ctcs/precision-config.rkt"
-         "../../../ctcs/common.rkt")
+         "../../../ctcs/common.rkt"
+         "../../../ctcs/configurable.rkt")
+
+(provide/configurable-contract)
+
+(provide color?
+         line-type
+         line?
+         station?)
 
 (define/ctc-helper (color? str)
   (member str '("blue" "green" "orange" "red")))
@@ -144,7 +153,3 @@
                 "Mattapan Station"
                 "")))              
 
-(provide color?
-         line-type
-         line?
-         station?)

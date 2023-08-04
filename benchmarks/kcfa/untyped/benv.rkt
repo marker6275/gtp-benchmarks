@@ -1,5 +1,4 @@
 #lang racket
-
 ;; Binding environment,
 ;; helper functions
 
@@ -7,15 +6,44 @@
   "structs.rkt"
   "../../../ctcs/precision-config.rkt"
   "../../../ctcs/common.rkt"
+  "../../../ctcs/configurable.rkt"
 )
+
+(provide/configurable-contract
+ [empty-benv ([max BEnv?]
+              [types BEnv?])]
+ [benv-lookup ([max (->i ([benv BEnv?]
+                          [key (benv) (and/c Var?
+                                             (key-of/c benv))])
+                         [result (benv key)
+                                 (equal?/c (hash-ref benv key))])]
+               [types (BEnv? Var? . -> . Addr?)])]
+ [benv-extend ([max (->i ([benv BEnv?]
+                          [key Var?]
+                          [val Addr?])
+                         [result BEnv?]
+                         #:post (benv key val result)
+                         (and (hash-has-key? result key)
+                              (equal? (hash-ref result key) val)))]
+               [types (BEnv? Var? Addr? . -> . BEnv?)])]
+ [benv-extend* ([max (->i ([benv BEnv?]
+                           [keys (listof Var?)]
+                           [vals (listof Addr?)])
+                          [result BEnv?]
+                          #:post (benv keys vals result)
+                          (for/and ([k (in-list keys)]
+                                    [v (in-list vals)])
+                            (and (hash-has-key? result k)
+                                 (equal? (hash-ref result k) v))))]
+                [types (BEnv? (listof Var?) (listof Addr?) . -> . BEnv?)])])
 
 (provide
   (struct-out Closure)
   (struct-out Binding)
-  empty-benv
-  benv-lookup
-  benv-extend
-  benv-extend*
+;;   empty-benv
+;;   benv-lookup
+;;   benv-extend
+;;   benv-extend*
 
   BEnv?
   Closure/c
@@ -75,48 +103,21 @@
 
 
 ;(: empty-benv BEnv)
-(define/contract empty-benv BEnv? (hash))
+(define empty-benv (hash))
 
 (define/ctc-helper ((key-of/c a-hash) k)
   (hash-has-key? a-hash k))
 
 ;(: benv-lookup (-> BEnv Var Addr))
-(define/contract benv-lookup
-  (configurable-ctc
-   [max (->i ([benv BEnv?]
-              [key (benv) (and/c Var?
-                                 (key-of/c benv))])
-             [result (benv key)
-                     (equal?/c (hash-ref benv key))])]
-   [types (BEnv? Var? . -> . Addr?)])
+(define benv-lookup
   hash-ref)
 
 ;(: benv-extend (-> BEnv Var Addr BEnv))
-(define/contract benv-extend
-  (configurable-ctc
-   [max (->i ([benv BEnv?]
-              [key Var?]
-              [val Addr?])
-             [result BEnv?]
-             #:post (benv key val result)
-             (and (hash-has-key? result key)
-                  (equal? (hash-ref result key) val)))]
-   [types (BEnv? Var? Addr? . -> . BEnv?)])
+(define benv-extend
   hash-set)
 
 ;(: benv-extend* (-> BEnv (Listof Var) (Listof Addr) BEnv))
-(define/contract (benv-extend* benv vars addrs)
-  (configurable-ctc
-   [max (->i ([benv BEnv?]
-              [keys (listof Var?)]
-              [vals (listof Addr?)])
-             [result BEnv?]
-             #:post (benv keys vals result)
-             (for/and ([k (in-list keys)]
-                       [v (in-list vals)])
-               (and (hash-has-key? result k)
-                    (equal? (hash-ref result k) v))))]
-   [types (BEnv? (listof Var?) (listof Addr?) . -> . BEnv?)])
+(define (benv-extend* benv vars addrs)
   (for/fold ([benv benv])
     ([v (in-list vars)]
      [a (in-list addrs)])

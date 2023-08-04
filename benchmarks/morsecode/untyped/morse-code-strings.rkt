@@ -9,14 +9,34 @@
 ;; Original file would make a SOUND from the sequence of dots and dashes.
 ;; We just make the . and -
 
-(provide string->morse)
 
 (require "morse-code-table.rkt"
          "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt"
+         "../../../ctcs/configurable.rkt"
          racket/contract
          racket/match
          racket/string)
+
+(provide/configurable-contract
+ [char->dit-dah-string ([max (->i ([letter char?])
+                                  #:pre (letter) (hash-has-key? char-table (char-downcase letter))
+                                  [result (letter)
+                                          (and/c morse-string?
+                                                 (morse-decodes-to? letter))])]
+                        [types (-> char? string?)])]
+ [string->morse ([max (->i ([str string?])
+                           [result (str)
+                                   (and/c morse-string? (morse-decodes-to? str))]
+                           #:post (str result)
+                           (if (non-empty-string? str)
+                               (non-empty-string? result)
+                               (string=? result "")))]
+                 [types (-> string? string?)])])
+
+
+;; (provide string->morse)
+
 
 (define/ctc-helper ((morse-decodes-to? str/char) morse-str)
   (define target-str (if (char? str/char)
@@ -29,31 +49,14 @@
   (string=? encoded-target morse-str))
 
 ;; map a character to a dit-dah string
-(define/contract (char->dit-dah-string letter)
-  (configurable-ctc
-   [max (->i ([letter char?])
-             #:pre (letter) (hash-has-key? char-table (char-downcase letter))
-             [result (letter)
-                     (and/c morse-string?
-                            (morse-decodes-to? letter))])]
-   [types (-> char? string?)])
+(define (char->dit-dah-string letter)
   (define res (hash-ref char-table (char-downcase letter) #f))
   (if (eq? #f res)
     (raise-argument-error 'letter-map "character in map"
                               0 letter)
     res))
 
-(define/contract (string->morse str)
-  (configurable-ctc
-   [max (->i ([str string?])
-             [result (str)
-                     (and/c morse-string? (morse-decodes-to? str))]
-             #:post (str result)
-             (if (non-empty-string? str)
-                 (non-empty-string? result)
-                 (string=? result "")))]
-   [types (-> string? string?)])
-
+(define (string->morse str)
   (define morse-list (for/list ([c str])
       (char->dit-dah-string c)))
   (apply string-append morse-list))

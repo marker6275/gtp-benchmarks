@@ -6,90 +6,89 @@
          "helpers.rkt"
          "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt"
+         "../../../ctcs/configurable.rkt"
          (only-in racket/string string-join))
 
+;; (provide/configurable-contract
+;;  [dat->station-names ([max (->i ([fname (and/c string? (λ (f) (file-exists? f)))])
+;;                                 [result (fname)
+;;                                         (and/c (listof station?)
+;;                                                (λ (lst)
+;;                                                  (sublist? lst (file->lines fname))))])]            
+;;                       #;[max/sub1 (-> (and/c string? (λ (f) (file-exists? f)))
+;;                                       (listof station?))]             
+;;                       [types (-> string? (listof string?))])]
+;;  [BLUE-STATIONS ([max (and/c (listof station?)
+;;                              (λ (lst)
+;;                                (sublist? lst (file->lines "../base/blue.dat"))))]
+;;                  #;[max/sub1 (listof station?)]
+;;                  [types (listof string?)])]
+;;  [ORANGE-STATIONS ([max (and/c (listof station?)
+;;                                (λ (lst)
+;;                                  (sublist? lst (file->lines "../base/orange.dat"))))]
+;;                    #;[max/sub1 (listof station?)]
+;;                    [types (listof string?)])]
+;;  [path ([max (->i ([from string?]
+;;                    [to string?])
+;;                   [result (from to)
+;;                           (λ (res)
+;;                             (ordered-substrings? (list "from" from "to" to) res))])]
+;;         #;[max/sub1 (->i ([from string?]
+;;                           [to string?])
+;;                          [result (from to)
+;;                                  (λ (res)
+;;                                    (and (substring? from res)
+;;                                         (substring? to res)))])]
+;;         [types (-> string? string? string?)])]
+;;  [enable ([max (->i ([s string?])
+;;                     [result (s)
+;;                             (λ (res)
+;;                               (ordered-substrings? (list "enable" s) res))])]
+;;           #;[max/sub1 (->i ([s string?])
+;;                            [result (s)
+;;                                    (λ (res)
+;;                                      (substring? s res))])]
+;;           [types (-> string? string?)])]
+;;  [disable ([max (->i ([s string?])
+;;                      [result (s)
+;;                              (λ (res)
+;;                                (ordered-substrings? (list "disable" s) res))])]
+;;            #;[max/sub1 (->i ([s string?])
+;;                             [result (s)
+;;                                     (λ (res)
+;;                                       (substring? s res))])]
+;;            [types (-> string? string?)])]
+;;  [assert (string? natural? . -> . void?)]
+;;  [main any/c])
+
+
 ;; ===================================================================================================
-(define/contract (dat->station-names fname)
-  (configurable-ctc
-   [max (->i ([fname (and/c string? (λ (f) (file-exists? f)))])
-             [result (fname)
-                     (and/c (listof station?)
-                            (λ (lst)
-                              (sublist? lst (file->lines fname))))])]            
-   #;[max/sub1 (-> (and/c string? (λ (f) (file-exists? f)))
-                 (listof station?))]             
-   [types (-> string? (listof string?))])
+(define (dat->station-names fname)
   (for/list ([line (in-list (file->lines fname))]
              #:when (and (< 0 (string-length line))
                          (not (eq? #\- (string-ref line 0)))))
     (string-trim line)))
 
-(define/contract BLUE-STATIONS
-  (configurable-ctc
-   [max (and/c (listof station?)
-               (λ (lst)
-                 (sublist? lst (file->lines "../base/blue.dat"))))]
-   #;[max/sub1 (listof station?)]
-   [types (listof string?)])
+(define BLUE-STATIONS
   (dat->station-names "../base/blue.dat"))
 
-(define/contract ORANGE-STATIONS
-  (configurable-ctc
-   [max (and/c (listof station?)
-               (λ (lst)
-                 (sublist? lst (file->lines "../base/orange.dat"))))]
-   #;[max/sub1 (listof station?)]
-   [types (listof string?)])
+(define ORANGE-STATIONS
   (dat->station-names "../base/orange.dat"))
 
 ;; String String -> String
-(define/contract (path from to)
-  (configurable-ctc
-   [max (->i ([from string?]
-              [to string?])
-             [result (from to)
-                     (λ (res)
-                       (ordered-substrings? (list "from" from "to" to) res))])]
-   #;[max/sub1 (->i ([from string?]
-                   [to string?])
-                  [result (from to)
-                          (λ (res)
-                            (and (substring? from res)
-                                 (substring? to res)))])]
-   [types (-> string? string? string?)])
+(define (path from to)
   (format "from ~a to ~a" from to))
 
 ;; String -> String
-(define/contract (enable s)
-  (configurable-ctc
-   [max (->i ([s string?])
-             [result (s)
-                     (λ (res)
-                       (ordered-substrings? (list "enable" s) res))])]
-   #;[max/sub1 (->i ([s string?])
-                  [result (s)
-                          (λ (res)
-                            (substring? s res))])]
-   [types (-> string? string?)])
+(define (enable s)
   (format "enable ~a" s))
 
-(define/contract (disable s)
-  (configurable-ctc
-   [max (->i ([s string?])
-             [result (s)
-                     (λ (res)
-                       (ordered-substrings? (list "disable" s) res))])]
-   #;[max/sub1 (->i ([s string?])
-                  [result (s)
-                          (λ (res)
-                            (substring? s res))])]
-   [types (-> string? string?)])
+(define (disable s)
   (format "disable ~a" s))
 
 ;; ===================================================================================================
 
-(define/contract (assert result expected-length)
-  (string? natural? . -> . void?)
+(define (assert result expected-length)
   (define num-result (length (string-split result "\n")))
   (unless (= num-result expected-length)
     (error (format "Expected ~a results, got ~a\nFull list:~a"
@@ -97,8 +96,7 @@
                    num-result
                    result))))
 
-(define/contract (main)
-  any/c
+(define (main)
   (define (run-query str)
     (define r (run-t str))
     (if r

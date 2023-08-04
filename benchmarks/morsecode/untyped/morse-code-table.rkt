@@ -2,18 +2,36 @@
 
 ;; Copyright 2014 John Clements, except the portion that comes from wikipedia!
 
-(provide char-table
-         morse-string?)
 (require racket/match
          racket/contract
          "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt"
+         "../../../ctcs/configurable.rkt"
          racket/string
          racket/set)
 
-(define/contract wikipedia-text
-  string?
-#<<#
+(provide/configurable-contract
+ [wikipedia-text ([max string?]
+                  [types string?])]
+ [lines ([max (and/c (listof string?) (length=/c (lines-in wikipedia-text)))]
+         [types (listof string?)])]
+ [clean-pattern ([max (->i ([pat string?])
+                           [result (pat)
+                                   (and/c string?
+                                          (not/c (string-contains/c "·" "–" "&nbsp;"))
+                                          (subsequence-of/c pat
+                                                            #:swap (hash #\· #\.
+                                                                         #\– #\-)))])]
+                 [types (string? . -> . string?)])]
+ [char-table ([max (and/c (hash/c char? (and/c non-empty-string? morse-string?))
+                          (hash-with-keys/c all-chars))]
+              [types (hash/c char? string?)])])
+
+(provide morse-string?)
+
+
+(define wikipedia-text
+  #<<#
 | {{Audio-nohelp|A morse code.ogg|A}} || '''·&nbsp;–'''
 | {{Audio-nohelp|J morse code.ogg|J}} || '''·&nbsp;–&nbsp;–&nbsp;–'''
 | {{Audio-nohelp|S morse code.ogg|S}} || '''·&nbsp;·&nbsp;·'''
@@ -78,10 +96,7 @@
   (length (string-split str "\n" #:trim? #f)))
 
 ;; the lines of the wikipedia text
-(define/contract lines
-  (configurable-ctc
-   [max (and/c (listof string?) (length=/c (lines-in wikipedia-text)))]
-   [types (listof string?)])
+(define lines
   (regexp-split #px"\n" wikipedia-text))
 
 ;; Does `target` contain any of `strs`?
@@ -106,16 +121,7 @@
       [{'() (not '())} #f])))
 
 ;; replace some unicode chars with ascii ones in the wikipedia patterns
-(define/contract (clean-pattern pat)
-  (configurable-ctc
-   [max (->i ([pat string?])
-             [result (pat)
-                     (and/c string?
-                            (not/c (string-contains/c "·" "–" "&nbsp;"))
-                            (subsequence-of/c pat
-                                              #:swap (hash #\· #\.
-                                                           #\– #\-)))])]
-   [types (string? . -> . string?)])
+(define (clean-pattern pat)
   (regexp-replace*
    #px"·"
    (regexp-replace*
@@ -138,12 +144,8 @@
   (subset? key-set (hash-keys h)))
 
 ;; parse the wikipedia text into a table mapping characters to their morse code representations
-(define/contract char-table
-  (configurable-ctc
-   [max (and/c (hash/c char? (and/c non-empty-string? morse-string?))
-               (hash-with-keys/c all-chars))]
-   [types (hash/c char? string?)])
-(make-hash
+(define char-table
+  (make-hash
  (for/list
    ([l lines])
     (match 

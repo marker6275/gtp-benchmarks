@@ -9,44 +9,63 @@
   "denotable.rkt"
   racket/set
   racket/match
+  "../../../ctcs/configurable.rkt"
   "../../../ctcs/precision-config.rkt"
   "../../../ctcs/common.rkt"
 )
 
 ;; ---
 
+(provide/configurable-contract
+ [atom-eval ([max (->i ([benv BEnv?]
+                        [store Store/c])
+                       [result (benv store)
+                               (->i ([id Exp-type/c])
+                                    #:pre (id) (match id
+                                                 [(Ref _ var)
+                                                  (hash-has-key? benv var)]
+                                                 [_ #t])
+                                    [result Denotable/c]
+                                    #:post (id result)
+                                    (match id
+                                      [(Ref _ var)
+                                       (=> fail)
+                                       (equal? result (hash-ref store (hash-ref benv var fail) fail))]
+                                      [(Ref _ var)
+                                       (set-empty? result)]
+                                      [(? Lam?)
+                                       (equal? result (set (Closure id benv)))]
+                                      [_ #f]))])]
+             [types (BEnv? Store/c . -> . (Exp-type/c . -> . Denotable/c))])]
+ [next ([max ((and/c State-type? closed-State?) . -> . (set/c (and/c State-type?
+                                                                     closed-State?)
+                                                              #:kind 'immutable))]
+        [types (State-type? . -> . (set/c State-type? #:kind 'immutable))])]
+ [explore ([max (->i ([seen (set/c (and/c State-type? closed-State?)
+                                   #:kind 'immutable)]
+                      [todo (listof (and/c State-type? closed-State?))])
+                     [result (seen todo)
+                             (and/c (set/c (and/c State-type? closed-State?)
+                                           #:kind 'immutable)
+                                    (subset?/c seen)
+                                    (subset?/c (list->set todo)))])]
+           [types ((set/c State-type? #:kind 'immutable)
+                   (listof State-type?)
+                   . -> .
+                   (set/c State-type? #:kind 'immutable))])])
+
+
 (provide
-  atom-eval
-  next
-  explore
+;;   atom-eval
+;;   next
+;;   explore
   closed-term?
 )
 
 ;; =============================================================================
 
 ;(: atom-eval (-> BEnv Store (-> Exp Denotable)))
-(define/contract (atom-eval benv store)
-  (configurable-ctc
-   [max (->i ([benv BEnv?]
-              [store Store/c])
-             [result (benv store)
-                     (->i ([id Exp-type/c])
-                          #:pre (id) (match id
-                                       [(Ref _ var)
-                                        (hash-has-key? benv var)]
-                                       [_ #t])
-                          [result Denotable/c]
-                          #:post (id result)
-                          (match id
-                            [(Ref _ var)
-                             (=> fail)
-                             (equal? result (hash-ref store (hash-ref benv var fail) fail))]
-                            [(Ref _ var)
-                             (set-empty? result)]
-                            [(? Lam?)
-                             (equal? result (set (Closure id benv)))]
-                            [_ #f]))])]
-   [types (BEnv? Store/c . -> . (Exp-type/c . -> . Denotable/c))])
+(define (atom-eval benv store)
   (λ (id)
     (cond
       [(Ref? id)
@@ -80,14 +99,9 @@
     [_ #t]))
 
 ;(: next (-> State (Setof State)))
-(define/contract (next st)
+(define (next st)
   ;; lltodo: I don't think there's any reason to be more specific
   ;; here. It just calls other functions.
-  (configurable-ctc
-   [max ((and/c State-type? closed-State?) . -> . (set/c (and/c State-type?
-                                                               closed-State?)
-                                                        #:kind 'immutable))]
-   [types (State-type? . -> . (set/c State-type? #:kind 'immutable))])
   (match-define (State c benv store time) st)
   (cond
     [(Call? c)
@@ -115,20 +129,7 @@
   (subset? sub s))
 
 ;(: explore (-> (Setof State) (Listof State) (Setof State)))
-(define/contract (explore seen todo)
-  (configurable-ctc
-   [max (->i ([seen (set/c (and/c State-type? closed-State?)
-                           #:kind 'immutable)]
-              [todo (listof (and/c State-type? closed-State?))])
-             [result (seen todo)
-                     (and/c (set/c (and/c State-type? closed-State?)
-                                   #:kind 'immutable)
-                            (subset?/c seen)
-                            (subset?/c (list->set todo)))])]
-   [types ((set/c State-type? #:kind 'immutable)
-           (listof State-type?)
-           . -> .
-           (set/c State-type? #:kind 'immutable))])
+(define (explore seen todo)
   (cond
     [(eq? '() todo)
      ;; Nothing left to do

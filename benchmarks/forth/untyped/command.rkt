@@ -1,9 +1,10 @@
 #lang racket
 
-(provide
-  command%
-  CMD*
-)
+
+;; (provide
+;;   command%
+;;   CMD*
+;; )
 
 ;; -----------------------------------------------------------------------------
 
@@ -12,7 +13,8 @@
  racket/class
  (only-in racket/string string-join string-split)
  (for-syntax racket/base racket/syntax syntax/parse)
- racket/contract
+ ;; racket/contract
+ "../../../ctcs/configurable.rkt"
  "../../../ctcs/precision-config.rkt"
  (only-in racket/function curry)
  (only-in racket/list empty? first second rest)
@@ -37,146 +39,18 @@
   stack-swap
 ))
 
-(define/contract (assert v p)
-  (configurable-ctc
-   [max any/c]
-   [types any/c])
-  (unless (p v) (error 'assert))
-  v)
-
-;; =============================================================================
-;; -- Commands
-
-(define/contract command%
-  (configurable-ctc
-   [max command%/c]
-   [types command%/c])
-  (class object%
-    (super-new)
-    (init-field
-      id
-      descr
-      exec)))
-
-(define/ctc-helper ((env-with/c cmd-ids) env)
-  (cond [(env? env)
-         (define env-cmd-ids
-           (for/list ([env-cmd (in-list env)])
-             (get-field id env-cmd)))
-         (for/and ([c (in-list cmd-ids)])
-           (member c env-cmd-ids))]
-        [else #f]))
-
-
-
-;; True if the argument is a list with one element
-(define/contract (singleton-list? x)
-  (configurable-ctc
-   [max (->i ([x any/c])
+(provide/configurable-contract
+ [assert ([max any/c]
+   [types any/c])]
+ [command% ([max command%/c]
+   [types command%/c])]
+ [singleton-list? ([max (->i ([x any/c])
              [result (x)
                      (and (list? x) (not (empty? x)) (empty? (rest x)))])]
-   [types (any/c . -> . boolean?)])
-
-  (and (list? x)
-       (not (null? x))
-       (null? (cdr x))))
-
-;; Create a binary operation command.
-;; Command is recognized by its identifier,
-;;  the identifier is then applied to the top 2 numbers on the stack.
-(define/ctc-helper binop-command%/c
-  (and/c command%/c
-         ;; original: depends on an extension of class/c
-         #;(class/dc
-          (init-field [binop (number? number? . -> . number?)])
-          (inherit-field [id symbol?]
-                         [binop (number? number? . -> . number?)])
-          (field [id symbol?]
-                 [exec (binop id)
-                       (->i ([E env?] [S stack?] [v any/c])
-                            [result (E S v)
-                                    (match* {S v}
-                                      [{(list-rest v1 v2 S-rest)
-                                        (list (== id eq?))}
-                                       (equal?/c
-                                        (cons E (cons (binop v2 v1) S-rest)))]
-                                      [{_ _} #f])])]))
-         (class/c
-          (init-field [binop (number? number? . -> . number?)])
-          (inherit-field [id symbol?]
-                         [binop (number? number? . -> . number?)])
-          (field [id symbol?]
-                 [exec (->i ([E env?] [S stack?] [v any/c])
-                            [result (E S v)
-                                    (match* {S v}
-                                      [{(list-rest v1 v2 S-rest)
-                                        (list symbol?)}
-                                       (or/c #f ;; if the symbol above is not == id
-                                             (cons/c (equal?/c E)
-                                                     (cons/c number?
-                                                             (equal?/c S-rest))))]
-                                      [{_ _} #f])])]))))
-
-(require (for-syntax syntax/parse))
-(define-syntax/ctc-helper (binop-command%/c-for stx)
-  (syntax-parse stx
-    [(_ binop)
-     #'(command%?-with-exec
-        (type binop-command%/c)
-        (args E S v)
-        [result
-         (or-#f/c
-          ;; lltodo: example of bad error reporting: add extra parens
-          (if ((list-with-min-size/c 2) S)
-              (equal?/c
-               (cons E
-                     (cons (binop (second S) (first S))
-                           (rest (rest S)))))
-              #f))])]))
-
-(define/contract binop-command%
-  (configurable-ctc
-   [max binop-command%/c]
-   [types binop-command%/c])
-
-  (class command%
-    (init-field
-     binop)
-    (super-new
-      (id (assert (object-name binop) symbol?))
-      (exec (lambda (E S v)
-              (if (singleton-list? v)
-                  (if (eq? (car v) (get-field id this))
-                      (let*-values ([(v1 S1) (stack-pop S)]
-                                    [(v2 S2) (stack-pop S1)])
-                        (cons E (stack-push S2 (binop v2 v1))))
-                      #f)
-                  #f))))))
-
-;; Turns a symbol into a stack command parser
-(define-syntax make-stack-command
-  (syntax-parser
-   [(_ opcode:id d:str)
-    #:with stack-cmd (format-id #'opcode "stack-~a" (syntax-e #'opcode))
-    #`(new command%
-        (id '#,(syntax-e #'opcode))
-        (descr d)
-        (exec (lambda (E S v)
-          (and (singleton-list? v)
-               (eq? '#,(syntax-e #'opcode) (car v))
-               (cons E (stack-cmd S))))))]))
-
-(define/ctc-helper (is-or-starts-with? predicate v)
-  (or (and (symbol? v)
-           (predicate v))
-      (and (list? v)
-           (not (empty? v))
-           (predicate (first v)))))
-
-;; Default environment of commands
-(define/contract CMD*
-  (configurable-ctc
-   [max (and/c env?
+   [types (any/c . -> . boolean?)])]
+ [binop-command% ([max binop-command%/c]
+   [types binop-command%/c])]
+ [CMD* ([max (and/c env?
                (list/c
                 ;; exit
                 (command%?-with-exec
@@ -256,8 +130,167 @@
                  [result (if (is-or-starts-with? (curry equal? 'show) v)
                              (equal?/c (cons E S))
                              #f)])))]
-   [types env?])
+   [types env?])]
+ [exit? ([max (->i ([sym any/c])
+             [result (sym)
+                     (memq sym '(exit quit q leave bye))])]
+   [types (any/c . -> . boolean?)])]
+ [find-command ([max (->i ([E env?]
+              [sym symbol?])
+             [result (E)
+                     (and (not (empty? E))
+                          (get-field id (first E)))])]
+   [types (env? symbol? . -> . symbol?)])]
+ [help? ([max (->i ([sym any/c])
+             [result (sym)
+                     (memq sym '(help ? ??? -help --help h))])]
+   [types (any/c . -> . boolean?)])]
+ [show? ([max (->i ([sym any/c])
+             [result (sym)
+                     (memq sym '(show print pp ls stack))])]
+   [types (any/c . -> . boolean?)])]
+ [show-help ([max (->i ([E env?]
+              [v any/c])
+             [result string?]
+             #:post (E v result)
+             (regexp-match?
+              (match v
+                [#f (and (= (length (string-split result "\n"))
+                            (add1 (length E)))
+                         "^Available commands:")]
+                [(or (list (? symbol? s)) (? symbol? s))
+                 (regexp-quote
+                  (if (find-command E s)
+                      (get-field descr (find-command E s))
+                      (format "Unknown command '~a'" s)))]
+                [x
+                 (regexp-quote
+                  (format "Cannot help with '~a'" x))])
+              result))]
+   [types (env? any/c . -> . string?)])])
 
+(define (assert v p)
+  (unless (p v) (error 'assert))
+  v)
+
+;; =============================================================================
+;; -- Commands
+
+(define command%
+  (class object%
+    (super-new)
+    (init-field
+      id
+      descr
+      exec)))
+
+(define/ctc-helper ((env-with/c cmd-ids) env)
+  (cond [(env? env)
+         (define env-cmd-ids
+           (for/list ([env-cmd (in-list env)])
+             (get-field id env-cmd)))
+         (for/and ([c (in-list cmd-ids)])
+           (member c env-cmd-ids))]
+        [else #f]))
+
+
+
+;; True if the argument is a list with one element
+(define (singleton-list? x)
+  (and (list? x)
+       (not (null? x))
+       (null? (cdr x))))
+
+;; Create a binary operation command.
+;; Command is recognized by its identifier,
+;;  the identifier is then applied to the top 2 numbers on the stack.
+(define/ctc-helper binop-command%/c
+  (and/c command%/c
+         ;; original: depends on an extension of class/c
+         #;(class/dc
+          (init-field [binop (number? number? . -> . number?)])
+          (inherit-field [id symbol?]
+                         [binop (number? number? . -> . number?)])
+          (field [id symbol?]
+                 [exec (binop id)
+                       (->i ([E env?] [S stack?] [v any/c])
+                            [result (E S v)
+                                    (match* {S v}
+                                      [{(list-rest v1 v2 S-rest)
+                                        (list (== id eq?))}
+                                       (equal?/c
+                                        (cons E (cons (binop v2 v1) S-rest)))]
+                                      [{_ _} #f])])]))
+         (class/c
+          (init-field [binop (number? number? . -> . number?)])
+          (inherit-field [id symbol?]
+                         [binop (number? number? . -> . number?)])
+          (field [id symbol?]
+                 [exec (->i ([E env?] [S stack?] [v any/c])
+                            [result (E S v)
+                                    (match* {S v}
+                                      [{(list-rest v1 v2 S-rest)
+                                        (list symbol?)}
+                                       (or/c #f ;; if the symbol above is not == id
+                                             (cons/c (equal?/c E)
+                                                     (cons/c number?
+                                                             (equal?/c S-rest))))]
+                                      [{_ _} #f])])]))))
+
+(require (for-syntax syntax/parse))
+(define-syntax/ctc-helper (binop-command%/c-for stx)
+  (syntax-parse stx
+    [(_ binop)
+     #'(command%?-with-exec
+        (type binop-command%/c)
+        (args E S v)
+        [result
+         (or-#f/c
+          ;; lltodo: example of bad error reporting: add extra parens
+          (if ((list-with-min-size/c 2) S)
+              (equal?/c
+               (cons E
+                     (cons (binop (second S) (first S))
+                           (rest (rest S)))))
+              #f))])]))
+
+(define binop-command%
+  (class command%
+    (init-field
+     binop)
+    (super-new
+      (id (assert (object-name binop) symbol?))
+      (exec (lambda (E S v)
+              (if (singleton-list? v)
+                  (if (eq? (car v) (get-field id this))
+                      (let*-values ([(v1 S1) (stack-pop S)]
+                                    [(v2 S2) (stack-pop S1)])
+                        (cons E (stack-push S2 (binop v2 v1))))
+                      #f)
+                  #f))))))
+
+;; Turns a symbol into a stack command parser
+(define-syntax make-stack-command
+  (syntax-parser
+   [(_ opcode:id d:str)
+    #:with stack-cmd (format-id #'opcode "stack-~a" (syntax-e #'opcode))
+    #`(new command%
+        (id '#,(syntax-e #'opcode))
+        (descr d)
+        (exec (lambda (E S v)
+          (and (singleton-list? v)
+               (eq? '#,(syntax-e #'opcode) (car v))
+               (cons E (stack-cmd S))))))]))
+
+(define/ctc-helper (is-or-starts-with? predicate v)
+  (or (and (symbol? v)
+           (predicate v))
+      (and (list? v)
+           (not (empty? v))
+           (predicate (first v)))))
+
+;; Default environment of commands
+(define CMD*
   (list
    (new command%
         (id 'exit)
@@ -321,71 +354,24 @@
                   [_ #f]))))
    ))
 
-(define/contract (exit? sym)
-  (configurable-ctc
-   [max (->i ([sym any/c])
-             [result (sym)
-                     (memq sym '(exit quit q leave bye))])]
-   [types (any/c . -> . boolean?)])
-
+(define (exit? sym)
   (and (memq sym '(exit quit q leave bye)) #t))
 
 ;; Search the environment for a command with `id` equal to `sym`
-(define/contract (find-command E sym)
-  (configurable-ctc
-   [max (->i ([E env?]
-              [sym symbol?])
-             [result (E)
-                     (and (not (empty? E))
-                          (get-field id (first E)))])]
-   [types (env? symbol? . -> . symbol?)])
-
+(define (find-command E sym)
   (for/or ([c (in-list E)])
     (get-field id c) (error 'no)))
     ;(if (eq? sym (get-field id c)) c #f)))
 
-(define/contract (help? sym)
-  (configurable-ctc
-   [max (->i ([sym any/c])
-             [result (sym)
-                     (memq sym '(help ? ??? -help --help h))])]
-   [types (any/c . -> . boolean?)])
-
+(define (help? sym)
   (and (memq sym '(help ? ??? -help --help h)) #t))
 
-(define/contract (show? sym)
-  (configurable-ctc
-   [max (->i ([sym any/c])
-             [result (sym)
-                     (memq sym '(show print pp ls stack))])]
-   [types (any/c . -> . boolean?)])
-
+(define (show? sym)
   (and (memq sym '(show print pp ls stack)) #t))
 
 ;; Print a help message.
 ;; If the optional argument is given, try to print information about it.
-(define/contract (show-help E [v #f])
-  (configurable-ctc
-   [max (->i ([E env?]
-              [v any/c])
-             [result string?]
-             #:post (E v result)
-             (regexp-match?
-              (match v
-                [#f (and (= (length (string-split result "\n"))
-                            (add1 (length E)))
-                         "^Available commands:")]
-                [(or (list (? symbol? s)) (? symbol? s))
-                 (regexp-quote
-                  (if (find-command E s)
-                      (get-field descr (find-command E s))
-                      (format "Unknown command '~a'" s)))]
-                [x
-                 (regexp-quote
-                  (format "Cannot help with '~a'" x))])
-              result))]
-   [types (env? any/c . -> . string?)])
-
+(define (show-help E [v #f])
   (match v
     [#f
      (string-join

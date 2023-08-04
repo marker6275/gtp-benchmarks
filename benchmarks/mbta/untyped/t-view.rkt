@@ -2,23 +2,69 @@
 
 ;; implement the view (renderer) for the T path finder
 
-(provide 
- ;; type Manage = 
- ;; (Class 
- ;;  ;; disable the given station: #f for sucecss, String for failure
- ;;  [add-to-disabled (-> String [Maybe String]]
- ;;  ;; enable the given station: #f for sucecss, String for failure
- ;;  [remove-from-disabled (-> String [Maybe String]]
- ;;  ;; turn the inquiry strings into stations and find a path from the first to the second  
- ;;  [find (-> String String String)])
- manage%)
+;; (provide 
+;;  ;; type Manage = 
+;;  ;; (Class 
+;;  ;;  ;; disable the given station: #f for sucecss, String for failure
+;;  ;;  [add-to-disabled (-> String [Maybe String]]
+;;  ;;  ;; enable the given station: #f for sucecss, String for failure
+;;  ;;  [remove-from-disabled (-> String [Maybe String]]
+;;  ;;  ;; turn the inquiry strings into stations and find a path from the first to the second  
+;;  ;;  [find (-> String String String)])
+;;  manage%)
 
 ;; ===================================================================================================
 (require "t-graph.rkt"
          "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt"
+         "../../../ctcs/configurable.rkt"
          "helpers.rkt"
          racket/contract)
+
+(provide/configurable-contract
+ [selector ([max (->i ([inp-lst (listof (listof any/c))])
+                      [result (inp-lst)
+                              (λ (out-lst)
+                                (and (list? out-lst)
+                                     (cons? (member out-lst inp-lst))
+                                     (andmap (lambda (l)
+                                               (<= (count-strs-in-lst out-lst)
+                                                   (count-strs-in-lst l)))
+                                             inp-lst)))])]
+            #;[max/sub1 (->i ([inp-lst (listof (listof any/c))])
+                             [result (inp-lst)
+                                     (λ (out-lst)
+                                       (and (list? out-lst)
+                                            (cons? (member out-lst inp-lst))))])]
+            [types (-> (listof (listof any/c))
+                       (listof any/c))])]
+ [INTERNAL ([max "find path: it is impossible to get from ~a to ~a [internal error]"]
+            [types string?])]
+ [CURRENT-LOCATION ([max "disambiguate your current location: ~a"]
+                    [types string?])]
+ [CURRENT-LOCATION-0 ([max "no such station: ~a"]
+                      [types string?])]
+ [DESTINATION ([max "disambiguate your destination: ~a"]
+               [types string?])]
+ [DESTINATION-0 ([max "no such destination: ~a"]
+                 [types string?])]
+ [NO-PATH ([max "it is currently impossible to reach ~a from ~a via subways"]
+           [types string?])]
+ [DISABLED ([max "clarify station to be disabled: ~a"]
+            [types string?])]
+ [ENABLED ([max "clarify station to be enabled: ~a"]
+           [types string?])]
+ [DISABLED-0 ([max "no such station to disable: ~a"]
+              [types string?])]
+ [ENABLED-0 ([max "no such station to enable: ~a"]
+             [types string?])]
+ [ENSURE ([max "---ensure you are on ~a"]
+          [types string?])]
+ [SWITCH ([max "---switch from ~a to ~a"]
+          [types string?])]
+ [manage% ([max manage-c/max-ctc]
+           #;[max/sub1 manage-c/max/sub1-ctc]
+           [types manage-c/types-ctc])])
 
 (define/ctc-helper t-graph-val (box #f))
 (define/ctc-helper (t-graph)
@@ -31,98 +77,45 @@
 ;; [X -> Real] [Listof X] -> X
 ;; argmax also okay 
 ;; select an [Listof X] that satisfies certain length criteria
-(define/contract (selector l)
-  (configurable-ctc
-   [max (->i ([inp-lst (listof (listof any/c))])
-             [result (inp-lst)
-                     (λ (out-lst)
-                       (and (list? out-lst)
-                            (cons? (member out-lst inp-lst))
-                            (andmap (lambda (l)
-                                      (<= (count-strs-in-lst out-lst)
-                                          (count-strs-in-lst l)))
-                                    inp-lst)))])]
-   #;[max/sub1 (->i ([inp-lst (listof (listof any/c))])
-                  [result (inp-lst)
-                          (λ (out-lst)
-                            (and (list? out-lst)
-                                 (cons? (member out-lst inp-lst))))])]
-   [types (-> (listof (listof any/c))
-              (listof any/c))])
+(define (selector l)
   ((curry argmin (lambda (p) (length (filter string? p)))) l)) 
 
 ;; ---------------------------------------------------------------------------------------------------
 
-(define/contract INTERNAL
-  (configurable-ctc
-   [max "find path: it is impossible to get from ~a to ~a [internal error]"]
-   [types string?])
+(define INTERNAL
   "find path: it is impossible to get from ~a to ~a [internal error]")
 
-(define/contract CURRENT-LOCATION
-  (configurable-ctc
-   [max "disambiguate your current location: ~a"]
-   [types string?])
+(define CURRENT-LOCATION
   "disambiguate your current location: ~a")
 
-(define/contract CURRENT-LOCATION-0
-  (configurable-ctc
-   [max "no such station: ~a"]
-   [types string?])
+(define CURRENT-LOCATION-0
   "no such station: ~a") 
 
-(define/contract DESTINATION
-  (configurable-ctc
-   [max "disambiguate your destination: ~a"]
-   [types string?])
+(define DESTINATION
   "disambiguate your destination: ~a")
 
-(define/contract DESTINATION-0
-  (configurable-ctc
-   [max "no such destination: ~a"]
-   [types string?])
+(define DESTINATION-0
   "no such destination: ~a")
 
-(define/contract NO-PATH
-  (configurable-ctc
-   [max "it is currently impossible to reach ~a from ~a via subways"]
-   [types string?])
+(define NO-PATH
   "it is currently impossible to reach ~a from ~a via subways")
 
-(define/contract DISABLED
-  (configurable-ctc
-   [max "clarify station to be disabled: ~a"]
-   [types string?])
+(define DISABLED
   "clarify station to be disabled: ~a")
 
-(define/contract ENABLED
-  (configurable-ctc
-   [max "clarify station to be enabled: ~a"]
-   [types string?])
+(define ENABLED
   "clarify station to be enabled: ~a")
 
-(define/contract DISABLED-0
-  (configurable-ctc
-   [max "no such station to disable: ~a"]
-   [types string?])
+(define DISABLED-0
   "no such station to disable: ~a")
 
-(define/contract ENABLED-0
-  (configurable-ctc
-   [max "no such station to enable: ~a"]
-   [types string?])
+(define ENABLED-0
   "no such station to enable: ~a")
 
-(define/contract ENSURE
-  (configurable-ctc
-   [max "---ensure you are on ~a"]
-   [types string?])
+(define ENSURE
   "---ensure you are on ~a")
 
-(define/contract SWITCH
-  (configurable-ctc
-   [max "---switch from ~a to ~a"]
-   [types string?])
+(define SWITCH
   "---switch from ~a to ~a")
 
 ;; ---------------------------------------------------------------------------------------------------
@@ -243,11 +236,7 @@
             [disabled list?])))
 
 
-(define/contract manage%
-  (configurable-ctc
-   [max manage-c/max-ctc]
-   #;[max/sub1 manage-c/max/sub1-ctc]
-   [types manage-c/types-ctc])
+(define manage%
   (class object% 
     (super-new)
     

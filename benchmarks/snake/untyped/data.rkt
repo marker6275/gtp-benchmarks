@@ -1,7 +1,40 @@
 #lang racket
 
+
 (require "../../../ctcs/precision-config.rkt"
+         "../../../ctcs/configurable.rkt"
          "../../../ctcs/common.rkt")
+
+(provide/configurable-contract
+ [posn=? ([max (->i ([p1 posn?]
+                     [p2 posn?])
+                    [result (p1 p2)
+                            (match* (p1 p2)
+                              [((posn x y) (posn x y)) #t]
+                              [(_ _) #f])])]
+          [types (posn? posn? . -> . boolean?)])])
+
+(provide [struct-out posn])
+
+(provide
+ ;; posn=?
+ [struct-out snake]
+ [struct-out world]
+ posn?
+ posn-type?
+ posn/c
+ snake-segs?
+ snake-segs=?/c
+ snake-dir?
+ snake-type?
+ snake/c
+ snake=?/c
+ posn=?/c
+ world/c
+ world-type?
+ world=?/c
+ food=?/c)
+
 
 
 (struct posn (x y))
@@ -74,36 +107,7 @@
 
 (define/ctc-helper world-type? (world/c snake-type? food?))
 
-(define/contract (posn=? p1 p2)
-  (configurable-ctc
-   [max (->i ([p1 posn?]
-              [p2 posn?])
-             [result (p1 p2)
-                     (match* (p1 p2)
-                       [((posn x y) (posn x y)) #t]
-                       [(_ _) #f])])]
-   [types (posn? posn? . -> . boolean?)])
-
+(define (posn=? p1 p2)
   (and (= (posn-x p1) (posn-x p2))
        (= (posn-y p1) (posn-y p2))))
 
-(provide [struct-out posn])
-
-(provide
- posn=?
- [struct-out snake]
- [struct-out world]
- posn?
- posn-type?
- posn/c
- snake-segs?
- snake-segs=?/c
- snake-dir?
- snake-type?
- snake/c
- snake=?/c
- posn=?/c
- world/c
- world-type?
- world=?/c
- food=?/c)

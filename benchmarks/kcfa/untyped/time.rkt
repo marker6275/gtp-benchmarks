@@ -6,16 +6,47 @@
   "benv.rkt"
   "../../../ctcs/precision-config.rkt"
   "../../../ctcs/common.rkt"
-)
+  "../../../ctcs/configurable.rkt"
+  )
 
 ;; ---
 
-(provide
-  time-zero
-  ;; k
-  tick
-  alloc
-)
+(provide/configurable-contract
+ [take* ([max (->i ([l (listof any/c)]
+                    [n natural?])
+                   [result (l n)
+                           (and/c (listof any/c)
+                                  (length<=/c n)
+                                  (prefix-of/c l))])]
+         [types ((listof any/c) natural? . -> . (listof any/c))])]
+ [time-zero ([max (listof Time?)]
+             [types (listof Time?)])]
+ #;[k ([max (parameter/c (and/c natural?
+                              (=/c 1)))]
+     [types (parameter/c natural?)])]
+ [tick ([max (->i ([call Stx-type/c]
+                   [time Time?])
+                  [result (call time)
+                          (and/c Time?
+                                 (length=/c 1 #;(k))
+                                 (prefix-of/c (cons (Stx-label call) time)))])]
+        [types (Stx-type/c Time? . -> . Time?)])]
+ [alloc ([max (->i ([time Time?])
+                   [result (time)
+                           (->i ([var Var?])
+                                [result (var)
+                                        (and/c Binding-type/c
+                                               (Binding/c (equal?/c var)
+                                                          (equal?/c time)))])])]
+         [types (Time? . -> . (Var? . -> . Binding-type/c))])])
+
+
+;; (provide
+;;   time-zero
+;;   ;; k
+;;   tick
+;;   alloc
+;; )
 
 ;; =============================================================================
 
@@ -33,15 +64,7 @@
   (list-prefix? pref l))
 
 ;(: take* (All (A) (-> (Listof A) Natural (Listof A))))
-(define/contract (take* l n)
-  (configurable-ctc
-   [max (->i ([l (listof any/c)]
-              [n natural?])
-             [result (l n)
-                     (and/c (listof any/c)
-                            (length<=/c n)
-                            (prefix-of/c l))])]
-   [types ((listof any/c) natural? . -> . (listof any/c))])
+(define (take* l n)
   (for/list ([e (in-list l)]
              [i (in-range n)])
     e))
@@ -49,43 +72,20 @@
 ;; ---
 
 ;(: time-zero Time)
-(define/contract time-zero
-  (listof Time?)
+(define time-zero
   '())
 
 ;(: k (Parameterof Natural))
-#;(define/contract k
-  (configurable-ctc
-   [max (parameter/c (and/c natural?
-                            (=/c 1)))]
-   [types (parameter/c natural?)])
+#;(define k
   (make-parameter 1))
 
 ;(: tick (-> Stx Time Time))
-(define/contract (tick call time)
-  (configurable-ctc
-   [max (->i ([call Stx-type/c]
-              [time Time?])
-             [result (call time)
-                     (and/c Time?
-                            (length=/c 1 #;(k))
-                            (prefix-of/c (cons (Stx-label call) time)))])]
-   [types (Stx-type/c Time? . -> . Time?)])
-
+(define (tick call time)
   (define label (Stx-label call))
   (take* (cons label time) 1 #;(k)))
 
 ;(: alloc (-> Time (-> Var Addr)))
-(define/contract (alloc time)
-  (configurable-ctc
-   [max (->i ([time Time?])
-             [result (time)
-                     (->i ([var Var?])
-                          [result (var)
-                                  (and/c Binding-type/c
-                                         (Binding/c (equal?/c var)
-                                                    (equal?/c time)))])])]
-   [types (Time? . -> . (Var? . -> . Binding-type/c))])
+(define (alloc time)
   (λ (var)
     (Binding var time)))
 

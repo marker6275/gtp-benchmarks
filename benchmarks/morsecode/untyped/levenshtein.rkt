@@ -22,6 +22,7 @@
 
 #lang racket/base
 
+
 ;;; @section Introduction
 ;;;
 ;;; This is a Scheme implementation of the @dfn{Levenshtein Distance}
@@ -45,35 +46,103 @@
  racket/contract
  "../../../ctcs/precision-config.rkt"
  "../../../ctcs/common.rkt"
+ "../../../ctcs/configurable.rkt"
  racket/match
  racket/math)
 
-(define/contract (%identity x)
-  (-> any/c any/c)
+(provide/configurable-contract
+ [%identity ([max (-> any/c any/c)]
+             [types (-> any/c any/c)])]
+ [%string-empty? ([max (->i ([v string?])
+                            [result (v) (zero? (string-length v))])]
+                  [types (-> string? boolean?)])]
+ [%vector-empty? ([max (->i ([v vector?])
+                            [result (v) (zero? (vector-length v))])]
+                  [types (-> vector? boolean?)])]
+ [%string->vector ([max (->i ([s string?])
+                             [result (vectorof char?)]
+                             #:post (s result)
+                             (and (= (string-length s) (vector-length result))
+                                  (andmap char=? (string->list s) (vector->list result))))]
+                   [types (-> string? (vectorof char?))])]
+ [vector-levenshtein/predicate/get-scratch ([max (->i ([a vector?]
+                                                       [b vector?]
+                                                       [pred (any/c any/c . -> . boolean?)]
+                                                       [get-scratch (->i ([n natural?])
+                                                                         [result vector?]
+                                                                         #:post (n result)
+                                                                         (= (vector-length result) n))])
+                                                      [result natural?]
+                                                      #:post (a b pred result)
+                                                      (editable-to? a b result #:compare-with pred))]
+                                            [types (vector?
+                                                    vector?
+                                                    (any/c any/c . -> . boolean?)
+                                                    (natural? . -> . vector?)
+                                                    . -> .
+                                                    natural?)])]
+ [vector-levenshtein/predicate ([max (levenshtein-variant/pred/c #:at 'max)]
+                                [types (levenshtein-variant/pred/c #:at 'types)])]
+ [vector-levenshtein/eq ([max (levenshtein-variant/c eq? #:at 'max)]
+                         [types (levenshtein-variant/c eq? #:at 'types)])]
+ [vector-levenshtein/eqv ([max (levenshtein-variant/c eqv? #:at 'max)]
+                          [types (levenshtein-variant/c eqv? #:at 'types)])]
+ [vector-levenshtein/equal ([max (levenshtein-variant/c equal? #:at 'max)]
+                            [types (levenshtein-variant/c equal? #:at 'types)])]
+ [vector-levenshtein ([max (levenshtein-variant/c equal? #:at 'max)]
+                      [types (levenshtein-variant/c equal? #:at 'types)])]
+ [list-levenshtein/predicate ([max (levenshtein-variant/pred/c #:at 'max
+                                                               #:sequence-type list?)]
+                              [types (levenshtein-variant/pred/c #:at 'types
+                                                                 #:sequence-type list?)])]
+ [list-levenshtein/eq ([max (levenshtein-variant/c eq? #:at 'max #:sequence-type list?)]
+                       [types (levenshtein-variant/c eq? #:at 'types #:sequence-type list?)])]
+ [list-levenshtein/eqv ([max (levenshtein-variant/c eqv? #:at 'max #:sequence-type list?)]
+                        [types (levenshtein-variant/c eqv? #:at 'types #:sequence-type list?)])]
+ [list-levenshtein/equal ([max (levenshtein-variant/c equal? #:at 'max #:sequence-type list?)]
+                          [types (levenshtein-variant/c equal? #:at 'types #:sequence-type list?)])]
+ [list-levenshtein ([max (levenshtein-variant/c equal? #:at 'max #:sequence-type list?)]
+                    [types (levenshtein-variant/c equal? #:at 'types #:sequence-type list?)])]
+ [string-levenshtein ([max (levenshtein-variant/c eqv? #:at 'max #:sequence-type string?)]
+                      [types (levenshtein-variant/c eqv? #:at 'types #:sequence-type string?)])]
+ [%string-levenshtein/predicate ([max (levenshtein-variant/pred/c #:at 'max
+                                                                  #:sequence-type string?)]
+                                 [types (levenshtein-variant/pred/c #:at 'types
+                                                                    #:sequence-type string?)])]
+ [levenshtein ([max (levenshtein-variant/c equal?
+                                           #:at 'max
+                                           #:sequence-type (or/c string? vector? list?))]
+               [types (levenshtein-variant/c equal?
+                                             #:at 'types
+                                             #:sequence-type (or/c string? vector? list?))])])
+
+;; (provide
+;;  levenshtein
+;;  ;levenshtein/predicate
+;;  list-levenshtein
+;;  list-levenshtein/eq
+;;  list-levenshtein/equal
+;;  list-levenshtein/eqv
+;;  list-levenshtein/predicate
+;;  string-levenshtein
+;;  vector-levenshtein
+;;  vector-levenshtein/eq
+;;  vector-levenshtein/equal
+;;  vector-levenshtein/eqv
+;;  vector-levenshtein/predicate
+;;  vector-levenshtein/predicate/get-scratch)
+
+
+(define (%identity x)
   x)
 
-(define/contract (%string-empty? v)
-  (configurable-ctc
-   [max (->i ([v string?])
-             [result (v) (zero? (string-length v))])]
-   [types (-> string? boolean?)])
+(define (%string-empty? v)
   (zero? (string-length v)))
 
-(define/contract (%vector-empty? v)
-  (configurable-ctc
-   [max (->i ([v vector?])
-             [result (v) (zero? (vector-length v))])]
-   [types (-> vector? boolean?)])
+(define (%vector-empty? v)
   (zero? (vector-length v)))
 
-(define/contract (%string->vector s)
-  (configurable-ctc
-   [max (->i ([s string?])
-             [result (vectorof char?)]
-             #:post (s result)
-             (and (= (string-length s) (vector-length result))
-                  (andmap char=? (string->list s) (vector->list result))))]
-   [types (-> string? (vectorof char?))])
+(define (%string->vector s)
   (list->vector (string->list s)))
 
 ;;; @section Basic Comparisons
@@ -173,24 +242,7 @@
          (elt-equal? a-el b-el))
        (editable-to?/DP/memo a/vec b/vec edits #:compare-with elt-equal?))))
 
-(define/contract (vector-levenshtein/predicate/get-scratch a b pred get-scratch)
-  (configurable-ctc
-   [max (->i ([a vector?]
-              [b vector?]
-              [pred (any/c any/c . -> . boolean?)]
-              [get-scratch (->i ([n natural?])
-                                [result vector?]
-                                #:post (n result)
-                                (= (vector-length result) n))])
-             [result natural?]
-             #:post (a b pred result)
-             (editable-to? a b result #:compare-with pred))]
-   [types (vector?
-           vector?
-           (any/c any/c . -> . boolean?)
-           (natural? . -> . vector?)
-           . -> .
-           natural?)])
+(define (vector-levenshtein/predicate/get-scratch a b pred get-scratch)
   (let ((a-len (vector-length a))
         (b-len (vector-length b)))
     (cond ((zero? a-len) b-len)
@@ -266,32 +318,17 @@
              . -> .
              natural?)]))
 
-(define/contract (vector-levenshtein/predicate a b pred)
-  (configurable-ctc
-   [max (levenshtein-variant/pred/c #:at 'max)]
-   [types (levenshtein-variant/pred/c #:at 'types)])
+(define (vector-levenshtein/predicate a b pred)
   (vector-levenshtein/predicate/get-scratch a b pred make-vector))
 
-(define/contract (vector-levenshtein/eq    a b)
-  (configurable-ctc
-   [max (levenshtein-variant/c eq? #:at 'max)]
-   [types (levenshtein-variant/c eq? #:at 'types)])
+(define (vector-levenshtein/eq    a b)
   (vector-levenshtein/predicate a b eq?))
-(define/contract (vector-levenshtein/eqv   a b)
-  (configurable-ctc
-   [max (levenshtein-variant/c eqv? #:at 'max)]
-   [types (levenshtein-variant/c eqv? #:at 'types)])
+(define (vector-levenshtein/eqv   a b)
   (vector-levenshtein/predicate a b eqv?))
-(define/contract (vector-levenshtein/equal a b)
-  (configurable-ctc
-   [max (levenshtein-variant/c equal? #:at 'max)]
-   [types (levenshtein-variant/c equal? #:at 'types)])
+(define (vector-levenshtein/equal a b)
   (vector-levenshtein/predicate a b equal?))
 
-(define/contract (vector-levenshtein a b)
-  (configurable-ctc
-   [max (levenshtein-variant/c equal? #:at 'max)]
-   [types (levenshtein-variant/c equal? #:at 'types)])
+(define (vector-levenshtein a b)
   (vector-levenshtein/equal a b))
 
 ;;; @defproc  list-levenshtein/predicate a b pred
@@ -312,38 +349,21 @@
 ;;; (list-levenshtein/eq '(b c e x f y) '(a b c d e f)) @result{} 4
 ;;; @end lisp
 
-(define/contract (list-levenshtein/predicate a b pred)
-  (configurable-ctc
-   [max (levenshtein-variant/pred/c #:at 'max
-                                    #:sequence-type list?)]
-   [types (levenshtein-variant/pred/c #:at 'types
-                                      #:sequence-type list?)])
+(define (list-levenshtein/predicate a b pred)
   (cond ((null? a) (length b))
         ((null? b) (length a))
         (else (vector-levenshtein/predicate (list->vector a)
                                             (list->vector b)
                                             pred))))
 
-(define/contract (list-levenshtein/eq    a b)
-  (configurable-ctc
-   [max (levenshtein-variant/c eq? #:at 'max #:sequence-type list?)]
-   [types (levenshtein-variant/c eq? #:at 'types #:sequence-type list?)])
+(define (list-levenshtein/eq    a b)
   (list-levenshtein/predicate a b eq?))
-(define/contract (list-levenshtein/eqv   a b)
-  (configurable-ctc
-   [max (levenshtein-variant/c eqv? #:at 'max #:sequence-type list?)]
-   [types (levenshtein-variant/c eqv? #:at 'types #:sequence-type list?)])
+(define (list-levenshtein/eqv   a b)
   (list-levenshtein/predicate a b eqv?))
-(define/contract (list-levenshtein/equal a b)
-  (configurable-ctc
-   [max (levenshtein-variant/c equal? #:at 'max #:sequence-type list?)]
-   [types (levenshtein-variant/c equal? #:at 'types #:sequence-type list?)])
+(define (list-levenshtein/equal a b)
   (list-levenshtein/predicate a b equal?))
 
-(define/contract (list-levenshtein       a b)
-  (configurable-ctc
-   [max (levenshtein-variant/c equal? #:at 'max #:sequence-type list?)]
-   [types (levenshtein-variant/c equal? #:at 'types #:sequence-type list?)])
+(define (list-levenshtein       a b)
   (list-levenshtein/equal     a b))
 
 ;; TODO: Maybe make a version that does the O(n) access to the list elements in
@@ -357,11 +377,7 @@
 ;;; (string-levenshtein "adresse" "address") @result{} 2
 ;;; @end lisp
 
-(define/contract (string-levenshtein a b)
-  (configurable-ctc
-   [max (levenshtein-variant/c eqv? #:at 'max #:sequence-type string?)]
-   [types (levenshtein-variant/c eqv? #:at 'types #:sequence-type string?)])
-
+(define (string-levenshtein a b)
   ;; TODO: Maybe make a version that doesn't convert to vectors but also
   ;;       doesn't do lots of string-refs.
   (cond ((zero? (string-length a)) (string-length b))
@@ -370,13 +386,7 @@
                (%string->vector a)
                (%string->vector b)))))
 
-(define/contract (%string-levenshtein/predicate a b pred)
-  (configurable-ctc
-   [max (levenshtein-variant/pred/c #:at 'max
-                                    #:sequence-type string?)]
-   [types (levenshtein-variant/pred/c #:at 'types
-                                      #:sequence-type string?)])
-
+(define (%string-levenshtein/predicate a b pred)
   (cond ((zero? (string-length a)) (string-length b))
         ((zero? (string-length b)) (string-length a))
         (else (vector-levenshtein/predicate
@@ -460,16 +470,9 @@
 ;  (if (and (string? a) (string? b))
 ;      (string-levenshtein a b)
 ;      (levenshtein/predicate a b equal?)))
-(define/contract (levenshtein a b)
+(define (levenshtein a b)
   ;; ll: this never even gets called, no reason to get fancy (e.g.
   ;; ensuring `a` and `b` are same type)
-  (configurable-ctc
-   [max (levenshtein-variant/c equal?
-                               #:at 'max
-                               #:sequence-type (or/c string? vector? list?))]
-   [types (levenshtein-variant/c equal?
-                                 #:at 'types
-                                 #:sequence-type (or/c string? vector? list?))])
   (cond [(and (string? a) (string? b))
          (string-levenshtein a b)]
         [(and (vector? a) (vector? b))
@@ -536,18 +539,3 @@
 ;;;
 ;;; @end table
 
-(provide
- levenshtein
- ;levenshtein/predicate
- list-levenshtein
- list-levenshtein/eq
- list-levenshtein/equal
- list-levenshtein/eqv
- list-levenshtein/predicate
- string-levenshtein
- vector-levenshtein
- vector-levenshtein/eq
- vector-levenshtein/equal
- vector-levenshtein/eqv
- vector-levenshtein/predicate
- vector-levenshtein/predicate/get-scratch)

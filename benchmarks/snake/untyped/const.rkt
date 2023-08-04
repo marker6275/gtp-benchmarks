@@ -1,56 +1,52 @@
 #lang racket
+
 (require "data.rkt"
+         "../../../ctcs/configurable.rkt"
          "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt")
 
-(define/contract GRID-SIZE
-  (configurable-ctc
-   [max (=/c 30)]
-   [types natural?])
+(provide/configurable-contract
+ [GRID-SIZE ([max (=/c 30)]
+             [types natural?])]
+ [BOARD-HEIGHT ([max (=/c 20)]
+                [types natural?])]
+ [BOARD-WIDTH ([max (=/c 30)]
+               [types natural?])]
+ [BOARD-HEIGHT-PIXELS ([max (-> (=/c (* GRID-SIZE BOARD-HEIGHT)))]
+                       [types (-> natural?)])]
+ [BOARD-WIDTH-PIXELS ([max (-> (=/c (* GRID-SIZE BOARD-WIDTH)))]
+                      [types (-> natural?)])]
+ [SEGMENT-RADIUS ([max (-> (=/c (/ GRID-SIZE 2)))]
+                  [types (-> number?)])]
+ [FOOD-RADIUS ([max (-> (=/c (/ GRID-SIZE 2)))]
+               [types (-> number?)])]
+ [WORLD ([max (-> (world/c (snake/c "right"
+                                    (snake-segs=?/c (list (posn 5 3))))
+                           (posn/c 8 12)))]
+         [types (-> world-type?)])])
+;; (provide
+;;  WORLD
+;;  GRID-SIZE
+;;  BOARD-HEIGHT-PIXELS
+;;  BOARD-WIDTH
+;;  BOARD-HEIGHT)
+
+(define GRID-SIZE
   30)
-(define/contract BOARD-HEIGHT
-  (configurable-ctc
-   [max (=/c 20)]
-   [types natural?])
+(define BOARD-HEIGHT
   20)
-(define/contract BOARD-WIDTH
-  (configurable-ctc
-   [max (=/c 30)]
-   [types natural?])
+(define BOARD-WIDTH
   30)
-(define/contract (BOARD-HEIGHT-PIXELS)
-  (configurable-ctc
-   [max (-> (=/c (* GRID-SIZE BOARD-HEIGHT)))]
-   [types (-> natural?)])
+(define (BOARD-HEIGHT-PIXELS)
   (* GRID-SIZE BOARD-HEIGHT))
-(define/contract (BOARD-WIDTH-PIXELS)
-  (configurable-ctc
-   [max (-> (=/c (* GRID-SIZE BOARD-WIDTH)))]
-   [types (-> natural?)])
+(define (BOARD-WIDTH-PIXELS)
   (* GRID-SIZE BOARD-WIDTH))
-(define/contract (SEGMENT-RADIUS)
-  (configurable-ctc
-   [max (-> (=/c (/ GRID-SIZE 2)))]
-   [types (-> number?)])
+(define (SEGMENT-RADIUS)
   (/ GRID-SIZE 2))
-(define/contract (FOOD-RADIUS)
-  (configurable-ctc
-   [max (-> (=/c (/ GRID-SIZE 2)))]
-   [types (-> number?)])
+(define (FOOD-RADIUS)
   (SEGMENT-RADIUS))
-(define/contract (WORLD)
-  (configurable-ctc
-   [max (-> (world/c (snake/c "right"
-                              (snake-segs=?/c (list (posn 5 3))))
-                     (posn/c 8 12)))]
-   [types (-> world-type?)])
+(define (WORLD)
   (world (snake "right" (cons (posn 5 3) empty))
          (posn 8 12)))
 
-(provide
- WORLD
- GRID-SIZE
- BOARD-HEIGHT-PIXELS
- BOARD-WIDTH
- BOARD-HEIGHT)
 

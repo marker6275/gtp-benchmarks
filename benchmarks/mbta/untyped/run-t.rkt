@@ -1,71 +1,32 @@
 #lang racket
 
-(provide
- ;; String 
- EOM
- DONE
- 
- ;; constants, regexps that match PATH, DISABLE, and ENABLE requests
- PATH 
- DISABLE
- ENABLE
- 
- ;; InputPort OutputPort -> Void 
- ;; read FROM, DISABLE, and ENABLE requests input-port, write responses to output-port, loop
- run-t)
-
 ;; ===================================================================================================
 
 (require "t-view.rkt"
          "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt"
+         "../../../ctcs/configurable.rkt"
          "helpers.rkt"
          "t-graph.rkt")
 
-(define/contract PATH
-  (configurable-ctc
-   [max (λ (re)
+(provide/configurable-contract
+ [PATH ([max (λ (re)
           (equal? #rx"from (.*) to (.*)$" re))]
-   [types regexp?])
-  #rx"from (.*) to (.*)$")
-
-(define/contract DISABLE
-  (configurable-ctc
-   [max (λ (re)
+   [types regexp?])]
+ [DISABLE ([max (λ (re)
           (equal? #rx"disable (.*)$" re))]
-   [types regexp?])
-  #rx"disable (.*)$")
-
-(define/contract ENABLE
-  (configurable-ctc
-   [max (λ (re)
+   [types regexp?])]
+ [ENABLE ([max (λ (re)
           (equal? #rx"enable (.*)$" re))]
-   [types regexp?])
-  #rx"enable (.*)$")
-
-(define/contract DONE
-  (configurable-ctc
-   [max "done"]
-   [types string?])
-  "done")
-
-(define/contract EOM
-  (configurable-ctc
-   [max "eom"]
-   [types string?])
-  "eom")
-
-(define/contract manage
-  (configurable-ctc
-   [max (instanceof/c manage-c/max-ctc)]
+   [types regexp?])]
+ [DONE ([max "done"]
+   [types string?])]
+ [EOM ([max "eom"]
+   [types string?])]
+ [manage ([max (instanceof/c manage-c/max-ctc)]
    #;[max/sub1 (instanceof/c manage-c/max/sub1-ctc)]
-   [types (instanceof/c manage-c/types-ctc)])
-  (new manage%))
-
-(define/ctc-helper stash-len (box #f))
-(define/contract (run-t next)
-  (configurable-ctc
-   [max (->i ([next string?])
+   [types (instanceof/c manage-c/types-ctc)])]
+ [run-t ([max (->i ([next string?])
              #:pre (next)
              (when (not (regexp-match PATH next))
                (set-box! stash-len (length (get-field disabled manage))))
@@ -135,8 +96,44 @@
                                         [(empty? station) (substring? x2 res)]
                                         [else (substring? (string-join station res))])))]
                               [else "message not understood"]))])]
-   [types (-> string? string?)])
-    (cond
+   [types (-> string? string?)])])
+
+;; (provide
+;;  ;; String 
+;;  EOM
+;;  DONE
+ 
+;;  ;; constants, regexps that match PATH, DISABLE, and ENABLE requests
+;;  PATH 
+;;  DISABLE
+;;  ENABLE
+ 
+;;  ;; InputPort OutputPort -> Void 
+;;  ;; read FROM, DISABLE, and ENABLE requests input-port, write responses to output-port, loop
+;;  run-t)
+
+
+(define PATH
+  #rx"from (.*) to (.*)$")
+
+(define DISABLE
+  #rx"disable (.*)$")
+
+(define ENABLE
+  #rx"enable (.*)$")
+
+(define DONE
+  "done")
+
+(define EOM
+  "eom")
+
+(define manage
+  (new manage%))
+
+(define/ctc-helper stash-len (box #f))
+(define (run-t next)
+  (cond
       [(regexp-match PATH next)
        => (lambda (x)
        (define x2 (second x))
