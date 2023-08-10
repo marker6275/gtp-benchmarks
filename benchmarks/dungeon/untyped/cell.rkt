@@ -14,9 +14,10 @@
  )
 (require (only-in racket/function
                   curry))
-(require (only-in "message-queue.rkt"
-                  enqueue-message!
-                  ))
+;; (require (only-in "message-queue.rkt"
+;;                   enqueue-message!
+;;                   ))
+(require/configurable-contract "message-queue.rkt" enqueue-message! )
 (require (only-in racket/dict
                   dict-ref
                   dict-set!

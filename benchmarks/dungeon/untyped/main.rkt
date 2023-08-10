@@ -19,53 +19,56 @@
   dict-set
 ))
 (require (only-in "cell.rkt"
-  void-cell%
-  wall%
-  door%
-  vertical-door%
-  horizontal-door%
-  horizontal-wall%
-  four-corner-wall%
-  pillar%
-  vertical-wall%
-  north-west-wall%
-  north-east-wall%
-  south-west-wall%
-  south-east-wall%
-  north-tee-wall%
-  west-tee-wall%
-  east-tee-wall%
-  south-tee-wall%
-  empty-cell%
+;;   void-cell%
+;;   wall%
+;;   door%
+;;   vertical-door%
+;;   horizontal-door%
+;;   horizontal-wall%
+;;   four-corner-wall%
+;;   pillar%
+;;   vertical-wall%
+;;   north-west-wall%
+;;   north-east-wall%
+;;   south-west-wall%
+;;   south-east-wall%
+;;   north-tee-wall%
+;;   west-tee-wall%
+;;   east-tee-wall%
+;;   south-tee-wall%
+;;   empty-cell%
   cell%?
   cell%/c
-  cell%
+;;   cell%
 ))
+(require/configurable-contract "cell.rkt" cell% empty-cell% south-tee-wall% east-tee-wall% west-tee-wall% north-tee-wall% south-east-wall% south-west-wall% north-east-wall% north-west-wall% vertical-wall% pillar% four-corner-wall% horizontal-wall% horizontal-door% vertical-door% door% wall% void-cell% )
 (require (only-in "grid.rkt"
-  left
-  right
-  up
-  down
-  grid-ref
-  grid-height
-  grid-width
-  show-grid
-  array-set!
-  build-array
+;;   left
+;;   right
+;;   up
+;;   down
+;;   grid-ref
+;;   grid-height
+;;   grid-width
+;;   show-grid
+;;   array-set!
+;;   build-array
   array-coord?
   arrayof
   grid?
-  within-grid?
+;;   within-grid?
   within-grid/c
   direction?
 ))
+(require/configurable-contract "grid.rkt" within-grid? build-array array-set! show-grid grid-width grid-height grid-ref down up right left )
 (require (only-in "utils.rkt"
-  random-between
-  random-from
-  random
-  reset!
+;;   random-between
+;;   random-from
+;;   random
+;;   reset!
   random-result-between/c
 ))
+(require/configurable-contract "utils.rkt" reset! random random-from random-between )
 
 ;; (provide/configurable-contract
 ;;  [N exact-nonnegative-integer?]

@@ -10,11 +10,12 @@
  "../../../ctcs/precision-config.rkt"
 )
 (require (only-in "cell.rkt"
-  char->cell%
-  void-cell%
+;;   char->cell%
+;;   void-cell%
   cell%?
   class-equal?
 ))
+(require/configurable-contract "cell.rkt" void-cell% char->cell% )
 
 (provide/configurable-contract
  [array-set! ([max (->i ([g (arrayof cell%?)]

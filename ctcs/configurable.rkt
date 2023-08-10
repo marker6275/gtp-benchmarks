@@ -71,13 +71,24 @@
      ]))
 
 
-;; lltodo: this still doesn't work due to some binding issues
 (define-simple-macro (require/configurable-contract mod:str name:id ...)
   #:do [(define current-level (contract-level-for-expansion-context-of this-syntax))]
   #:with current-level-stx #`'#,current-level
   #:with middle-mod-name (format-id #f
                                     "middleman-~a"
                                     (string->symbol (syntax->datum #'mod)))
+  #:with syntax-to-require-middle-mod (datum->syntax
+                                       this-syntax
+                                       (list
+                                        'require
+                                        (list
+                                         'quote
+                                         (format-id
+                                          #f
+                                          "middleman-~a"
+                                          (string->symbol (syntax->datum #'mod)))))
+                                       this-syntax
+                                       this-syntax)
   (begin (module middle-mod-name racket/base
            (require racket/contract
                     mod
@@ -85,5 +96,5 @@
            (provide (contract-out [name (hash-ref (hash-ref contract-maps 'name)
                                                   current-level-stx)]
                                   ...)))
-         (require 'middle-mod-name)))
+         syntax-to-require-middle-mod))
 
