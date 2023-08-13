@@ -29,15 +29,16 @@
           list-with-min-size/c
           equal?/c)
 )
-(require (only-in "stack.rkt"
-  stack-drop
-  stack-dup
-  stack-init
-  stack-over
-  stack-pop
-  stack-push
-  stack-swap
-))
+;; (require (only-in "stack.rkt"
+;;   stack-drop
+;;   stack-dup
+;;   stack-init
+;;   stack-over
+;;   stack-pop
+;;   stack-push
+;;   stack-swap
+;; ))
+(require/configurable-contract "stack.rkt" stack-swap stack-push stack-pop stack-over stack-init stack-dup stack-drop )
 
 (provide/configurable-contract
  [assert ([max any/c]

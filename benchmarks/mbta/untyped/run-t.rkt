@@ -2,12 +2,16 @@
 
 ;; ===================================================================================================
 
-(require "t-view.rkt"
-         "../../../ctcs/precision-config.rkt"
-         "../../../ctcs/common.rkt"
-         "../../../ctcs/configurable.rkt"
-         "helpers.rkt"
-         "t-graph.rkt")
+(require
+ (only-in "t-view.rkt" manage-c/types-ctc manage-c/max/sub1-ctc manage-c/max-ctc t-graph)
+ "../../../ctcs/precision-config.rkt"
+ "../../../ctcs/common.rkt"
+ "../../../ctcs/configurable.rkt"
+ "helpers.rkt"
+ ;; "t-graph.rkt"
+ )
+(require/configurable-contract "t-graph.rkt" mbta% lines->hash read-t-line-from-file read-t-graph line-specification? COLORS SOURCE-DIRECTORY in-neighbors* attach-edge-property* unweighted-graph/directed* )
+(require/configurable-contract "t-view.rkt" manage% SWITCH ENSURE ENABLED-0 DISABLED-0 ENABLED DISABLED NO-PATH DESTINATION-0 DESTINATION CURRENT-LOCATION-0 CURRENT-LOCATION INTERNAL selector )
 
 (provide/configurable-contract
  [PATH ([max (λ (re)

@@ -15,11 +15,13 @@
   racket/contract
   racket/random)
 
-(require (only-in "morse-code-strings.rkt"
-  string->morse))
+;; (require (only-in "morse-code-strings.rkt"
+  ;; string->morse))
+(require/configurable-contract "morse-code-strings.rkt" string->morse )
 
-(require (only-in "levenshtein.rkt"
-               string-levenshtein))
+;; (require (only-in "levenshtein.rkt"
+               ;; string-levenshtein))
+(require/configurable-contract "levenshtein.rkt" string-levenshtein )
 
 ;; (provide/configurable-contract
 ;;  [word-frequency-list string?]

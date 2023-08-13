@@ -2,12 +2,33 @@
 
 ;; Movie handlers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(require "data.rkt"
-         "motion.rkt"
-         "collide.rkt"
+(require (only-in "data.rkt"
+                  posn
+                  snake
+                  world
+                  world-snake
+                  posn?
+                  posn-type?
+                  posn/c
+                  snake-segs?
+                  snake-segs=?/c
+                  snake-dir?
+                  snake-type?
+                  snake/c
+                  snake=?/c
+                  posn=?/c
+                  world/c
+                  world-type?
+                  world=?/c
+                  food=?/c)
+         ;; "motion.rkt"
+         ;; "collide.rkt"
          "../../../ctcs/configurable.rkt"
          "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt")
+(require/configurable-contract "collide.rkt" segs-self-collide? snake-self-collide? head-collide? snake-wall-collide? )
+(require/configurable-contract "motion.rkt" snake-eat world-change-dir snake-change-direction eating? world->world reset! r )
+(require/configurable-contract "data.rkt" posn=? )
 
 (provide/configurable-contract
  [handle-key ([max (->i ([w world-type?]

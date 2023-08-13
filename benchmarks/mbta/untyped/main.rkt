@@ -1,13 +1,15 @@
 #lang racket
 
 ;; ===================================================================================================
-(require "run-t.rkt"
-         "data.rkt"
-         "helpers.rkt"
-         "../../../ctcs/precision-config.rkt"
-         "../../../ctcs/common.rkt"
-         "../../../ctcs/configurable.rkt"
-         (only-in racket/string string-join))
+(require
+ ;; "run-t.rkt"
+ "data.rkt"
+ "helpers.rkt"
+ "../../../ctcs/precision-config.rkt"
+ "../../../ctcs/common.rkt"
+ "../../../ctcs/configurable.rkt"
+ (only-in racket/string string-join))
+(require/configurable-contract "run-t.rkt" run-t manage EOM DONE ENABLE DISABLE PATH )
 
 ;; (provide/configurable-contract
 ;;  [dat->station-names ([max (->i ([fname (and/c string? (λ (f) (file-exists? f)))])

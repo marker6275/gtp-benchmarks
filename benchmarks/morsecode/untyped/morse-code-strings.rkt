@@ -10,13 +10,14 @@
 ;; We just make the . and -
 
 
-(require "morse-code-table.rkt"
+(require (only-in "morse-code-table.rkt" morse-string?)
          "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt"
          "../../../ctcs/configurable.rkt"
          racket/contract
          racket/match
          racket/string)
+(require/configurable-contract "morse-code-table.rkt" char-table clean-pattern lines wikipedia-text )
 
 (provide/configurable-contract
  [char->dit-dah-string ([max (->i ([letter char?])

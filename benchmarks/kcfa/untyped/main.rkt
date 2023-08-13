@@ -3,12 +3,13 @@
 
 (require
   "structs.rkt"
-  "ui.rkt"
+  ;; "ui.rkt"
   "../../../ctcs/precision-config.rkt"
   "../../../ctcs/common.rkt"
   "../../../ctcs/configurable.rkt"
   (only-in "ai.rkt" closed-term?)
 )
+(require/configurable-contract "ui.rkt" format-mono-store analyze monovariant-store monovariant-value empty-mono-store summarize )
 
 ;; (provide/configurable-contract
 ;;  [new-label any/c]

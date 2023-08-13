@@ -14,12 +14,14 @@
 ;;  manage%)
 
 ;; ===================================================================================================
-(require "t-graph.rkt"
-         "../../../ctcs/precision-config.rkt"
-         "../../../ctcs/common.rkt"
-         "../../../ctcs/configurable.rkt"
-         "helpers.rkt"
-         racket/contract)
+(require
+ ; "t-graph.rkt"
+ "../../../ctcs/precision-config.rkt"
+ "../../../ctcs/common.rkt"
+ "../../../ctcs/configurable.rkt"
+ "helpers.rkt"
+ racket/contract)
+(require/configurable-contract "t-graph.rkt" mbta% lines->hash read-t-line-from-file read-t-graph line-specification? COLORS SOURCE-DIRECTORY in-neighbors* attach-edge-property* unweighted-graph/directed* )
 
 (provide/configurable-contract
  [selector ([max (->i ([inp-lst (listof (listof any/c))])

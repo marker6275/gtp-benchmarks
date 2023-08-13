@@ -6,16 +6,24 @@
   require-typed-check
   racket/set
   "structs.rkt"
-  "benv.rkt"
-  "denotable.rkt"
-  "time.rkt"
+  ;; "benv.rkt"
+  (only-in "benv.rkt" Closure Binding BEnv? Closure/c Binding/c Closure-type/c Binding-type/c
+           Time? Addr? Closure-lam Closure-benv Binding-var Binding-time)
+  ;; "denotable.rkt"
+    (only-in "denotable.rkt" State Denotable/c Store/c State/c State-type? State-call State-benv State-store State-time)
+
+  ;; "time.rkt"
   (only-in racket/string string-join)
   "../../../ctcs/configurable.rkt"
   "../../../ctcs/precision-config.rkt"
   "../../../ctcs/common.rkt"
 )
+(require/configurable-contract "time.rkt" time-zero take* tick alloc)
+(require/configurable-contract "denotable.rkt" store-join store-update* store-update store-lookup empty-store d-join d-bot )
+(require/configurable-contract "benv.rkt" benv-extend* benv-extend benv-lookup empty-benv )
 
-(require "ai.rkt")
+(require/configurable-contract "ai.rkt" explore next atom-eval )
+(require (only-in "ai.rkt" closed-term?))
 ;(require/typed/check "ai.rkt"
 ;  (atom-eval (-> BEnv Store (-> Exp Denotable)))
 ;  (next (-> State (Setof State)))

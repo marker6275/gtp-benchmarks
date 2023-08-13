@@ -1,11 +1,14 @@
 #lang racket
 
-(require "data.rkt"
-         "const.rkt"
-         "motion-help.rkt"
+(require (except-in "data.rkt" posn=?)
+         (except-in "const.rkt" WORLD FOOD-RADIUS SEGMENT-RADIUS BOARD-WIDTH-PIXELS BOARD-HEIGHT-PIXELS BOARD-WIDTH BOARD-HEIGHT GRID-SIZE)
+         (except-in "motion-help.rkt" snake-grow snake-slither next-head)
          "../../../ctcs/configurable.rkt"
          "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt")
+(require/configurable-contract "motion-help.rkt" snake-grow snake-slither next-head )
+(require/configurable-contract "const.rkt" WORLD FOOD-RADIUS SEGMENT-RADIUS BOARD-WIDTH-PIXELS BOARD-HEIGHT-PIXELS BOARD-WIDTH BOARD-HEIGHT GRID-SIZE )
+(require/configurable-contract "data.rkt" posn=? )
 
 (provide/configurable-contract
  [r ([max pseudo-random-generator?]

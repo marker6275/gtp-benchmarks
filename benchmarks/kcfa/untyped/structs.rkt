@@ -28,7 +28,7 @@
 
 (require "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt"
-           "../../../ctcs/configurable.rkt")
+         "../../../ctcs/configurable.rkt")
 
 (provide/configurable-contract)
 

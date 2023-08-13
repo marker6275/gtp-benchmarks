@@ -4,7 +4,13 @@
          "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt"
          "../../../ctcs/configurable.rkt"
-         "streams.rkt")
+         (only-in "streams.rkt"
+                  simple-stream
+                  simple-stream/c
+                  simple-streamof
+                  simple-stream/dc
+                  simple-stream/dc*))
+(require/configurable-contract "streams.rkt" simple-stream-take simple-stream-get simple-stream-unfold make-simple-stream )
 
 ;;--------------------------------------------------------------------------------------------------
 

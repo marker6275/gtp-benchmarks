@@ -1,9 +1,28 @@
 #lang racket
 
-(require "data.rkt"
+(require (only-in "data.rkt"
+                  posn
+                  snake
+                  world
+                  posn?
+                  posn-type?
+                  posn/c
+                  snake-segs?
+                  snake-segs=?/c
+                  snake-dir?
+                  snake-type?
+                  snake/c
+                  snake=?/c
+                  posn=?/c
+                  world/c
+                  world-type?
+                  world=?/c
+                  food=?/c)
          "../../../ctcs/configurable.rkt"
          "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt")
+(require/configurable-contract "data.rkt"
+                               posn=?)
 
 (provide/configurable-contract
  [GRID-SIZE ([max (=/c 30)]

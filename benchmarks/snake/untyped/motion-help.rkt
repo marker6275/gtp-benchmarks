@@ -1,10 +1,12 @@
 #lang racket
 
-(require "data.rkt"
-         "cut-tail.rkt"
+(require (except-in "data.rkt" posn=?)
+         (except-in "cut-tail.rkt" cut-tail)
          "../../../ctcs/configurable.rkt"
          "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt")
+(require/configurable-contract "cut-tail.rkt" cut-tail )
+(require/configurable-contract "data.rkt" posn=? )
 
 (provide/configurable-contract
  [next-head ([max (->i ([seg posn-type?]

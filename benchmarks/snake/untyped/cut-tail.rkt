@@ -1,9 +1,10 @@
 #lang racket
 
-(require "data.rkt"
+(require (except-in "data.rkt" posn=?)
          "../../../ctcs/configurable.rkt"
          "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt")
+(require/configurable-contract "data.rkt" posn=? )
 ;; NeSegs is one of:
 ;; - (cons Posn empty)
 ;; - (cons Posn NeSegs)

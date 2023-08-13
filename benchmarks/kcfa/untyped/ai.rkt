@@ -4,15 +4,21 @@
 
 (require
   "structs.rkt"
-  "benv.rkt"
-  "time.rkt"
-  "denotable.rkt"
+  ;; "benv.rkt"
+  (only-in "benv.rkt" Closure Binding BEnv? Closure/c Binding/c Closure-type/c Binding-type/c
+           Time? Addr? Closure-lam Closure-benv Binding-var Binding-time)
+  ;; "time.rkt"
+  (only-in "denotable.rkt" State Denotable/c Store/c State/c State-type? State-call State-benv
+           State-store State-time)
   racket/set
   racket/match
   "../../../ctcs/configurable.rkt"
   "../../../ctcs/precision-config.rkt"
   "../../../ctcs/common.rkt"
 )
+(require/configurable-contract "denotable.rkt" store-join store-update* store-update store-lookup empty-store d-join d-bot )
+(require/configurable-contract "time.rkt" time-zero take* tick alloc)
+(require/configurable-contract "benv.rkt" benv-extend* benv-extend benv-lookup empty-benv )
 
 ;; ---
 

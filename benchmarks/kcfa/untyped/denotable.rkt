@@ -8,12 +8,15 @@
   racket/set
   racket/list
   "structs.rkt"
-  "benv.rkt"
-  "time.rkt"
+  (only-in "benv.rkt" Closure Binding BEnv? Closure/c Binding/c Closure-type/c Binding-type/c
+           Time? Addr? Closure-lam Closure-benv Binding-var Binding-time)
+  ;; "time.rkt"
   "../../../ctcs/precision-config.rkt"
   "../../../ctcs/common.rkt"
   "../../../ctcs/configurable.rkt"
   )
+(require/configurable-contract "time.rkt" time-zero take* tick alloc)
+(require/configurable-contract "benv.rkt" benv-extend* benv-extend benv-lookup empty-benv )
 
 ;; -----------------------------------------------------------------------------
 (provide/configurable-contract

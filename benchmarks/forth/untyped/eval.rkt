@@ -22,13 +22,15 @@
            curry)
   (only-in racket/list first)
 )
-(require (only-in "command.rkt"
-  CMD*
-  command%
-))
-(require (only-in "stack.rkt"
-  stack-init
-))
+;; (require (only-in "command.rkt"
+;;   CMD*
+;;   command%
+;; ))
+(require/configurable-contract "command.rkt" command% CMD* )
+;; (require (only-in "stack.rkt"
+;;   stack-init
+;; ))
+(require/configurable-contract "stack.rkt" stack-init )
 
 (provide/configurable-contract
  [assert ([max #;(parametric->/c [A] (A (A . -> . boolean?) . -> . A))

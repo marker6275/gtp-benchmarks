@@ -1,10 +1,12 @@
 #lang racket
 
-(require "data.rkt"
-         "const.rkt"
+(require (except-in "data.rkt" posn=?)
+         (except-in "const.rkt" WORLD FOOD-RADIUS SEGMENT-RADIUS BOARD-WIDTH-PIXELS BOARD-HEIGHT-PIXELS BOARD-WIDTH BOARD-HEIGHT GRID-SIZE)
          "../../../ctcs/configurable.rkt"
          "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt")
+(require/configurable-contract "const.rkt" WORLD FOOD-RADIUS SEGMENT-RADIUS BOARD-WIDTH-PIXELS BOARD-HEIGHT-PIXELS BOARD-WIDTH BOARD-HEIGHT GRID-SIZE )
+(require/configurable-contract "data.rkt" posn=? )
 
 (provide/configurable-contract
  [snake-wall-collide? ([max (->i ([snk snake-type?])
