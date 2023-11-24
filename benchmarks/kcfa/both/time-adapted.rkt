@@ -8,7 +8,7 @@
 
 (require/typed/check "time.rkt"
   [time-zero Time]
-  [k (Parameterof Natural)]
+  ;; [k (Parameterof Natural)]
   [tick (-> Stx Time Time)]
   [alloc (-> Time (-> Var Addr))]
 )
@@ -17,7 +17,7 @@
 
 (provide
   time-zero
-  k
+  ;; k
   tick
   alloc
   Value
