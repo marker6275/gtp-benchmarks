@@ -4,36 +4,38 @@
          (except-in "const.rkt" WORLD FOOD-RADIUS SEGMENT-RADIUS BOARD-WIDTH-PIXELS BOARD-HEIGHT-PIXELS BOARD-WIDTH BOARD-HEIGHT GRID-SIZE)
          "../../../ctcs/configurable.rkt"
          "../../../ctcs/precision-config.rkt"
-         "../../../ctcs/common.rkt")
+         "../../../ctcs/common.rkt"
+         modalc
+         "../../curr-mode.rkt")
 (require/configurable-contract "const.rkt" WORLD FOOD-RADIUS SEGMENT-RADIUS BOARD-WIDTH-PIXELS BOARD-HEIGHT-PIXELS BOARD-WIDTH BOARD-HEIGHT GRID-SIZE )
 (require/configurable-contract "data.rkt" posn=? )
 
 (provide/configurable-contract
- [snake-wall-collide? ([max (->i ([snk snake-type?])
+ [snake-wall-collide? ([max (modal->i curr-mode ([snk snake-type?])
                                  [result (snk)
                                          (match snk
                                            [(snake _ (cons h _)) (head-collide? h)]
                                            [_ #f])])]
-                       [types (snake-type? . -> . boolean?)])]
- [head-collide? ([max (->i ([p posn-type?])
+                       [types (snake-type? . modal-> . boolean?)])]
+ [head-collide? ([max (modal->i curr-mode ([p posn-type?])
                            [result (p)
                                    (not (and (< 0 (posn-x p) BOARD-WIDTH)
                                              (< 0 (posn-y p) BOARD-HEIGHT)))])]
-                 [types (posn-type? . -> . boolean?)])]
- [snake-self-collide? ([max (->i ([snk snake-type?])
+                 [types (posn-type? . modal-> . boolean?)])]
+ [snake-self-collide? ([max (modal->i curr-mode([snk snake-type?])
                                  [result (snk)
                                          (match snk
                                            [(snake _ (cons h t))
                                             (memf? (posn=?/c h) t)]
                                            [_ #f])])]
-                       [types (snake-type? . -> . boolean?)])]
- [segs-self-collide? ([max (->i ([h posn-type?]
+                       [types (snake-type? . modal-> . boolean?)])]
+ [segs-self-collide? ([max (modal->i curr-mode ([h posn-type?]
                                  [segs snake-segs?])
                                 [result (h segs)
                                         (if (empty? segs)
                                             #f
                                             (memf? (posn=?/c h) segs))])]
-                      [types (posn-type? snake-segs? . -> . boolean?)])])
+                      [types (posn-type? snake-segs? . modal-> . boolean?)])])
 
 ;; (provide
  ;; snake-wall-collide?

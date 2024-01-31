@@ -23,6 +23,7 @@
                ;; string-levenshtein))
 (require/configurable-contract "levenshtein.rkt" string-levenshtein )
 
+;; why are these commented out? Why can't we use these?
 ;; (provide/configurable-contract
 ;;  [word-frequency-list string?]
 ;;  [word-frequency-list-small string?]

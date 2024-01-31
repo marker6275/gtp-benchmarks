@@ -3,7 +3,9 @@
 (require #;racket/contract
          "../../../ctcs/precision-config.rkt"
          "../../../ctcs/common.rkt"
-         "../../../ctcs/configurable.rkt")
+         "../../../ctcs/configurable.rkt"
+         modalc
+         "../../curr-mode.rkt")
 
 
 
@@ -11,25 +13,25 @@
 ;; For building and using infinite lists.
 
 (provide/configurable-contract
- [make-simple-stream {[max (->i ([hd any/c]
+ [make-simple-stream {[max (modal->i curr-mode ([hd any/c]
                                  [thunk (-> simple-stream?)])
                                 [result (hd thunk)
                                         (begin (displayln 'using-max!)
                                         (simple-stream/c (equal?/c hd) (equal?/c thunk)))])]
-                      [types (-> any/c (-> simple-stream?) simple-stream?)]}]
- [simple-stream-unfold {[max (->i ([st simple-stream?])
+                      [types (modal-> any/c (-> simple-stream?) simple-stream?)]}]
+ [simple-stream-unfold {[max (modal->i curr-mode ([st simple-stream?])
                                   (values [r1 (st) (equal?/c (simple-stream-first st))]
                                           [r2 simple-stream?]))]
-                        [types (-> simple-stream? (values any/c simple-stream?))]}]
- [simple-stream-get {[max (->i ([st simple-stream?]
+                        [types (modal-> simple-stream? (values any/c simple-stream?))]}]
+ [simple-stream-get {[max (modal->i curr-mode ([st simple-stream?]
                                 [i exact-nonnegative-integer?])
                                [result (st i)
                                        (equal?/c (for/fold ([current-st st]
                                                             #:result (simple-stream-first current-st))
                                                            ([_ (in-range i)])
                                                    ((simple-stream-rest current-st))))])]
-                     [types (-> simple-stream? exact-nonnegative-integer? any/c)]}]
- [simple-stream-take {[max (->i ([st simple-stream?]
+                     [types (modal-> simple-stream? exact-nonnegative-integer? any/c)]}]
+ [simple-stream-take {[max (modal->i curr-mode ([st simple-stream?]
                                  [n exact-nonnegative-integer?])
                                 [result (st n)
                                         (and/c list?

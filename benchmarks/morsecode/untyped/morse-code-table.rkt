@@ -8,21 +8,24 @@
          "../../../ctcs/common.rkt"
          "../../../ctcs/configurable.rkt"
          racket/string
-         racket/set)
-
+         racket/set
+         modalc
+         "../../curr-mode.rkt")
+;; This whole file is literally not used
+;; char-table is used but is not an arrow contract, what to do
 (provide/configurable-contract
  [wikipedia-text ([max string?]
                   [types string?])]
  [lines ([max (and/c (listof string?) (length=/c (lines-in wikipedia-text)))]
          [types (listof string?)])]
- [clean-pattern ([max (->i ([pat string?])
+ [clean-pattern ([max (modal->i curr-mode ([pat string?])
                            [result (pat)
                                    (and/c string?
                                           (not/c (string-contains/c "·" "–" "&nbsp;"))
                                           (subsequence-of/c pat
                                                             #:swap (hash #\· #\.
                                                                          #\– #\-)))])]
-                 [types (string? . -> . string?)])]
+                 [types (string? . modal-> . string?)])]
  [char-table ([max (and/c (hash/c char? (and/c non-empty-string? morse-string?))
                           (hash-with-keys/c all-chars))]
               [types (hash/c char? string?)])])

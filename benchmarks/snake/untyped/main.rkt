@@ -1,6 +1,5 @@
 #lang racket
 
-
 (require ;; "data.rkt"
  (only-in "data.rkt"
           posn

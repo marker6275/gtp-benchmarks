@@ -3,16 +3,18 @@
 
 (require "../../../ctcs/precision-config.rkt"
          "../../../ctcs/configurable.rkt"
-         "../../../ctcs/common.rkt")
+         "../../../ctcs/common.rkt"
+         modalc
+         "../../curr-mode.rkt")
 
 (provide/configurable-contract
- [posn=? ([max (->i ([p1 posn?]
+ [posn=? ([max (modal->i curr-mode ([p1 posn?]
                      [p2 posn?])
                     [result (p1 p2)
                             (match* (p1 p2)
                               [((posn x y) (posn x y)) #t]
                               [(_ _) #f])])]
-          [types (posn? posn? . -> . boolean?)])])
+          [types (posn? posn? . modal-> . boolean?)])])
 
 (provide [struct-out posn])
 

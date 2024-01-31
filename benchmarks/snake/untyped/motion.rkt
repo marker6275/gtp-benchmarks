@@ -5,7 +5,9 @@
          (except-in "motion-help.rkt" snake-grow snake-slither next-head)
          "../../../ctcs/configurable.rkt"
          "../../../ctcs/precision-config.rkt"
-         "../../../ctcs/common.rkt")
+         "../../../ctcs/common.rkt"
+         modalc
+         "../../curr-mode.rkt")
 (require/configurable-contract "motion-help.rkt" snake-grow snake-slither next-head )
 (require/configurable-contract "const.rkt" WORLD FOOD-RADIUS SEGMENT-RADIUS BOARD-WIDTH-PIXELS BOARD-HEIGHT-PIXELS BOARD-WIDTH BOARD-HEIGHT GRID-SIZE )
 (require/configurable-contract "data.rkt" posn=? )
@@ -13,6 +15,7 @@
 (provide/configurable-contract
  [r ([max pseudo-random-generator?]
      [types pseudo-random-generator?])]
+ ;; ->* contract? no modal?
  [reset! ([max (->* ()
                     void?
                     #:post
@@ -23,7 +26,7 @@
                          (random-seed 1324)
                          (pseudo-random-generator->vector r*)))))]
           [types (-> void?)])]
- [world->world ([max (->i ([w world-type?])
+ [world->world ([max (modal->i curr-mode ([w world-type?])
                           [result
                            (w)
                            (match w
@@ -37,33 +40,33 @@
                                                 (compose (=/c (length segs))
                                                          length))
                                        (food=?/c food))])])]
-                [types (world-type? . -> . world-type?)])]
- [eating? ([max (->i ([w world-type?])
+                [types (world-type? . modal-> . world-type?)])]
+ [eating? ([max (modal->i curr-mode ([w world-type?])
                      [result (w)
                              (match w
                                [(world (snake _ (cons p1 _)) p2) #:when (posn=? p1 p2)
                                                                  #t]
                                [_ #f])])]
-           [types (world-type? . -> . boolean?)])]
+           [types (world-type? . modal-> . boolean?)])]
  [snake-change-direction ([max (->i ([snk snake-type?]
                                      [dir snake-dir?])
                                     [result (snk dir)
                                             (snake/c dir (snake-segs=?/c (snake-segs snk)))])]
                           [types (snake-type? string? . -> . snake-type?)])]
- [world-change-dir ([max (->i ([w world-type?]
+ [world-change-dir ([max (modal->i curr-mode ([w world-type?]
                                [dir snake-dir?])
                               [result (w dir)
                                       (match w
                                         [(world (snake _ segs) food)
                                          (world/c (snake/c dir (snake-segs=?/c segs))
                                                   (food=?/c food))])])]
-                    [types (world-type? string? . -> . world-type?)])]
- [snake-eat ([max (->i ([w world-type?])
+                    [types (world-type? string? . modal-> . world-type?)])]
+ [snake-eat ([max (modal->i curr-mode ([w world-type?])
                        [result (w)
                                (world/c (snake=?/c (snake-grow (world-snake w)))
                                         (posn/c (integer-in 0 (sub1 BOARD-WIDTH))
                                                 (integer-in 0 (sub1 BOARD-HEIGHT))))])]
-             [types (world-type? . -> . world-type?)])])
+             [types (world-type? . modal-> . world-type?)])])
 
 
 ;; (provide reset!)

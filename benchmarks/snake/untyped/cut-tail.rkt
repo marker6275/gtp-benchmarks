@@ -3,17 +3,19 @@
 (require (except-in "data.rkt" posn=?)
          "../../../ctcs/configurable.rkt"
          "../../../ctcs/precision-config.rkt"
-         "../../../ctcs/common.rkt")
+         "../../../ctcs/common.rkt"
+         modalc
+         "../../curr-mode.rkt")
 (require/configurable-contract "data.rkt" posn=? )
 ;; NeSegs is one of:
 ;; - (cons Posn empty)
 ;; - (cons Posn NeSegs)
 
 (provide/configurable-contract
- [cut-tail ([max (->i ([segs ne-segs?])
+ [cut-tail ([max (modal->i curr-mode ([segs ne-segs?])
                       [result (segs)
                               (snake-segs=?/c (drop-right segs 1))])]
-            [types (ne-segs? . -> . snake-segs?)])])
+            [types (ne-segs? . modal-> . snake-segs?)])])
 
 (define/ctc-helper ne-segs? (and/c snake-segs? cons?))
 

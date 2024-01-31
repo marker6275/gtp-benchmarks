@@ -20,7 +20,9 @@
                   food=?/c)
          "../../../ctcs/configurable.rkt"
          "../../../ctcs/precision-config.rkt"
-         "../../../ctcs/common.rkt")
+         "../../../ctcs/common.rkt"
+         modalc
+         "../../curr-mode.rkt")
 (require/configurable-contract "data.rkt"
                                posn=?)
 

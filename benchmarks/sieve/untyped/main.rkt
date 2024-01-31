@@ -83,3 +83,4 @@
   (void (simple-stream-get primes N-1)))
 
 (time (main))
+(println (simple-stream-get primes N-1))

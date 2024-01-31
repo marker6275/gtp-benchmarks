@@ -4,12 +4,14 @@
          (except-in "cut-tail.rkt" cut-tail)
          "../../../ctcs/configurable.rkt"
          "../../../ctcs/precision-config.rkt"
-         "../../../ctcs/common.rkt")
+         "../../../ctcs/common.rkt"
+         modalc
+         "../../curr-mode.rkt")
 (require/configurable-contract "cut-tail.rkt" cut-tail )
 (require/configurable-contract "data.rkt" posn=? )
 
 (provide/configurable-contract
- [next-head ([max (->i ([seg posn-type?]
+ [next-head ([max (modal->i curr-mode ([seg posn-type?]
                         [dir snake-dir?])
                        [result (seg dir)
                                (posn=?/c
@@ -18,8 +20,8 @@
                                   [((posn x y) "left")  (posn (sub1 x) y)]
                                   [((posn x y) "down")  (posn x (sub1 y))]
                                   [((posn x y) "up")    (posn x (add1 y))]))])]
-             [types (posn-type? string? . -> . posn-type?)])]
- [snake-slither ([max (->i ([snk snake-type?])
+             [types (posn-type? string? . modal-> . posn-type?)])]
+ [snake-slither ([max (modal->i curr-mode ([snk snake-type?])
                            [result (snk)
                                    (and/c
                                     ;; intermediate ctcs
@@ -33,8 +35,8 @@
                                                         (snake-segs=?/c
                                                          (drop-right segs 1))))]
                                       [_ #f]))])]
-                 [types (snake-type? . -> . snake-type?)])]
- [snake-grow ([max (->i ([snk snake-type?])
+                 [types (snake-type? . modal-> . snake-type?)])]
+ [snake-grow ([max (modal->i curr-mode ([snk snake-type?])
                         [result (snk)
                                 (and/c
                                  ;; intermediate ctcs
@@ -48,7 +50,7 @@
                                     (snake/c d
                                              (cons/c (posn=?/c (next-head segs/h d))
                                                      (snake-segs=?/c segs)))]))])]
-              [types (snake-type? . -> . snake-type?)])])
+              [types (snake-type? . modal-> . snake-type?)])])
 
 ;; (provide
 ;;  snake-slither

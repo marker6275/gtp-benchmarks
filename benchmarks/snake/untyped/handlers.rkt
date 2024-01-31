@@ -25,13 +25,15 @@
          ;; "collide.rkt"
          "../../../ctcs/configurable.rkt"
          "../../../ctcs/precision-config.rkt"
-         "../../../ctcs/common.rkt")
+         "../../../ctcs/common.rkt"
+         modalc
+         "../../curr-mode.rkt")
 (require/configurable-contract "collide.rkt" segs-self-collide? snake-self-collide? head-collide? snake-wall-collide? )
 (require/configurable-contract "motion.rkt" snake-eat world-change-dir snake-change-direction eating? world->world reset! r )
 (require/configurable-contract "data.rkt" posn=? )
 
 (provide/configurable-contract
- [handle-key ([max (->i ([w world-type?]
+ [handle-key ([max (modal->i curr-mode ([w world-type?]
                          [ke string?])
                         [result (w ke)
                                 (world=?/c
@@ -47,14 +49,14 @@
                                                     segs)
                                              food)]
                                      [(_ w) w])))])]
-              [types (world-type? string? . -> . world-type?)])]
- [game-over? ([max (->i ([w world-type?])
+              [types (world-type? string? . modal-> . world-type?)])]
+ [game-over? ([max (modal->i curr-mode ([w world-type?])
                         [result (w)
                                 (match w
                                   [(world s _)
                                    (or (snake-wall-collide? s)
                                        (snake-self-collide? s))])])]
-              [types (world-type? . -> . boolean?)])])
+              [types (world-type? . modal-> . boolean?)])])
 
 ;; handle-key : World String -> World
 (define (handle-key w ke)

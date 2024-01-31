@@ -48,8 +48,13 @@
  "../../../ctcs/common.rkt"
  "../../../ctcs/configurable.rkt"
  racket/match
- racket/math)
+ racket/math
+ modalc
+ "../../curr-mode.rkt")
 
+;; only string-levenshtein is used (in main.rkt)
+;; it's a levenshtein-variant/c type, but so are most contracts
+;; nothing else is used, in other files or inside string-levenshtein
 (provide/configurable-contract
  [%identity ([max (-> any/c any/c)]
              [types (-> any/c any/c)])]
@@ -59,13 +64,13 @@
  [%vector-empty? ([max (->i ([v vector?])
                             [result (v) (zero? (vector-length v))])]
                   [types (-> vector? boolean?)])]
- [%string->vector ([max (->i ([s string?])
+ [%string->vector ([max (modal->i curr-mode ([s string?])
                              [result (vectorof char?)]
                              #:post (s result)
                              (and (= (string-length s) (vector-length result))
                                   (andmap char=? (string->list s) (vector->list result))))]
-                   [types (-> string? (vectorof char?))])]
- [vector-levenshtein/predicate/get-scratch ([max (->i ([a vector?]
+                   [types (modal-> string? (vectorof char?))])]
+ [vector-levenshtein/predicate/get-scratch ([max (modal->i curr-mode ([a vector?]
                                                        [b vector?]
                                                        [pred (any/c any/c . -> . boolean?)]
                                                        [get-scratch (->i ([n natural?])
@@ -79,7 +84,7 @@
                                                     vector?
                                                     (any/c any/c . -> . boolean?)
                                                     (natural? . -> . vector?)
-                                                    . -> .
+                                                    . modal-> .
                                                     natural?)])]
  [vector-levenshtein/predicate ([max (levenshtein-variant/pred/c #:at 'max)]
                                 [types (levenshtein-variant/pred/c #:at 'types)])]
@@ -292,7 +297,7 @@
 (define/ctc-helper (levenshtein-variant/pred/c #:at level
                                                #:sequence-type [seq? vector?])
   (match level
-    ['max (->i ([a seq?]
+    ['max (modal->i curr-mode ([a seq?]
                 [b seq?]
                 [pred (any/c any/c . -> . boolean?)])
                [result natural?]
@@ -301,21 +306,21 @@
     ['types (seq?
              seq?
              (any/c any/c . -> . boolean?)
-             . -> .
+             . modal-> .
              natural?)]))
 
 (define/ctc-helper (levenshtein-variant/c pred
                                           #:at level
                                           #:sequence-type [seq? vector?])
   (match level
-    ['max (->i ([a seq?]
+    ['max (modal->i curr-mode ([a seq?]
                 [b seq?])
                [result natural?]
                #:post (a b result)
                (editable-to? a b result #:compare-with pred))]
     ['types (seq?
              seq?
-             . -> .
+             . modal-> .
              natural?)]))
 
 (define (vector-levenshtein/predicate a b pred)

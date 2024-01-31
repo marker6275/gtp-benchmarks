@@ -16,24 +16,26 @@
          "../../../ctcs/configurable.rkt"
          racket/contract
          racket/match
-         racket/string)
+         racket/string
+         modalc
+         "../../curr-mode.rkt")
 (require/configurable-contract "morse-code-table.rkt" char-table clean-pattern lines wikipedia-text )
 
 (provide/configurable-contract
- [char->dit-dah-string ([max (->i ([letter char?])
+ [char->dit-dah-string ([max (modal->i curr-mode ([letter char?])
                                   #:pre (letter) (hash-has-key? char-table (char-downcase letter))
                                   [result (letter)
                                           (and/c morse-string?
                                                  (morse-decodes-to? letter))])]
-                        [types (-> char? string?)])]
- [string->morse ([max (->i ([str string?])
+                        [types (modal-> char? string?)])]
+ [string->morse ([max (modal->i curr-mode ([str string?])
                            [result (str)
                                    (and/c morse-string? (morse-decodes-to? str))]
                            #:post (str result)
                            (if (non-empty-string? str)
                                (non-empty-string? result)
                                (string=? result "")))]
-                 [types (-> string? string?)])])
+                 [types (modal-> string? string?)])])
 
 
 ;; (provide string->morse)
