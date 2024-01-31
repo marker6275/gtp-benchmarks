@@ -9,6 +9,8 @@
  "../../../ctcs/configurable.rkt"
  "helpers.rkt"
  ;; "t-graph.rkt"
+ modalc
+ "../../curr-mode.rkt"
  )
 (require/configurable-contract "t-graph.rkt" mbta% lines->hash read-t-line-from-file read-t-graph line-specification? COLORS SOURCE-DIRECTORY in-neighbors* attach-edge-property* unweighted-graph/directed* )
 (require/configurable-contract "t-view.rkt" manage% SWITCH ENSURE ENABLED-0 DISABLED-0 ENABLED DISABLED NO-PATH DESTINATION-0 DESTINATION CURRENT-LOCATION-0 CURRENT-LOCATION INTERNAL selector )
@@ -30,7 +32,7 @@
  [manage ([max (instanceof/c manage-c/max-ctc)]
    #;[max/sub1 (instanceof/c manage-c/max/sub1-ctc)]
    [types (instanceof/c manage-c/types-ctc)])]
- [run-t ([max (->i ([next string?])
+ [run-t ([max (modal->i curr-mode ([next string?])
              #:pre (next)
              (when (not (regexp-match PATH next))
                (set-box! stash-len (length (get-field disabled manage))))
@@ -100,7 +102,7 @@
                                         [(empty? station) (substring? x2 res)]
                                         [else (substring? (string-join station res))])))]
                               [else "message not understood"]))])]
-   [types (-> string? string?)])])
+   [types (modal-> string? string?)])])
 
 ;; (provide
 ;;  ;; String 

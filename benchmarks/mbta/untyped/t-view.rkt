@@ -20,11 +20,13 @@
  "../../../ctcs/common.rkt"
  "../../../ctcs/configurable.rkt"
  "helpers.rkt"
- racket/contract)
+ racket/contract
+ modalc
+ "../../curr-mode.rkt")
 (require/configurable-contract "t-graph.rkt" mbta% lines->hash read-t-line-from-file read-t-graph line-specification? COLORS SOURCE-DIRECTORY in-neighbors* attach-edge-property* unweighted-graph/directed* )
 
 (provide/configurable-contract
- [selector ([max (->i ([inp-lst (listof (listof any/c))])
+ [selector ([max (modal->i curr-mode ([inp-lst (listof (listof any/c))])
                       [result (inp-lst)
                               (λ (out-lst)
                                 (and (list? out-lst)
@@ -38,7 +40,7 @@
                                      (λ (out-lst)
                                        (and (list? out-lst)
                                             (cons? (member out-lst inp-lst))))])]
-            [types (-> (listof (listof any/c))
+            [types (modal-> (listof (listof any/c))
                        (listof any/c))])]
  [INTERNAL ([max "find path: it is impossible to get from ~a to ~a [internal error]"]
             [types string?])]
@@ -128,49 +130,49 @@
 (define/ctc-helper manage-c/max-ctc
   (class/c
    (add-to-disabled
-    (->i ([this any/c]
-          [s string?])
-         #:pre (this)
-         (set-box! stash1 (length (get-field disabled this)))
-         [result (s)
-                 (let ([station (send (t-graph) station s)])
-                   (cond
-                     [(string? station) #f]
-                     [(empty? station) (λ (res) (substring? res s))]
-                     [else (λ (res) (substring? res (string-join station)))]))]
-         #:post (this s)
-         (let ([station (send (t-graph) station s)]
-               [disabled (get-field disabled this)])
-           (and (list? disabled)
-                (> (length disabled)
-                   (unbox stash1))
-                (when (string? station)
-                  (member station (get-field disabled this)))))))
+    (modal->i curr-mode ([this any/c]
+                         [s string?])
+              #:pre (this)
+              (set-box! stash1 (length (get-field disabled this)))
+              [result (s)
+                      (let ([station (send (t-graph) station s)])
+                        (cond
+                          [(string? station) #f]
+                          [(empty? station) (λ (res) (substring? res s))]
+                          [else (λ (res) (substring? res (string-join station)))]))]
+              #:post (this s)
+              (let ([station (send (t-graph) station s)]
+                    [disabled (get-field disabled this)])
+                (and (list? disabled)
+                     (> (length disabled)
+                        (unbox stash1))
+                     (when (string? station)
+                       (member station (get-field disabled this)))))))
    (remove-from-disabled
-    (->i ([this any/c]
-          [s string?])
-         #:pre (this)
-         (set-box! stash2 (length (get-field disabled this)))
-         [result (s)
-                 (let ([station (send (t-graph) station s)])
-                   (cond
-                     [(string? station) #f]
-                     [(empty? station) (λ (res) (substring? res s))]
-                     [else (λ (res) (substring? res (string-join station)))]))]
-         #:post (this s)
-         (let ([station (send (t-graph) station s)]
-               [disabled (get-field disabled this)])
-           (and (list? disabled)
-                (<= (length disabled)
-                    (unbox stash2))
-                (when (string? station)
-                  (not (member station (get-field disabled this))))))))
-   (find (->i ([this any/c]
-               [from string?]
-               [to string?])
-              [result (from to)
-                      (λ (res)
-                        (correct-find-result? from to res))]))
+    (modal->i curr-mode ([this any/c]
+                         [s string?])
+              #:pre (this)
+              (set-box! stash2 (length (get-field disabled this)))
+              [result (s)
+                      (let ([station (send (t-graph) station s)])
+                        (cond
+                          [(string? station) #f]
+                          [(empty? station) (λ (res) (substring? res s))]
+                          [else (λ (res) (substring? res (string-join station)))]))]
+              #:post (this s)
+              (let ([station (send (t-graph) station s)]
+                    [disabled (get-field disabled this)])
+                (and (list? disabled)
+                     (<= (length disabled)
+                         (unbox stash2))
+                     (when (string? station)
+                       (not (member station (get-field disabled this))))))))
+   (find (modal->i curr-mode ([this any/c]
+                              [from string?]
+                              [to string?])
+                   [result (from to)
+                           (λ (res)
+                             (correct-find-result? from to res))]))
    (field [mbta-subways (is-a?/c mbta%)]
           [disabled list?])))
 
@@ -195,7 +197,7 @@
 (define/ctc-helper manage-c/max/sub1-ctc
   (class/c
    (add-to-disabled
-    (->i ([this any/c]
+    (modal->i curr-mode ([this any/c]
           [s string?])
          [result (s)
                  (let ([station (send (t-graph) station s)])
@@ -206,7 +208,7 @@
          #:post (this)
          (not (empty? (get-field disabled this)))))
    (remove-from-disabled
-    (->i ([this any/c]
+    (modal->i curr-mode ([this any/c]
           [s string?])
          #:pre (this)
          (set-box! stash3 (length (get-field disabled this)))
@@ -222,12 +224,12 @@
            (and (list? disabled)
                 (<= (length disabled) (unbox stash3))))))
    (find
-    (->i ([this any/c]
-          [from string?]
-          [to string?])
-         [result (from to)
-                 (λ (res)
-                   (correct-find-result? from to res))]))))
+    (modal->i curr-mode ([this any/c]
+                         [from string?]
+                         [to string?])
+              [result (from to)
+                      (λ (res)
+                        (correct-find-result? from to res))]))))
 
 (define/ctc-helper manage-c/types-ctc
   (class/c

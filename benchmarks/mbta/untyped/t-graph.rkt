@@ -36,7 +36,9 @@
          "../../../ctcs/configurable.rkt"
          "data.rkt"
          "helpers.rkt"
-         racket/contract)
+         racket/contract
+         modalc
+         "../../curr-mode.rkt")
 
 (provide/configurable-contract
  [unweighted-graph/directed* ([max ((listof (list/c any/c any/c)) . -> . any)]
@@ -68,7 +70,7 @@
                                 lst)))]
           #;[max/sub1 (listof color?)]
           [types (listof string?)])]
- [line-specification? ([max (->i ([s string?])
+ [line-specification? ([max (modal->i curr-mode ([s string?])
                                  [result (s)
                                          (λ (res)
                                            (if res
@@ -81,7 +83,7 @@
                                                   (if res
                                                       (< (length res) (string-length s))
                                                       (not (substring? "-- " s))))])]                      
-                       [types (-> string? (or/c boolean? (listof string?)))])]
+                       [types (modal-> string? (or/c boolean? (listof string?)))])]
  [read-t-graph (;; not the strongest contract I can think of here
                 ;; maybe you could check if find-path returns all valid paths
                 [max (-> (object/c
@@ -102,7 +104,7 @@
                             (station (->m string? (or/c string? (listof string?))))
                             (find-path (->m string? string?
                                             (listof (listof (list/c string? (set/c string?))))))))])]
- [read-t-line-from-file ([max (->i ([lf (λ (lf) (color? lf))])
+ [read-t-line-from-file ([max (modal->i curr-mode ([lf (λ (lf) (color? lf))])
                                    [result (lf)
                                            (λ (res)
                                              (andmap (λ (pair)
@@ -117,10 +119,10 @@
                                                               (and (line? (first pair))
                                                                    (= (remainder (length (second pair)) 2) 0)))
                                                             res))])]                 
-                         [types (-> string?
+                         [types (modal-> string?
                                     (listof (list/c string?
                                                     (listof (list/c string? string?)))))])]
- [lines->hash ([max (->i ([lines (listof string?)])
+ [lines->hash ([max (modal->i curr-mode ([lines (listof string?)])
                          [result (lines)
                                  ;; ll: checked 4x per unique line
                                  (λ (h)
@@ -137,7 +139,7 @@
                                                        (hash-values h))
                                                (= (remainder (length (rest (first (hash-values h)))) 2) 0)))])]
 
-               [types (-> (listof string?)
+               [types (modal-> (listof string?)
                           (hash/c string?
                                   (cons/c string?
                                           (listof (list/c string? string?)))))])]
