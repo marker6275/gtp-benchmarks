@@ -8,6 +8,8 @@
  (only-in "../../../ctcs/common.rkt" or-#f/c)
  "../../../ctcs/configurable.rkt"
  "../../../ctcs/precision-config.rkt"
+ modalc
+ "../../curr-mode.rkt"
 )
 (require (only-in "cell.rkt"
 ;;   char->cell%
@@ -18,13 +20,13 @@
 (require/configurable-contract "cell.rkt" void-cell% char->cell% )
 
 (provide/configurable-contract
- [array-set! ([max (->i ([g (arrayof cell%?)]
+ [array-set! ([max (modal->i curr-mode ([g (arrayof cell%?)]
                          [p array-coord?]
                          [v cell%?])
                         [result void?]
                         #:post (g p v) (equal? v (grid-ref g p)))]
-              [types ((arrayof cell%?) array-coord? cell%? . -> . void?)])]
- [build-array ([max (->i ([p array-coord?]
+              [types ((arrayof cell%?) array-coord? cell%? . modal-> . void?)])]
+ [build-array ([max (modal->i curr-mode ([p array-coord?]
                           [f (array-coord? . -> . cell%?)])
                          [result (p)
                                  (and/c (arrayof cell%?)
@@ -35,29 +37,29 @@
                            (define xy (vector x y))
                            (equal? (f xy)
                                    (grid-ref result xy))))]
-               [types (array-coord? (array-coord? . -> . cell%?) . -> . (arrayof cell%?))])]
- [parse-grid ([max ((listof string?) . -> . grid?)]
-              [types ((listof string?) . -> . grid?)])]
- [show-grid ([max (grid? . -> . string?)]
-             [types (grid? . -> . string?)])]
- [grid-height ([max (->i ([g grid?])
+               [types (array-coord? (array-coord? . -> . cell%?) . modal-> . (arrayof cell%?))])]
+ [parse-grid ([max ((listof string?) . modal-> . grid?)]
+              [types ((listof string?) . modal-> . grid?)])]
+ [show-grid ([max (grid? . modal-> . string?)]
+             [types (grid? . modal-> . string?)])]
+ [grid-height ([max (modal->i curr-mode ([g grid?])
                          [result (g) (and/c index?
                                             (curry equal? (vector-length g)))])]
-               [types (grid? . -> . index?)])]
- [grid-width ([max (->i ([g grid?])
+               [types (grid? . modal-> . index?)])]
+ [grid-width ([max (modal->i curr-mode ([g grid?])
                         [result (g) (and/c index?
                                            (curry equal? 
                                                   (vector-length (vector-ref g 0))))])]
-              [types (grid? . -> . index?)])]
- [within-grid? ([max (->i ([g grid?]
+              [types (grid? . modal-> . index?)])]
+ [within-grid? ([max (modal->i curr-mode ([g grid?]
                            [pos array-coord?])
                           [result 
                            (g pos)
                            (curry equal? 
                                   (and (<= 0 (vector-ref pos 0) (sub1 (grid-height g)))
                                        (<= 0 (vector-ref pos 1) (sub1 (grid-width  g)))))])]
-                [types (grid? array-coord? . -> . boolean?)])]
- [grid-ref ([max (->i ([g grid?]
+                [types (grid? array-coord? . modal-> . boolean?)])]
+ [grid-ref ([max (modal->i curr-mode ([g grid?]
                        [pos array-coord?])
                       [result 
                        (g pos)
@@ -67,39 +69,39 @@
                                       (when (within-grid? g pos)
                                         (vector-ref (vector-ref g (vector-ref pos 0))
                                                     (vector-ref pos 1))))))])]
-            [types (grid? array-coord? . -> . (or-#f/c cell%?))])]
- [left ([max (and/c direction?
-                    (->i ([pos array-coord?])
+            [types (grid? array-coord? . modal-> . (or-#f/c cell%?))])]
+ [left ([max (modal/c curr-mode (and/c direction?
+                    (modal->i curr-mode ([pos array-coord?])
                          ([n exact-nonnegative-integer?])
                          [result
                           (pos n)
                           (vector/c (vector-ref pos 0)
-                                    (max (- (vector-ref pos 1) (if (unsupplied-arg? n) 1 n)) 0))]))]
-        [types direction?])]
- [right ([max (and/c direction?
-                     (->i ([pos array-coord?])
+                                    (max (- (vector-ref pos 1) (if (unsupplied-arg? n) 1 n)) 0))])))]
+        [types (modal/c curr-mode direction?)])]
+ [right ([max (modal/c curr-mode (and/c direction?
+                     (modal->i curr-mode ([pos array-coord?])
                           ([n exact-nonnegative-integer?])
                           [result
                            (pos n)
                            (vector/c (vector-ref pos 0)
-                                     (max (+ (vector-ref pos 1) (if (unsupplied-arg? n) 1 n)) 0))]))]
-         [types direction?])]
- [up ([max (and/c direction?
-                  (->i ([pos array-coord?])
+                                     (max (+ (vector-ref pos 1) (if (unsupplied-arg? n) 1 n)) 0))])))]
+         [types (modal/c curr-mode direction?)])]
+ [up ([max (modal/c curr-mode (and/c direction?
+                  (modal->i curr-mode ([pos array-coord?])
                        ([n exact-nonnegative-integer?])
                        [result (pos n) (vector/c (max (- (vector-ref pos 0)
                                                          (if (unsupplied-arg? n) 1 n))
                                                       0)
-                                                 (vector-ref pos 1))]))]
-      [types direction?])]
- [down ([max (and/c direction?
-                    (->i ([pos array-coord?])
+                                                 (vector-ref pos 1))])))]
+      [types (modal/c curr-mode direction?)])]
+ [down ([max (modal/c curr-mode (and/c direction?
+                    (modal->i curr-mode ([pos array-coord?])
                          ([n exact-nonnegative-integer?])
                          [result (pos n) (vector/c (max (+ (vector-ref pos 0)
                                                            (if (unsupplied-arg? n) 1 n))
                                                         0)
-                                                   (vector-ref pos 1))]))]
-        [types direction?])])
+                                                   (vector-ref pos 1))])))]
+        [types (modal/c curr-mode direction?)])])
 
 (provide
 ;;   left

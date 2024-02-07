@@ -9,43 +9,45 @@
            permutationof/c)
   "../../../ctcs/precision-config.rkt"
   "../../../ctcs/configurable.rkt"
+  modalc
+  "../../curr-mode.rkt"
 )
 
 (provide/configurable-contract
- [orig ([max any/c]
-        [types any/c])]
- [r* ([max any/c]
-      [types any/c])]
- [reset! ([max (->* ()
+ [orig ([max (modal/c curr-mode any/c)]
+        [types (modal/c curr-mode any/c)])]
+ [r* ([max (modal/c curr-mode any/c)]
+      [types (modal/c curr-mode any/c)])]
+ [reset! ([max (modal/c curr-mode (->* ()
                     void?
-                    #:post (equal? (unbox r*) orig))]
-          [types (-> void?)])]
- [random ([max (->i ([n exact-nonnegative-integer?])
+                    #:post (equal? (unbox r*) orig)))]
+          [types (modal-> curr-mode void?)])]
+ [random ([max (modal->i curr-mode ([n exact-nonnegative-integer?])
                     [result (n) (and/c exact-nonnegative-integer?
                                        (</c n))])]
-          [types (any/c . -> . exact-nonnegative-integer?)])]
+          [types (any/c . modal-> . exact-nonnegative-integer?)])]
  [article ([max (->* (boolean? boolean?)
                      [#:an? boolean?]
                      (apply or/c (list+titlecases "the" "an" "a")))]
            [types (->* (boolean? boolean?)
                        [#:an? boolean?]
                        string?)])]
- [random-between ([max (->i ([min exact-nonnegative-integer?]
+ [random-between ([max (modal->i curr-mode ([min exact-nonnegative-integer?]
                              [max (min) (and/c exact-nonnegative-integer?
                                                (>/c min))])
                             [result (min max) (random-result-between/c min max)])]
                   [types (exact-nonnegative-integer? exact-nonnegative-integer?
-                                                     . -> . exact-nonnegative-integer?)])]
+                                                     . modal-> . exact-nonnegative-integer?)])]
  [d6 ([max (-> (random-result-between/c 1 7))]
       [types (-> exact-nonnegative-integer?)])]
  [d20 ([max (-> (random-result-between/c 1 21))]
        [types (-> exact-nonnegative-integer?)])]
- [random-from ([max (->i ([l (listof any/c)])
+ [random-from ([max (modal->i curr-mode ([l (listof any/c)])
                          [result (l) (memberof/c l)])]
-               [types ((listof any/c) . -> . any/c)])]
- [shuffle ([max (->i ([l (listof any/c)])
-                     [result (l) (permutationof/c l)])]
-           [types ((listof any/c) . -> . (listof any/c))])])
+               [types ((listof any/c) . modal-> . any/c)])]
+ [shuffle ([max (modal->i curr-mode ([l (listof any/c)])
+                          [result (l) (permutationof/c l)])]
+           [types ((listof any/c) . modal-> . (listof any/c))])])
 
 (provide
 ;;   article

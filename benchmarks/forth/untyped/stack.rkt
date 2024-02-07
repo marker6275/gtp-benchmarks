@@ -9,7 +9,9 @@
  (only-in "../../../ctcs/common.rkt"
           stack?
           list-with-min-size/c
-          equal?/c))
+          equal?/c)
+ modalc
+ "../../curr-mode.rkt")
 
 (provide/configurable-contract
  [list->stack ([max (->i ([xs list?])
@@ -21,8 +23,8 @@
  [stack-dup ([max (->i ([S non-empty-stack?])
                        [result (S) (equal?/c (cons (first S) S))])]
              [types (stack? . -> . stack?)])]
- [stack-init ([max (-> (and/c stack? empty?))]
-              [types (-> stack?)])]
+ [stack-init ([max (modal-> curr-mode (and/c stack? empty?))]
+              [types (modal-> curr-mode stack?)])]
  [stack-over ([max (->i ([S (stack-with-min-size/c 2)])
                         [result (S)
                                 (equal?/c
@@ -31,16 +33,16 @@
                                              (cons (first S)
                                                    (rest (rest S))))))])]
               [types (stack? . -> . stack?)])]
- [stack-pop ([max (->i ([S stack?])
+ [stack-pop ([max (modal->i curr-mode ([S stack?])
                        (values
                         [first-result (S) (equal?/c (first S))]
                         [second-result (S) (equal?/c (rest S))]))]
-             [types (stack? . -> . (values any/c stack?))])]
- [stack-push ([max (->i ([S stack?]
+             [types (stack? . modal-> . (values any/c stack?))])]
+ [stack-push ([max (modal->i curr-mode ([S stack?]
                          [v any/c])
                         [result (S v)
                                 (equal?/c (cons v S))])]
-              [types (stack? any/c . -> . stack?)])]
+              [types (stack? any/c . modal-> . stack?)])]
  [stack-swap ([max (->i ([S (stack-with-min-size/c 2)])
                         [result (S)
                                 (equal?/c

@@ -17,6 +17,8 @@
   "../../../ctcs/configurable.rkt"
   "../../../ctcs/precision-config.rkt"
   "../../../ctcs/common.rkt"
+  modalc
+  "../../curr-mode.rkt"
 )
 (require/configurable-contract "time.rkt" time-zero take* tick alloc)
 (require/configurable-contract "denotable.rkt" store-join store-update* store-update store-lookup empty-store d-join d-bot )
@@ -32,30 +34,30 @@
 ;; ---
 
 (provide/configurable-contract
- [summarize ([max (->i ([states (set/c State-type? #:kind 'immutable)])
+ [summarize ([max (modal->i curr-mode ([states (set/c State-type? #:kind 'immutable)])
                        [result (states)
                                (equal?/c
                                 (foldl store-join
                                        empty-store
                                        (set-map states State-store)))])]
-             [types ((set/c State-type? #:kind 'immutable) . -> . Store/c)])]
- [empty-mono-store ([max MonoStore/c]
-                    [types MonoStore/c])]
- [monovariant-value ([max (->i ([v Closure-type/c])
+             [types ((set/c State-type? #:kind 'immutable) . modal-> . Store/c)])]
+ [empty-mono-store ([max (modal/c curr-mode MonoStore/c)]
+                    [types (modal/c curr-mode MonoStore/c)])]
+ [monovariant-value ([max (modal->i curr-mode ([v Closure-type/c])
                                [result (v) (equal?/c (Closure-lam v))])]
-                     [types (Closure-type/c . -> . Lam-type/c)])]
- [monovariant-store ([max (->i ([store Store/c])
+                     [types (Closure-type/c . modal-> . Lam-type/c)])]
+ [monovariant-store ([max (modal->i curr-mode ([store Store/c])
                                [result MonoStore/c]
                                #:post (store result)
                                (for/and ([(b vs) (in-hash store)])
                                  (define result-vs (hash-ref result (Binding-var b) set))
                                  (define mono-vs (list->set (set-map vs monovariant-value)))
                                  (subset? mono-vs result-vs)))]
-                     [types (Store/c . -> . MonoStore/c)])]
- [analyze ([max (->i ([exp (and/c Exp-type/c closed-term?)])
+                     [types (Store/c . modal-> . MonoStore/c)])]
+ [analyze ([max (modal->i curr-mode ([exp (and/c Exp-type/c closed-term?)])
                      ;; lltodo: can be stronger?
                      [result MonoStore/c])]
-           [types (Exp-type/c . -> . MonoStore/c)])]
+           [types (Exp-type/c . modal-> . MonoStore/c)])]
  [format-mono-store ([max (MonoStore/c . -> . string?)]
                      [types (MonoStore/c . -> . string?)])])
 

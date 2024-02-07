@@ -14,10 +14,10 @@
 ;; This whole file is literally not used
 ;; char-table is used but is not an arrow contract, what to do
 (provide/configurable-contract
- [wikipedia-text ([max string?]
-                  [types string?])]
- [lines ([max (and/c (listof string?) (length=/c (lines-in wikipedia-text)))]
-         [types (listof string?)])]
+ [wikipedia-text ([max (modal/c curr-mode string?)]
+                  [types (modal/c curr-mode string?)])]
+ [lines ([max (modal/c curr-mode (and/c (listof string?) (length=/c (lines-in wikipedia-text))))]
+         [types (modal/c curr-mode (listof string?))])]
  [clean-pattern ([max (modal->i curr-mode ([pat string?])
                            [result (pat)
                                    (and/c string?
@@ -26,9 +26,9 @@
                                                             #:swap (hash #\· #\.
                                                                          #\– #\-)))])]
                  [types (string? . modal-> . string?)])]
- [char-table ([max (and/c (hash/c char? (and/c non-empty-string? morse-string?))
-                          (hash-with-keys/c all-chars))]
-              [types (hash/c char? string?)])])
+ [char-table ([max (modal/c curr-mode (and/c (hash/c char? (and/c non-empty-string? morse-string?))
+                          (hash-with-keys/c all-chars)))]
+              [types (modal/c curr-mode (hash/c char? string?))])])
 
 (provide morse-string?)
 

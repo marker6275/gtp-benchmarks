@@ -8,39 +8,41 @@
   "../../../ctcs/precision-config.rkt"
   "../../../ctcs/common.rkt"
   "../../../ctcs/configurable.rkt"
+  modalc
+  "../../curr-mode.rkt"
   )
 (require/configurable-contract "benv.rkt" benv-extend* benv-extend benv-lookup empty-benv )
 
 ;; ---
 
 (provide/configurable-contract
- [take* ([max (->i ([l (listof any/c)]
-                    [n natural?])
-                   [result (l n)
-                           (and/c (listof any/c)
-                                  (length<=/c n)
-                                  (prefix-of/c l))])]
-         [types ((listof any/c) natural? . -> . (listof any/c))])]
- [time-zero ([max (listof Time?)]
-             [types (listof Time?)])]
+ [take* ([max (modal->i curr-mode ([l (listof any/c)]
+                                   [n natural?])
+                        [result (l n)
+                                (and/c (listof any/c)
+                                       (length<=/c n)
+                                       (prefix-of/c l))])]
+         [types ((listof any/c) natural? . modal-> . (listof any/c))])]
+ [time-zero ([max (modal/c curr-mode (listof Time?))]
+             [types (modal/c curr-mode (listof Time?))])]
  #;[k ([max (parameter/c (and/c natural?
-                              (=/c 1)))]
-     [types (parameter/c natural?)])]
- [tick ([max (->i ([call Stx-type/c]
+                                (=/c 1)))]
+       [types (parameter/c natural?)])]
+ [tick ([max (modal->i curr-mode ([call Stx-type/c]
                    [time Time?])
                   [result (call time)
                           (and/c Time?
                                  (length=/c 1 #;(k))
                                  (prefix-of/c (cons (Stx-label call) time)))])]
-        [types (Stx-type/c Time? . -> . Time?)])]
- [alloc ([max (->i ([time Time?])
+        [types (Stx-type/c Time? . modal-> . Time?)])]
+ [alloc ([max (modal->i curr-mode ([time Time?])
                    [result (time)
                            (->i ([var Var?])
                                 [result (var)
                                         (and/c Binding-type/c
                                                (Binding/c (equal?/c var)
                                                           (equal?/c time)))])])]
-         [types (Time? . -> . (Var? . -> . Binding-type/c))])])
+         [types (Time? . modal-> . (Var? . -> . Binding-type/c))])])
 
 
 ;; (provide

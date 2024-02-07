@@ -21,6 +21,8 @@
   (only-in racket/function
            curry)
   (only-in racket/list first)
+  modalc
+  "../../curr-mode.rkt"
 )
 ;; (require (only-in "command.rkt"
 ;;   CMD*
@@ -34,42 +36,42 @@
 
 (provide/configurable-contract
  [assert ([max #;(parametric->/c [A] (A (A . -> . boolean?) . -> . A))
-        (any/c (any/c . -> . boolean?) . -> . any/c)]
-   [types (any/c (any/c . -> . boolean?) . -> . any/c)])]
- [defn-command ([max (command%?-with-exec
-         (args E S v)
-         [result (match v
-                   [(cons (or ': 'define)
-                          (cons w defn*-any))
-                    (cons/c (cons/c command%? (equal?/c E))
-                            (equal?/c S))]
-                   [_ #f])])]
-   [types command%?])]
+        (any/c (any/c . -> . boolean?) . modal-> . any/c)]
+   [types (any/c (any/c . -> . boolean?) . modal-> . any/c)])]
+ [defn-command ([max (modal/c curr-mode (command%?-with-exec
+                                         (args E S v)
+                                         [result (match v
+                                                   [(cons (or ': 'define)
+                                                          (cons w defn*-any))
+                                                    (cons/c (cons/c command%? (equal?/c E))
+                                                            (equal?/c S))]
+                                                   [_ #f])]))]
+                [types (modal/c curr-mode command%?)])]
  [forth-eval* (;; lltodo: not sure if this can (reasonably) be more precise?
-   [max ((listof string?) . -> . (values env? stack?))]
-   [types ((listof string?) . -> . (values env? stack?))])]
- [forth-eval ([max (->i ([E env?]
-              [S stack?]
-              [token* token*?])
-             ;; ll: as precise as it can get without copying the body exactly
-             (values
-              [env-result (E)
-                          (or/c (or/c #f (equal?/c E))
-                                env?)]
-              [stack-result (S)
-                            (or/c (equal?/c S)
-                                  stack?)]))]
-   [types (env? stack? token*? . -> . (values (or-#f/c env?) stack?))])]
- [forth-tokenize ([max (->i ([str string?])
+   [max ((listof string?) . modal-> . (values env? stack?))]
+   [types ((listof string?) . modal-> . (values env? stack?))])]
+ [forth-eval ([max (modal->i curr-mode ([E env?]
+                                        [S stack?]
+                                        [token* token*?])
+                             ;; ll: as precise as it can get without copying the body exactly
+                             (values
+                              [env-result (E)
+                                          (or/c (or/c #f (equal?/c E))
+                                                env?)]
+                              [stack-result (S)
+                                            (or/c (equal?/c S)
+                                                  stack?)]))]
+              [types (env? stack? token*? . modal-> . (values (or-#f/c env?) stack?))])]
+ [forth-tokenize ([max (modal->i curr-mode ([str string?])
              [result (str) (equal?/c
                             (de-nest
                              (read
                               (open-input-string
                                (string-append "(" str ")")))))])]
-   [types (string? . -> . token*?)])]
- [de-nest ([max (->i ([v* (listof/any-depth/c token*?)])
+   [types (string? . modal-> . token*?)])]
+ [de-nest ([max (modal->i curr-mode ([v* (listof/any-depth/c token*?)])
              [result (not/c nested-singleton-list?)])]
-   [types ((or/c list? symbol?) . -> . (or/c list? symbol?))])])
+   [types ((or/c list? symbol?) . modal-> . (or/c list? symbol?))])])
 
 
 (define (assert v p)

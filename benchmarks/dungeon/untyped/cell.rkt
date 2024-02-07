@@ -11,6 +11,8 @@
  (only-in "../../../ctcs/common.rkt" class/c*)
  "../../../ctcs/configurable.rkt"
  "../../../ctcs/precision-config.rkt"
+ modalc
+ "../../curr-mode.rkt"
  )
 (require (only-in racket/function
                   curry))
@@ -25,53 +27,53 @@
                   ))
 
 (provide/configurable-contract
- [cell% ([max (make-cell%/c-with self #\* equal?)]
-         [types cell%/c])]
- [chars->cell%s ([max (hash/c char? cell%/c)]
-                 [types hash?])]
- [register-cell-type! ([max (->i ([c% cell%/c]
+ [cell% ([max (modal/c curr-mode (make-cell%/c-with self #\* equal?))]
+         [types (modal/c curr-mode cell%/c)])]
+ [chars->cell%s ([max (modal/c curr-mode (hash/c char? cell%/c))]
+                 [types (modal/c curr-mode hash?)])]
+ [register-cell-type! ([max (modal->i curr-mode ([c% cell%/c]
                                   [char char?])
                                  [result void?]
                                  #:post (c% char) (class-equal? (dict-ref chars->cell%s char void)
                                                                 c%))]
-                       [types (cell%/c char? . -> . void?)])]
- [char->cell% ([max (->i ([char (and/c char? (curry dict-has-key? chars->cell%s))])
+                       [types (cell%/c char? . modal-> . void?)])]
+ [char->cell% ([max (modal->i curr-mode ([char (and/c char? (curry dict-has-key? chars->cell%s))])
                          [result (char)
                                  (and/c cell%/c
                                         (curry class-equal? (dict-ref chars->cell%s char)))])]
-               [types (char? . -> . cell%?)])]
- [empty-cell% ([max (make-cell%/c-with self
+               [types (char? . modal-> . cell%?)])]
+ [empty-cell% ([max (modal/c curr-mode (make-cell%/c-with self
                                        (or/c #\space
                                              (send (get-field occupant self)
                                                    show))
-                                       (not/c equal?))]
-               [types cell%/c])]
- [void-cell% ([max (make-cell%/c-with self #\. equal?)]
-              [types cell%/c])]
- [wall% ([max (make-cell%/c-with self #\X equal?)]
-         [types cell%/c])]
+                                       (not/c equal?)))]
+               [types (modal/c curr-mode cell%/c)])]
+ [void-cell% ([max (modal/c curr-mode (make-cell%/c-with self #\. equal?))]
+              [types (modal/c curr-mode cell%/c)])]
+ [wall% ([max (modal/c curr-mode (make-cell%/c-with self #\X equal?))]
+         [types (modal/c curr-mode cell%/c)])]
  [double-bar? ([max boolean?]
                [types boolean?])]
- [door% ([max (make-cell%/c-with self #\* (not/c equal?))]
-         [types cell%/c])]
- [vertical-door% ([max (make-cell%/c-with self
+ [door% ([max (modal/c curr-mode (make-cell%/c-with self #\* (not/c equal?)))]
+         [types (modal/c curr-mode cell%/c)])]
+ [vertical-door% ([max (modal/c curr-mode (make-cell%/c-with self
                                           (or/c #\_
                                                 (send (get-field occupant self)
                                                       show))
-                                          (not/c equal?))]
-                  [types cell%/c])]
+                                          (not/c equal?)))]
+                  [types (modal/c curr-mode cell%/c)])]
  [other-vertical-door% ([max (make-cell%/c-with self
                                                 (or/c #\_
                                                       (send (get-field occupant self)
                                                             show))
                                                 (not/c equal?))]
                         [types cell%/c])]
- [horizontal-door% ([max (make-cell%/c-with self
+ [horizontal-door% ([max (modal/c curr-mode (make-cell%/c-with self
                                             (or/c #\'
                                                   (send (get-field occupant self)
                                                         show))
-                                            (not/c equal?))]
-                    [types cell%/c])]
+                                            (not/c equal?)))]
+                    [types (modal/c curr-mode cell%/c)])]
  [other-horizontal-door% ([max (make-cell%/c-with self
                                                   (or/c #\'
                                                         (send (get-field occupant self)
@@ -100,7 +102,7 @@
 
 (define-syntax-rule/ctc-helper (make-cell%/c-with self-id show-char
                                        free?/occupant-comparer)
-  (class/c* (init-field/all [items list?]     ;; ll: never seems to
+  (modal/c curr-mode (class/c* (init-field/all [items list?]     ;; ll: never seems to
                             [occupant any/c]) ;; actually be used
 
             (all
@@ -117,7 +119,7 @@
                         [result (self-id)
                                 (curry free?/occupant-comparer
                                        (get-field occupant
-                                                  self-id))])]))
+                                                  self-id))])])))
 
 (define/ctc-helper cell%/c (make-cell%/c-with self any/c (λ x #t)))
 (define/ctc-helper cell%? (instanceof/c cell%/c))

@@ -16,22 +16,22 @@
 (require/configurable-contract "t-view.rkt" manage% SWITCH ENSURE ENABLED-0 DISABLED-0 ENABLED DISABLED NO-PATH DESTINATION-0 DESTINATION CURRENT-LOCATION-0 CURRENT-LOCATION INTERNAL selector )
 
 (provide/configurable-contract
- [PATH ([max (λ (re)
-          (equal? #rx"from (.*) to (.*)$" re))]
-   [types regexp?])]
- [DISABLE ([max (λ (re)
-          (equal? #rx"disable (.*)$" re))]
-   [types regexp?])]
- [ENABLE ([max (λ (re)
-          (equal? #rx"enable (.*)$" re))]
-   [types regexp?])]
+ [PATH ([max (modal/c curr-mode (λ (re)
+               (equal? #rx"from (.*) to (.*)$" re)))]
+        [types (modal/c curr-mode regexp?)])]
+ [DISABLE ([max (modal/c curr-mode (λ (re)
+                                     (equal? #rx"disable (.*)$" re)))]
+           [types (modal/c curr-mode regexp?)])]
+ [ENABLE ([max (modal/c curr-mode (λ (re)
+                                    (equal? #rx"enable (.*)$" re)))]
+   [types (modal/c curr-mode regexp?)])]
  [DONE ([max "done"]
    [types string?])]
  [EOM ([max "eom"]
    [types string?])]
- [manage ([max (instanceof/c manage-c/max-ctc)]
+ [manage ([max (modal/c curr-mode (instanceof/c manage-c/max-ctc))]
    #;[max/sub1 (instanceof/c manage-c/max/sub1-ctc)]
-   [types (instanceof/c manage-c/types-ctc)])]
+   [types (modal/c curr-mode (instanceof/c manage-c/types-ctc))])]
  [run-t ([max (modal->i curr-mode ([next string?])
              #:pre (next)
              (when (not (regexp-match PATH next))

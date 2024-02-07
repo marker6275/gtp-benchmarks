@@ -42,7 +42,7 @@
                                                           ([_ (in-range n)])
                                                   (values (cons (simple-stream-first current-st) lst)
                                                           ((simple-stream-rest current-st))))))])]
-                      [types (-> simple-stream? exact-nonnegative-integer? (listof any/c))]}])
+                      [types (modal-> simple-stream? exact-nonnegative-integer? (listof any/c))]}])
 
 (provide (struct-out simple-stream)
 

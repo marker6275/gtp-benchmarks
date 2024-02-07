@@ -7,18 +7,20 @@
   "../../../ctcs/precision-config.rkt"
   "../../../ctcs/common.rkt"
   "../../../ctcs/configurable.rkt"
+  modalc
+  "../../curr-mode.rkt"
 )
 
 (provide/configurable-contract
- [empty-benv ([max BEnv?]
-              [types BEnv?])]
- [benv-lookup ([max (->i ([benv BEnv?]
+ [empty-benv ([max (modal/c curr-mode BEnv?)]
+              [types (modal/c curr-mode BEnv?)])]
+ [benv-lookup ([max (modal->i curr-mode ([benv BEnv?]
                           [key (benv) (and/c Var?
                                              (key-of/c benv))])
                          [result (benv key)
                                  (equal?/c (hash-ref benv key))])]
-               [types (BEnv? Var? . -> . Addr?)])]
- [benv-extend ([max (->i ([benv BEnv?]
+               [types (BEnv? Var? . modal-> . Addr?)])]
+ [benv-extend ([max (modal->i curr-mode ([benv BEnv?]
                           [key Var?]
                           [val Addr?])
                          [result BEnv?]
@@ -26,7 +28,7 @@
                          (and (hash-has-key? result key)
                               (equal? (hash-ref result key) val)))]
                [types (BEnv? Var? Addr? . -> . BEnv?)])]
- [benv-extend* ([max (->i ([benv BEnv?]
+ [benv-extend* ([max (modal->i curr-mode ([benv BEnv?]
                            [keys (listof Var?)]
                            [vals (listof Addr?)])
                           [result BEnv?]
@@ -35,7 +37,7 @@
                                     [v (in-list vals)])
                             (and (hash-has-key? result k)
                                  (equal? (hash-ref result k) v))))]
-                [types (BEnv? (listof Var?) (listof Addr?) . -> . BEnv?)])])
+                [types (BEnv? (listof Var?) (listof Addr?) . modal-> . BEnv?)])])
 
 (provide
   (struct-out Closure)

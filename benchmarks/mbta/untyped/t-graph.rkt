@@ -41,8 +41,8 @@
          "../../curr-mode.rkt")
 
 (provide/configurable-contract
- [unweighted-graph/directed* ([max ((listof (list/c any/c any/c)) . -> . any)]
-                              [types ((listof (list/c any/c any/c)) . -> . any)])]
+ [unweighted-graph/directed* ([max (modal/c curr-mode ((listof (list/c any/c any/c)) any/c))]
+                              [types ((listof (list/c any/c any/c)) . modal-> . any)])]
  [attach-edge-property* ([max ([graph?]
                                [#:init any/c
                                 #:for-each any/c]
@@ -53,23 +53,23 @@
                                   #:for-each any/c]
                                  . ->* .
                                  any)])]
- [in-neighbors* ([max (graph? any/c . -> . any)]
-                 [types (graph? any/c . -> . any)])]
- [SOURCE-DIRECTORY ([max (λ (res)
-                           (string=? "../base/~a.dat" res))]
+ [in-neighbors* ([max (graph? any/c . modal-> . any)]
+                 [types (graph? any/c . modal-> . any)])]
+ [SOURCE-DIRECTORY ([max (modal/c curr-mode (λ (res)
+                           (string=? "../base/~a.dat" res)))]
                     #;[max/sub1 (and/c string?
                                        (λ (s)
                                          (let ([split (string-split s ".")])
                                            (string=? "dat"
                                                      (list-ref split (- (length split) 1))))))]                                           
-                    [types string?])]
- [COLORS ([max (and/c (listof color?)
+                    [types (modal/c curr-mode string?)])]
+ [COLORS ([max (modal/c curr-mode (and/c (listof color?)
                       (λ (lst)
                         (andmap (λ (color-file)
                                   (file-exists? (format SOURCE-DIRECTORY color-file)))
-                                lst)))]
+                                lst))))]
           #;[max/sub1 (listof color?)]
-          [types (listof string?)])]
+          [types (modal/c curr-mode (listof string?))])]
  [line-specification? ([max (modal->i curr-mode ([s string?])
                                  [result (s)
                                          (λ (res)
@@ -86,7 +86,7 @@
                        [types (modal-> string? (or/c boolean? (listof string?)))])]
  [read-t-graph (;; not the strongest contract I can think of here
                 ;; maybe you could check if find-path returns all valid paths
-                [max (-> (object/c
+                [max (modal/c curr-mode (object/c
                           (render (->m (set/c string?) string?))
                           (station? (->m string? boolean?))
                           (station (->m string? (or/c station? (listof station?))))
@@ -98,7 +98,7 @@
                                  (station (->m string? (or/c station? (listof station?))))
                                  (find-path (->m station? station?
                                                  (listof (listof (list/c station? (set/c line?))))))))]
-                [types (-> (object/c
+                [types (modal/c curr-mode (object/c
                             (render (->m (set/c string?) string?))
                             (station? (->m string? boolean?))
                             (station (->m string? (or/c string? (listof string?))))
@@ -144,7 +144,7 @@
                                   (cons/c string?
                                           (listof (list/c string? string?)))))])]
  [mbta% ([max
-          (class/c
+          (modal/c curr-mode (class/c
            (render (->m (set/c string?) string?))
            (station? (->m string? boolean?))
            (station (->m string? (or/c station? (listof station?))))
@@ -159,7 +159,7 @@
                                               (lines-in-color-file?
                                                (set->list(second lst))
                                                (file->lines (format SOURCE-DIRECTORY (first lst)))))
-                                            res)))]))]
+                                            res)))])))]
          #;[max/sub1
             (class/c
              (render (->m (set/c string?) string?))
@@ -172,16 +172,16 @@
                     [connection-on (-> station? station? (set/c line?))]
                     [bundles (listof (list/c color? (set/c line?)))]))]
          [types
-          (class/c
-           (render (->m (set/c string?) string?))
-           (station? (->m string? boolean?))
-           (station (->m string? (or/c string? (listof string?))))
-           (find-path (->m string? string?
-                           (listof (listof (list/c string? (set/c string?))))))
-           (field [G graph?]
-                  [stations (listof station?)]
-                  [connection-on (-> string? string? (set/c string?))]
-                  [bundles (listof (list/c string? (set/c string?)))]))])])
+          (modal/c curr-mode (class/c
+                              (render (->m (set/c string?) string?))
+                              (station? (->m string? boolean?))
+                              (station (->m string? (or/c string? (listof string?))))
+                              (find-path (->m string? string?
+                                              (listof (listof (list/c string? (set/c string?))))))
+                              (field [G graph?]
+                                     [stations (listof station?)]
+                                     [connection-on (-> string? string? (set/c string?))]
+                                     [bundles (listof (list/c string? (set/c string?)))])))])])
 
 (define unweighted-graph/directed*
   unweighted-graph/directed)

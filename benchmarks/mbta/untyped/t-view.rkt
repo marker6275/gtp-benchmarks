@@ -42,33 +42,33 @@
                                             (cons? (member out-lst inp-lst))))])]
             [types (modal-> (listof (listof any/c))
                        (listof any/c))])]
- [INTERNAL ([max "find path: it is impossible to get from ~a to ~a [internal error]"]
-            [types string?])]
- [CURRENT-LOCATION ([max "disambiguate your current location: ~a"]
-                    [types string?])]
- [CURRENT-LOCATION-0 ([max "no such station: ~a"]
-                      [types string?])]
- [DESTINATION ([max "disambiguate your destination: ~a"]
-               [types string?])]
- [DESTINATION-0 ([max "no such destination: ~a"]
-                 [types string?])]
- [NO-PATH ([max "it is currently impossible to reach ~a from ~a via subways"]
-           [types string?])]
- [DISABLED ([max "clarify station to be disabled: ~a"]
-            [types string?])]
- [ENABLED ([max "clarify station to be enabled: ~a"]
-           [types string?])]
- [DISABLED-0 ([max "no such station to disable: ~a"]
-              [types string?])]
- [ENABLED-0 ([max "no such station to enable: ~a"]
-             [types string?])]
- [ENSURE ([max "---ensure you are on ~a"]
-          [types string?])]
- [SWITCH ([max "---switch from ~a to ~a"]
-          [types string?])]
- [manage% ([max manage-c/max-ctc]
+ [INTERNAL ([max (modal/c curr-mode "find path: it is impossible to get from ~a to ~a [internal error]")]
+            [types (modal/c curr-mode string?)])]
+ [CURRENT-LOCATION ([max (modal/c curr-mode "disambiguate your current location: ~a")]
+                    [types (modal/c curr-mode string?)])]
+ [CURRENT-LOCATION-0 ([max (modal/c curr-mode "no such station: ~a")]
+                      [types (modal/c curr-mode string?)])]
+ [DESTINATION ([max (modal/c curr-mode "disambiguate your destination: ~a")]
+               [types (modal/c curr-mode string?)])]
+ [DESTINATION-0 ([max (modal/c curr-mode "no such destination: ~a")]
+                 [types (modal/c curr-mode string?)])]
+ [NO-PATH ([max (modal/c curr-mode "it is currently impossible to reach ~a from ~a via subways")]
+           [types (modal/c curr-mode string?)])]
+ [DISABLED ([max (modal/c curr-mode "clarify station to be disabled: ~a")]
+            [types (modal/c curr-mode string?)])]
+ [ENABLED ([max (modal/c curr-mode "clarify station to be enabled: ~a")]
+           [types (modal/c curr-mode string?)])]
+ [DISABLED-0 ([max (modal/c curr-mode "no such station to disable: ~a")]
+              [types (modal/c curr-mode string?)])]
+ [ENABLED-0 ([max (modal/c curr-mode "no such station to enable: ~a")]
+             [types (modal/c curr-mode string?)])]
+ [ENSURE ([max (modal/c curr-mode "---ensure you are on ~a")]
+          [types (modal/c curr-mode string?)])]
+ [SWITCH ([max (modal/c curr-mode "---switch from ~a to ~a")]
+          [types (modal/c curr-mode string?)])]
+ [manage% ([max (modal/c curr-mode manage-c/max-ctc)]
            #;[max/sub1 manage-c/max/sub1-ctc]
-           [types manage-c/types-ctc])])
+           [types (modal/c curr-mode manage-c/types-ctc)])])
 
 (define/ctc-helper t-graph-val (box #f))
 (define/ctc-helper (t-graph)
@@ -128,7 +128,7 @@
 (define/ctc-helper stash2 (box #f))
 (define/ctc-helper stash3 (box #f))
 (define/ctc-helper manage-c/max-ctc
-  (class/c
+  (modal/c curr-mode (class/c
    (add-to-disabled
     (modal->i curr-mode ([this any/c]
                          [s string?])
@@ -174,7 +174,7 @@
                            (λ (res)
                              (correct-find-result? from to res))]))
    (field [mbta-subways (is-a?/c mbta%)]
-          [disabled list?])))
+          [disabled list?]))))
 
 (define/ctc-helper find-result-memo (make-hash))
 (define/ctc-helper (correct-find-result? from to res)
@@ -232,12 +232,13 @@
                         (correct-find-result? from to res))]))))
 
 (define/ctc-helper manage-c/types-ctc
-  (class/c
-     (add-to-disabled (->m string? (or/c string? #f)))
-     (remove-from-disabled (->m string? (or/c string? #f)))
-     (find (->m string? string? string?))
-     (field [mbta-subways (is-a?/c mbta%)]
-            [disabled list?])))
+  (modal/c curr-mode
+           (class/c
+            (add-to-disabled (->m string? (or/c string? #f)))
+            (remove-from-disabled (->m string? (or/c string? #f)))
+            (find (->m string? string? string?))
+            (field [mbta-subways (is-a?/c mbta%)]
+                   [disabled list?]))))
 
 
 (define manage%

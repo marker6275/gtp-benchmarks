@@ -27,24 +27,24 @@
                                posn=?)
 
 (provide/configurable-contract
- [GRID-SIZE ([max (=/c 30)]
-             [types natural?])]
- [BOARD-HEIGHT ([max (=/c 20)]
-                [types natural?])]
- [BOARD-WIDTH ([max (=/c 30)]
-               [types natural?])]
- [BOARD-HEIGHT-PIXELS ([max (-> (=/c (* GRID-SIZE BOARD-HEIGHT)))]
-                       [types (-> natural?)])]
- [BOARD-WIDTH-PIXELS ([max (-> (=/c (* GRID-SIZE BOARD-WIDTH)))]
-                      [types (-> natural?)])]
- [SEGMENT-RADIUS ([max (-> (=/c (/ GRID-SIZE 2)))]
-                  [types (-> number?)])]
- [FOOD-RADIUS ([max (-> (=/c (/ GRID-SIZE 2)))]
-               [types (-> number?)])]
- [WORLD ([max (-> (world/c (snake/c "right"
+ [GRID-SIZE ([max (modal/c curr-mode (=/c 30))]
+             [types (modal/c curr-mode natural?)])]
+ [BOARD-HEIGHT ([max (modal/c curr-mode (=/c 20))]
+                [types (modal/c curr-mode natural?)])]
+ [BOARD-WIDTH ([max (modal/c curr-mode (=/c 30))]
+               [types (modal/c curr-mode natural?)])]
+ [BOARD-HEIGHT-PIXELS ([max (modal/c curr-mode (=/c (* GRID-SIZE BOARD-HEIGHT)))]
+                       [types (modal/c curr-mode natural?)])]
+ [BOARD-WIDTH-PIXELS ([max (modal/c curr-mode (=/c (* GRID-SIZE BOARD-WIDTH)))]
+                      [types (modal/c curr-mode natural?)])]
+ [SEGMENT-RADIUS ([max (modal/c curr-mode (=/c (/ GRID-SIZE 2)))]
+                  [types (modal/c curr-mode number?)])]
+ [FOOD-RADIUS ([max (modal/c curr-mode (=/c (/ GRID-SIZE 2)))]
+               [types (modal/c curr-mode number?)])]
+ [WORLD ([max (modal/c curr-mode (world/c (snake/c "right"
                                     (snake-segs=?/c (list (posn 5 3))))
                            (posn/c 8 12)))]
-         [types (-> world-type?)])])
+         [types (modal/c curr-mode world-type?)])])
 ;; (provide
 ;;  WORLD
 ;;  GRID-SIZE

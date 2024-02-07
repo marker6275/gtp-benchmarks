@@ -25,7 +25,7 @@
                        (parameterize ([current-pseudo-random-generator r*])
                          (random-seed 1324)
                          (pseudo-random-generator->vector r*)))))]
-          [types (-> void?)])]
+          [types (modal-> curr-mode void?)])]
  [world->world ([max (modal->i curr-mode ([w world-type?])
                           [result
                            (w)
@@ -48,11 +48,11 @@
                                                                  #t]
                                [_ #f])])]
            [types (world-type? . modal-> . boolean?)])]
- [snake-change-direction ([max (->i ([snk snake-type?]
+ [snake-change-direction ([max (modal->i curr-mode ([snk snake-type?]
                                      [dir snake-dir?])
                                     [result (snk dir)
                                             (snake/c dir (snake-segs=?/c (snake-segs snk)))])]
-                          [types (snake-type? string? . -> . snake-type?)])]
+                          [types (snake-type? string? . modal-> . snake-type?)])]
  [world-change-dir ([max (modal->i curr-mode ([w world-type?]
                                [dir snake-dir?])
                               [result (w dir)

@@ -15,6 +15,8 @@
   "../../../ctcs/configurable.rkt"
   "../../../ctcs/precision-config.rkt"
   "../../../ctcs/common.rkt"
+  modalc
+  "../../curr-mode.rkt"
 )
 (require/configurable-contract "denotable.rkt" store-join store-update* store-update store-lookup empty-store d-join d-bot )
 (require/configurable-contract "time.rkt" time-zero take* tick alloc)
@@ -23,7 +25,7 @@
 ;; ---
 
 (provide/configurable-contract
- [atom-eval ([max (->i ([benv BEnv?]
+ [atom-eval ([max (modal->i curr-mode ([benv BEnv?]
                         [store Store/c])
                        [result (benv store)
                                (->i ([id Exp-type/c])
@@ -42,12 +44,12 @@
                                       [(? Lam?)
                                        (equal? result (set (Closure id benv)))]
                                       [_ #f]))])]
-             [types (BEnv? Store/c . -> . (Exp-type/c . -> . Denotable/c))])]
- [next ([max ((and/c State-type? closed-State?) . -> . (set/c (and/c State-type?
+             [types (BEnv? Store/c . modal-> . (Exp-type/c . -> . Denotable/c))])]
+ [next ([max ((and/c State-type? closed-State?) . modal-> . (set/c (and/c State-type?
                                                                      closed-State?)
                                                               #:kind 'immutable))]
-        [types (State-type? . -> . (set/c State-type? #:kind 'immutable))])]
- [explore ([max (->i ([seen (set/c (and/c State-type? closed-State?)
+                [types (State-type? . modal-> . (set/c State-type? #:kind 'immutable))])]
+ [explore ([max (modal->i curr-mode ([seen (set/c (and/c State-type? closed-State?)
                                    #:kind 'immutable)]
                       [todo (listof (and/c State-type? closed-State?))])
                      [result (seen todo)
@@ -57,7 +59,7 @@
                                     (subset?/c (list->set todo)))])]
            [types ((set/c State-type? #:kind 'immutable)
                    (listof State-type?)
-                   . -> .
+                   . modal-> .
                    (set/c State-type? #:kind 'immutable))])])
 
 

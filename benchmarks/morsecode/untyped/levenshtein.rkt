@@ -52,16 +52,13 @@
  modalc
  "../../curr-mode.rkt")
 
-;; only string-levenshtein is used (in main.rkt)
-;; it's a levenshtein-variant/c type, but so are most contracts
-;; nothing else is used, in other files or inside string-levenshtein
 (provide/configurable-contract
- [%identity ([max (-> any/c any/c)]
+ #;[%identity ([max (-> any/c any/c)]
              [types (-> any/c any/c)])]
- [%string-empty? ([max (->i ([v string?])
+ #;[%string-empty? ([max (->i ([v string?])
                             [result (v) (zero? (string-length v))])]
                   [types (-> string? boolean?)])]
- [%vector-empty? ([max (->i ([v vector?])
+ #;[%vector-empty? ([max (->i ([v vector?])
                             [result (v) (zero? (vector-length v))])]
                   [types (-> vector? boolean?)])]
  [%string->vector ([max (modal->i curr-mode ([s string?])
@@ -138,13 +135,13 @@
 ;;  vector-levenshtein/predicate/get-scratch)
 
 
-(define (%identity x)
+#;(define (%identity x)
   x)
 
-(define (%string-empty? v)
+#;(define (%string-empty? v)
   (zero? (string-length v)))
 
-(define (%vector-empty? v)
+#;(define (%vector-empty? v)
   (zero? (vector-length v)))
 
 (define (%string->vector s)

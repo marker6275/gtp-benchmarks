@@ -14,31 +14,33 @@
   "../../../ctcs/precision-config.rkt"
   "../../../ctcs/common.rkt"
   "../../../ctcs/configurable.rkt"
+  modalc
+  "../../curr-mode.rkt"
   )
 (require/configurable-contract "time.rkt" time-zero take* tick alloc)
 (require/configurable-contract "benv.rkt" benv-extend* benv-extend benv-lookup empty-benv )
 
 ;; -----------------------------------------------------------------------------
 (provide/configurable-contract
- [d-bot ([max Denotable/c]
-         [types Denotable/c])]
- [d-join ([max (->i ([a Denotable/c]
+ [d-bot ([max (modal/c curr-mode Denotable/c)]
+         [types (modal/c curr-mode Denotable/c)])]
+ [d-join ([max (modal->i curr-mode ([a Denotable/c]
               [b Denotable/c])
              [result Denotable/c]
              #:post (a b result)
              (for/and ([el (in-sequences (in-set a) (in-set b))])
                (set-member? result el)))]
-   [types (Denotable/c Denotable/c . -> . Denotable/c)])]
- [empty-store ([max Store/c]
-               [types Store/c])]
- [store-lookup ([max (->i ([s Store/c]
+   [types (Denotable/c Denotable/c . modal-> . Denotable/c)])]
+ [empty-store ([max (modal/c curr-mode Store/c)]
+               [types (modal/c curr-mode Store/c)])]
+ [store-lookup ([max (modal->i curr-mode ([s Store/c]
               [a Addr?])
              [result (s a)
                      (equal?/c (if (hash-has-key? s a)
                                    (hash-ref s a)
                                    d-bot))])]
-   [types (Store/c Addr? . -> . Denotable/c)])]
- [store-update ([max (->i ([s Store/c]
+   [types (Store/c Addr? . modal-> . Denotable/c)])]
+ [store-update ([max (modal->i curr-mode ([s Store/c]
               [addr Addr?]
               [value Denotable/c])
              [result (s addr value)
@@ -48,8 +50,8 @@
                                    (equal?/c
                                     (set-union value
                                                (hash-ref s addr set)))))])]
-   [types (Store/c Addr? Denotable/c . -> . Store/c)])]
- [store-update* ([max (->i ([s Store/c]
+   [types (Store/c Addr? Denotable/c . modal-> . Store/c)])]
+ [store-update* ([max (modal->i curr-mode ([s Store/c]
               [as (listof Addr?)]
               [vs (listof Denotable/c)])
              [result Store/c]
@@ -58,15 +60,15 @@
                        [v (in-list vs)])
                (and (hash-has-key? result a)
                     (subset? v (hash-ref result a)))))]
-   [types (Store/c (listof Addr?) (listof Denotable/c) . -> . Store/c)])]
- [store-join ([max (->i ([s1 Store/c]
+   [types (Store/c (listof Addr?) (listof Denotable/c) . modal-> . Store/c)])]
+ [store-join ([max (modal->i curr-mode ([s1 Store/c]
               [s2 Store/c])
              [result Store/c]
              #:post (s1 s2 result)
              (for/and ([(k v) (in-hash result)])
                (equal? v (set-union (hash-ref s1 k set)
                                     (hash-ref s2 k set)))))]
-   [types (Store/c Store/c . -> . Store/c)])])
+   [types (Store/c Store/c . modal-> . Store/c)])])
 (provide
   (struct-out State)
 ;;   d-bot
@@ -93,7 +95,7 @@
 ;(define-type Denotable (Setof Value))
 ;(define-type Store (HashTable Addr Denotable))
 
-(define/ctc-helper Denotable/c (set/c Closure-type/c #:kind 'immutable))
+(define/ctc-helper Denotable/c (modal/c curr-mode (set/c Closure-type/c #:kind 'immutable)))
 (define/ctc-helper Store/c (hash/c Addr? Denotable/c #:immutable #t))
 
 ;; -- structs

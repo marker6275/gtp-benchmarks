@@ -28,6 +28,8 @@
           env?
           list-with-min-size/c
           equal?/c)
+ modalc
+ "../../curr-mode.rkt"
 )
 ;; (require (only-in "stack.rkt"
 ;;   stack-drop
@@ -41,17 +43,17 @@
 (require/configurable-contract "stack.rkt" stack-swap stack-push stack-pop stack-over stack-init stack-dup stack-drop )
 
 (provide/configurable-contract
- [assert ([max any/c]
-   [types any/c])]
- [command% ([max command%/c]
-   [types command%/c])]
- [singleton-list? ([max (->i ([x any/c])
+ [assert ([max (modal/c curr-mode any/c)]
+   [types (modal/c curr-mode any/c)])]
+ [command% ([max (modal/c curr-mode command%/c)]
+   [types (modal/c curr-mode command%/c)])]
+ [singleton-list? ([max (modal->i curr-mode ([x any/c])
              [result (x)
                      (and (list? x) (not (empty? x)) (empty? (rest x)))])]
-   [types (any/c . -> . boolean?)])]
- [binop-command% ([max binop-command%/c]
-   [types binop-command%/c])]
- [CMD* ([max (and/c env?
+   [types (any/c . modal-> . boolean?)])]
+ [binop-command% ([max (modal/c curr-mode binop-command%/c)]
+   [types (modal/c curr-mode binop-command%/c)])]
+ [CMD* ([max (modal/c curr-mode (and/c env?
                (list/c
                 ;; exit
                 (command%?-with-exec
@@ -130,45 +132,45 @@
                  (args E S v)
                  [result (if (is-or-starts-with? (curry equal? 'show) v)
                              (equal?/c (cons E S))
-                             #f)])))]
-   [types env?])]
- [exit? ([max (->i ([sym any/c])
+                             #f)]))))]
+   [types (modal/c curr-mode env?)])]
+ [exit? ([max (modal->i curr-mode ([sym any/c])
              [result (sym)
                      (memq sym '(exit quit q leave bye))])]
-   [types (any/c . -> . boolean?)])]
- [find-command ([max (->i ([E env?]
+   [types (any/c . modal-> . boolean?)])]
+ [find-command ([max (modal->i curr-mode ([E env?]
               [sym symbol?])
              [result (E)
                      (and (not (empty? E))
                           (get-field id (first E)))])]
-   [types (env? symbol? . -> . symbol?)])]
- [help? ([max (->i ([sym any/c])
+   [types (env? symbol? . modal-> . symbol?)])]
+ [help? ([max (modal->i curr-mode ([sym any/c])
              [result (sym)
                      (memq sym '(help ? ??? -help --help h))])]
-   [types (any/c . -> . boolean?)])]
- [show? ([max (->i ([sym any/c])
+   [types (any/c . modal-> . boolean?)])]
+ [show? ([max (modal->i curr-mode ([sym any/c])
              [result (sym)
                      (memq sym '(show print pp ls stack))])]
-   [types (any/c . -> . boolean?)])]
- [show-help ([max (->i ([E env?]
-              [v any/c])
-             [result string?]
-             #:post (E v result)
-             (regexp-match?
-              (match v
-                [#f (and (= (length (string-split result "\n"))
-                            (add1 (length E)))
-                         "^Available commands:")]
-                [(or (list (? symbol? s)) (? symbol? s))
-                 (regexp-quote
-                  (if (find-command E s)
-                      (get-field descr (find-command E s))
-                      (format "Unknown command '~a'" s)))]
-                [x
-                 (regexp-quote
-                  (format "Cannot help with '~a'" x))])
-              result))]
-   [types (env? any/c . -> . string?)])])
+   [types (any/c . modal-> . boolean?)])]
+ [show-help ([max (modal->i curr-mode ([E env?]
+                                       [v any/c])
+                            [result string?]
+                            #:post (E v result)
+                            (regexp-match?
+                             (match v
+                               [#f (and (= (length (string-split result "\n"))
+                                           (add1 (length E)))
+                                        "^Available commands:")]
+                               [(or (list (? symbol? s)) (? symbol? s))
+                                (regexp-quote
+                                 (if (find-command E s)
+                                     (get-field descr (find-command E s))
+                                     (format "Unknown command '~a'" s)))]
+                               [x
+                                (regexp-quote
+                                 (format "Cannot help with '~a'" x))])
+                             result))]
+             [types (env? any/c . modal-> . string?)])])
 
 (define (assert v p)
   (unless (p v) (error 'assert))
@@ -206,7 +208,7 @@
 ;; Command is recognized by its identifier,
 ;;  the identifier is then applied to the top 2 numbers on the stack.
 (define/ctc-helper binop-command%/c
-  (and/c command%/c
+  (modal/c curr-mode (and/c command%/c
          ;; original: depends on an extension of class/c
          #;(class/dc
           (init-field [binop (number? number? . -> . number?)])
@@ -236,7 +238,7 @@
                                              (cons/c (equal?/c E)
                                                      (cons/c number?
                                                              (equal?/c S-rest))))]
-                                      [{_ _} #f])])]))))
+                                      [{_ _} #f])])])))))
 
 (require (for-syntax syntax/parse))
 (define-syntax/ctc-helper (binop-command%/c-for stx)
