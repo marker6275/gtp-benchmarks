@@ -43,17 +43,17 @@
 (provide/configurable-contract
  [unweighted-graph/directed* ([max (modal/c curr-mode ((listof (list/c any/c any/c)) any/c))]
                               [types (curr-mode (listof (list/c any/c any/c)) . modal-> . any)])]
- [attach-edge-property* ([max (
+ [attach-edge-property* ([max (curr-mode
                                [graph?]
                                [#:init any/c
                                 #:for-each any/c]
-                               . ->* .
+                               . modal->* .
                                any)]
-                         [types (
+                         [types (curr-mode
                                  [graph?]
                                  [#:init any/c
                                   #:for-each any/c]
-                                 . ->* .
+                                 . modal->* .
                                  any)])]
  [in-neighbors* ([max (curr-mode graph? any/c . modal-> . any)]
                  [types (curr-mode graph? any/c . modal-> . any)])]
