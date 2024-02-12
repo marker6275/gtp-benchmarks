@@ -3,106 +3,106 @@
 ;; ===================================================================================================
 
 (require
- (only-in "t-view.rkt" manage-c/types-ctc manage-c/max/sub1-ctc manage-c/max-ctc t-graph)
- "../../../ctcs/precision-config.rkt"
- "../../../ctcs/common.rkt"
- "../../../ctcs/configurable.rkt"
- "helpers.rkt"
- ;; "t-graph.rkt"
- modalc
- "../../curr-mode.rkt"
- )
+  (only-in "t-view.rkt" manage-c/types-ctc manage-c/max/sub1-ctc manage-c/max-ctc t-graph)
+  "../../../ctcs/precision-config.rkt"
+  "../../../ctcs/common.rkt"
+  "../../../ctcs/configurable.rkt"
+  "helpers.rkt"
+  ;; "t-graph.rkt"
+  modalc
+  "../../curr-mode.rkt"
+  )
 (require/configurable-contract "t-graph.rkt" mbta% lines->hash read-t-line-from-file read-t-graph line-specification? COLORS SOURCE-DIRECTORY in-neighbors* attach-edge-property* unweighted-graph/directed* )
 (require/configurable-contract "t-view.rkt" manage% SWITCH ENSURE ENABLED-0 DISABLED-0 ENABLED DISABLED NO-PATH DESTINATION-0 DESTINATION CURRENT-LOCATION-0 CURRENT-LOCATION INTERNAL selector )
 
 (provide/configurable-contract
  [PATH ([max (modal/c curr-mode (λ (re)
-               (equal? #rx"from (.*) to (.*)$" re)))]
+                                  (equal? #rx"from (.*) to (.*)$" re)))]
         [types (modal/c curr-mode regexp?)])]
  [DISABLE ([max (modal/c curr-mode (λ (re)
                                      (equal? #rx"disable (.*)$" re)))]
            [types (modal/c curr-mode regexp?)])]
  [ENABLE ([max (modal/c curr-mode (λ (re)
                                     (equal? #rx"enable (.*)$" re)))]
-   [types (modal/c curr-mode regexp?)])]
+          [types (modal/c curr-mode regexp?)])]
  [DONE ([max "done"]
-   [types string?])]
+        [types string?])]
  [EOM ([max "eom"]
-   [types string?])]
+       [types string?])]
  [manage ([max (modal/c curr-mode (instanceof/c manage-c/max-ctc))]
-   #;[max/sub1 (instanceof/c manage-c/max/sub1-ctc)]
-   [types (modal/c curr-mode (instanceof/c manage-c/types-ctc))])]
+          #;[max/sub1 (instanceof/c manage-c/max/sub1-ctc)]
+          [types (modal/c curr-mode (instanceof/c manage-c/types-ctc))])]
  [run-t ([max (modal->i curr-mode ([next string?])
-             #:pre (next)
-             (when (not (regexp-match PATH next))
-               (set-box! stash-len (length (get-field disabled manage))))
-             [result (next)
-                     (λ (res)
-                       (cond
-                         [(regexp-match PATH next)
-                          => (lambda (x)
-                               (let ([x2 (second x)]
-                                     [x3 (third x)])
-                                 (if (substring? "\n" res)
-                                     (and (substring? x2 res)
-                                          (substring? x3 res))
-                                     (or (substring? x2 res)
-                                         (substring? x3 res)))))]
-                         [(regexp-match DISABLE next)
-                          => (lambda (x)
-                               (let* ([x2 (second x)]
-                                      [station (send (t-graph) station x2)])
-                                 (cond
-                                   [(string? station) "done"]
-                                   [(empty? station) (substring? x2 res)]
-                                   [else (substring? (string-join station) res)])))]
-                         [(regexp-match ENABLE next)
-                          => (lambda (x)
-                               (let* ([x2 (second x)]
-                                      [station (send (t-graph) station x2)])
-                                 (cond
-                                   [(string? station) "done"]
-                                   [(empty? station) (substring? x2 res)]
-                                   [else (substring? (string-join station) res)])))]
-                         [else "message not understood"]))]
-             #:post (next)
-             (cond
-               [(regexp-match DISABLE next)
-                (let ([x2 (second (regexp-match DISABLE next))])
-                  (> (length (get-field disabled manage))
-                     (unbox stash-len)))]
-               [(regexp-match ENABLE next)
-                (<= (length (get-field disabled manage))
-                    (unbox stash-len))]
-               [else #t]))]                           
-   #;[max/sub1 (->i ([next string?])
-                  [result (next)
-                          (λ (res)
-                            (cond
-                              [(regexp-match PATH next)
-                               => (lambda (x)
-                                    (let ([x2 (second x)]
-                                          [x3 (third x)])
-                                      (and (substring? x2 res)
-                                           (substring? x3 res))))]
-                              [(regexp-match DISABLE next)
-                               => (lambda (x)
-                                    (let* ([x2 (second x)]
-                                           [station (send (t-graph) station x2)])
-                                      (cond
-                                        [(string? station) "done"]
-                                        [(empty? station) (substring? x2 res)]
-                                        [else (substring? (string-join station) res)])))]
-                              [(regexp-match ENABLE next)
-                               => (lambda (x)
-                                    (let* ([x2 (second x)]
-                                           [station (send (t-graph) station x2)])
-                                      (cond
-                                        [(string? station) "done"]
-                                        [(empty? station) (substring? x2 res)]
-                                        [else (substring? (string-join station res))])))]
-                              [else "message not understood"]))])]
-   [types (modal-> string? string?)])])
+                        #:pre (next)
+                        (when (not (regexp-match PATH next))
+                          (set-box! stash-len (length (get-field disabled manage))))
+                        [result (next)
+                                (λ (res)
+                                  (cond
+                                    [(regexp-match PATH next)
+                                     => (lambda (x)
+                                          (let ([x2 (second x)]
+                                                [x3 (third x)])
+                                            (if (substring? "\n" res)
+                                                (and (substring? x2 res)
+                                                     (substring? x3 res))
+                                                (or (substring? x2 res)
+                                                    (substring? x3 res)))))]
+                                    [(regexp-match DISABLE next)
+                                     => (lambda (x)
+                                          (let* ([x2 (second x)]
+                                                 [station (send (t-graph) station x2)])
+                                            (cond
+                                              [(string? station) "done"]
+                                              [(empty? station) (substring? x2 res)]
+                                              [else (substring? (string-join station) res)])))]
+                                    [(regexp-match ENABLE next)
+                                     => (lambda (x)
+                                          (let* ([x2 (second x)]
+                                                 [station (send (t-graph) station x2)])
+                                            (cond
+                                              [(string? station) "done"]
+                                              [(empty? station) (substring? x2 res)]
+                                              [else (substring? (string-join station) res)])))]
+                                    [else "message not understood"]))]
+                        #:post (next)
+                        (cond
+                          [(regexp-match DISABLE next)
+                           (let ([x2 (second (regexp-match DISABLE next))])
+                             (> (length (get-field disabled manage))
+                                (unbox stash-len)))]
+                          [(regexp-match ENABLE next)
+                           (<= (length (get-field disabled manage))
+                               (unbox stash-len))]
+                          [else #t]))]                           
+         #;[max/sub1 (->i ([next string?])
+                          [result (next)
+                                  (λ (res)
+                                    (cond
+                                      [(regexp-match PATH next)
+                                       => (lambda (x)
+                                            (let ([x2 (second x)]
+                                                  [x3 (third x)])
+                                              (and (substring? x2 res)
+                                                   (substring? x3 res))))]
+                                      [(regexp-match DISABLE next)
+                                       => (lambda (x)
+                                            (let* ([x2 (second x)]
+                                                   [station (send (t-graph) station x2)])
+                                              (cond
+                                                [(string? station) "done"]
+                                                [(empty? station) (substring? x2 res)]
+                                                [else (substring? (string-join station) res)])))]
+                                      [(regexp-match ENABLE next)
+                                       => (lambda (x)
+                                            (let* ([x2 (second x)]
+                                                   [station (send (t-graph) station x2)])
+                                              (cond
+                                                [(string? station) "done"]
+                                                [(empty? station) (substring? x2 res)]
+                                                [else (substring? (string-join station res))])))]
+                                      [else "message not understood"]))])]
+         [types (modal-> curr-mode string? string?)])])
 
 ;; (provide
 ;;  ;; String 
@@ -140,23 +140,23 @@
 (define/ctc-helper stash-len (box #f))
 (define (run-t next)
   (cond
-      [(regexp-match PATH next)
-       => (lambda (x)
-       (define x2 (second x))
-       (define x3 (third x))
-       (unless (and x2 x3) (error 'run-t "invariat error"))
-       (send manage find x2 x3))]
-      [(regexp-match DISABLE next)
-       => (lambda (x)
-       (define x2 (second x))
-       (unless x2 (error 'run-t "invariants"))
-       (status-check add-to-disabled x2))]
-      [(regexp-match ENABLE next)
-       => (lambda (x)
-       (define x2 (second x))
-       (unless x2 (error 'run-t "invariants"))
-       (status-check remove-from-disabled x2))]
-      [else "message not understood"]))
+    [(regexp-match PATH next)
+     => (lambda (x)
+          (define x2 (second x))
+          (define x3 (third x))
+          (unless (and x2 x3) (error 'run-t "invariat error"))
+          (send manage find x2 x3))]
+    [(regexp-match DISABLE next)
+     => (lambda (x)
+          (define x2 (second x))
+          (unless x2 (error 'run-t "invariants"))
+          (status-check add-to-disabled x2))]
+    [(regexp-match ENABLE next)
+     => (lambda (x)
+          (define x2 (second x))
+          (unless x2 (error 'run-t "invariants"))
+          (status-check remove-from-disabled x2))]
+    [else "message not understood"]))
 
 (define-syntax-rule
   (status-check remove-from-disabled enabled)

@@ -66,7 +66,7 @@
                              #:post (s result)
                              (and (= (string-length s) (vector-length result))
                                   (andmap char=? (string->list s) (vector->list result))))]
-                   [types (modal-> string? (vectorof char?))])]
+                   [types (modal-> curr-mode string? (vectorof char?))])]
  [vector-levenshtein/predicate/get-scratch ([max (modal->i curr-mode ([a vector?]
                                                        [b vector?]
                                                        [pred (any/c any/c . -> . boolean?)]
@@ -77,7 +77,8 @@
                                                       [result natural?]
                                                       #:post (a b pred result)
                                                       (editable-to? a b result #:compare-with pred))]
-                                            [types (vector?
+                                            [types (curr-mode
+                                                    vector?
                                                     vector?
                                                     (any/c any/c . -> . boolean?)
                                                     (natural? . -> . vector?)
@@ -300,7 +301,8 @@
                [result natural?]
                #:post (a b pred result)
                (editable-to? a b result #:compare-with pred))]
-    ['types (seq?
+    ['types (curr-mode
+             seq?
              seq?
              (any/c any/c . -> . boolean?)
              . modal-> .
@@ -315,7 +317,8 @@
                [result natural?]
                #:post (a b result)
                (editable-to? a b result #:compare-with pred))]
-    ['types (seq?
+    ['types (curr-mode
+             seq?
              seq?
              . modal-> .
              natural?)]))

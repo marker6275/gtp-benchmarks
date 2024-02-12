@@ -44,11 +44,11 @@
                                       [(? Lam?)
                                        (equal? result (set (Closure id benv)))]
                                       [_ #f]))])]
-             [types (BEnv? Store/c . modal-> . (Exp-type/c . -> . Denotable/c))])]
- [next ([max ((and/c State-type? closed-State?) . modal-> . (set/c (and/c State-type?
+             [types (curr-mode BEnv? Store/c . modal-> . (Exp-type/c . -> . Denotable/c))])]
+ [next ([max (curr-mode (and/c State-type? closed-State?) . modal-> . (set/c (and/c State-type?
                                                                      closed-State?)
                                                               #:kind 'immutable))]
-                [types (State-type? . modal-> . (set/c State-type? #:kind 'immutable))])]
+                [types (curr-mode State-type? . modal-> . (set/c State-type? #:kind 'immutable))])]
  [explore ([max (modal->i curr-mode ([seen (set/c (and/c State-type? closed-State?)
                                    #:kind 'immutable)]
                       [todo (listof (and/c State-type? closed-State?))])
@@ -57,7 +57,8 @@
                                            #:kind 'immutable)
                                     (subset?/c seen)
                                     (subset?/c (list->set todo)))])]
-           [types ((set/c State-type? #:kind 'immutable)
+           [types (curr-mode
+                   (set/c State-type? #:kind 'immutable)
                    (listof State-type?)
                    . modal-> .
                    (set/c State-type? #:kind 'immutable))])])

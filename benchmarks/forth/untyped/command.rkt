@@ -9,28 +9,28 @@
 ;; -----------------------------------------------------------------------------
 
 (require
- racket/match
- racket/class
- (only-in racket/string string-join string-split)
- (for-syntax racket/base racket/syntax syntax/parse)
- ;; racket/contract
- "../../../ctcs/configurable.rkt"
- "../../../ctcs/precision-config.rkt"
- (only-in racket/function curry)
- (only-in racket/list empty? first second rest)
- (only-in "../../../ctcs/common.rkt"
-          class/c*
-          or-#f/c
-          command%/c
-          command%?
-          command%?-with-exec
-          stack?
-          env?
-          list-with-min-size/c
-          equal?/c)
- modalc
- "../../curr-mode.rkt"
-)
+  racket/match
+  racket/class
+  (only-in racket/string string-join string-split)
+  (for-syntax racket/base racket/syntax syntax/parse)
+  ;; racket/contract
+  "../../../ctcs/configurable.rkt"
+  "../../../ctcs/precision-config.rkt"
+  (only-in racket/function curry)
+  (only-in racket/list empty? first second rest)
+  (only-in "../../../ctcs/common.rkt"
+           class/c*
+           or-#f/c
+           command%/c
+           command%?
+           command%?-with-exec
+           stack?
+           env?
+           list-with-min-size/c
+           equal?/c)
+  modalc
+  "../../curr-mode.rkt"
+  )
 ;; (require (only-in "stack.rkt"
 ;;   stack-drop
 ;;   stack-dup
@@ -44,114 +44,115 @@
 
 (provide/configurable-contract
  [assert ([max (modal/c curr-mode any/c)]
-   [types (modal/c curr-mode any/c)])]
+          [types (modal/c curr-mode any/c)])]
  [command% ([max (modal/c curr-mode command%/c)]
-   [types (modal/c curr-mode command%/c)])]
+            [types (modal/c curr-mode command%/c)])]
  [singleton-list? ([max (modal->i curr-mode ([x any/c])
-             [result (x)
-                     (and (list? x) (not (empty? x)) (empty? (rest x)))])]
-   [types (any/c . modal-> . boolean?)])]
- [binop-command% ([max (modal/c curr-mode binop-command%/c)]
-   [types (modal/c curr-mode binop-command%/c)])]
- [CMD* ([max (modal/c curr-mode (and/c env?
-               (list/c
-                ;; exit
-                (command%?-with-exec
-                 (args E S v)
-                 [result (if (or (eof-object? v)
-                                 (is-or-starts-with? exit? v))
-                             'EXIT
-                             #f)])
-                ;; help
-                (command%?-with-exec
-                 (args E S v)
-                 [result (if (is-or-starts-with? help? v)
-                             (equal?/c (cons E S))
-                             #f)])
+                                  [result (x)
+                                          (and (list? x) (not (empty? x)) (empty? (rest x)))])]
+                   [types (curr-mode any/c . modal-> . boolean?)])]
+ [binop-command% ([max binop-command%/c]
+                  [types binop-command%/c])]
+ [CMD* ([max (modal/c curr-mode
+                      (and/c env?
+                             (list/c
+                              ;; exit
+                              (command%?-with-exec
+                               (args E S v)
+                               [result (if (or (eof-object? v)
+                                               (is-or-starts-with? exit? v))
+                                           'EXIT
+                                           #f)])
+                              ;; help
+                              (command%?-with-exec
+                               (args E S v)
+                               [result (if (is-or-starts-with? help? v)
+                                           (equal?/c (cons E S))
+                                           #f)])
 
-                (binop-command%/c-for +)
-                (binop-command%/c-for -)
-                (binop-command%/c-for *)
+                              (binop-command%/c-for +)
+                              (binop-command%/c-for -)
+                              (binop-command%/c-for *)
 
-                ;; drop
-                (command%?-with-exec
-                 (args E S v)
-                 [result (if (and (is-or-starts-with? (curry equal? 'drop) v)
-                                  ((list-with-min-size/c 1) S))
-                             (equal?/c (cons E (rest S)))
-                             #f)])
-                ;; dup
-                (command%?-with-exec
-                 (args E S v)
-                 [result (if (and (is-or-starts-with? (curry equal? 'dup) v)
-                                  ((list-with-min-size/c 1) S))
-                             (equal?/c (cons E (cons (first S) S)))
-                             #f)])
-                ;; over
-                (command%?-with-exec
-                 (args E S v)
-                 [result (if (and (is-or-starts-with? (curry equal? 'over) v)
-                                  ((list-with-min-size/c 2) S))
-                             (equal?/c
-                              (cons E (cons (first S)
-                                            (cons (second S)
-                                                  (cons (first S)
-                                                        (rest (rest S)))))))
-                             #f)])
-                ;; swap
-                (command%?-with-exec
-                 (args E S v)
-                 [result (if (and (is-or-starts-with? (curry equal? 'swap) v)
-                                  ((list-with-min-size/c 2) S))
-                             (equal?/c
-                              (cons E
-                                    (cons (second S)
-                                          (cons (first S)
-                                                (rest (rest S))))))
-                             #f)])
-                ;; push
-                (command%?-with-exec
-                 (args E S v)
-                 [result (if (or (and (list? v)
-                                      (>= (length v) 1)
-                                      (exact-integer? (first v)))
-                                 (and (list? v)
-                                      (>= (length v) 2)
-                                      (equal? (first v) 'push)
-                                      (exact-integer? (second v))))
-                             (equal?/c
-                              (cons E
-                                    (cons (if (exact-integer? (first v))
-                                              (first v)
-                                              (second v))
-                                          S)))
-                             #f)])
-                ;; show
-                ;; lltemporal: prints
-                (command%?-with-exec
-                 (args E S v)
-                 [result (if (is-or-starts-with? (curry equal? 'show) v)
-                             (equal?/c (cons E S))
-                             #f)]))))]
-   [types (modal/c curr-mode env?)])]
+                              ;; drop
+                              (command%?-with-exec
+                               (args E S v)
+                               [result (if (and (is-or-starts-with? (curry equal? 'drop) v)
+                                                ((list-with-min-size/c 1) S))
+                                           (equal?/c (cons E (rest S)))
+                                           #f)])
+                              ;; dup
+                              (command%?-with-exec
+                               (args E S v)
+                               [result (if (and (is-or-starts-with? (curry equal? 'dup) v)
+                                                ((list-with-min-size/c 1) S))
+                                           (equal?/c (cons E (cons (first S) S)))
+                                           #f)])
+                              ;; over
+                              (command%?-with-exec
+                               (args E S v)
+                               [result (if (and (is-or-starts-with? (curry equal? 'over) v)
+                                                ((list-with-min-size/c 2) S))
+                                           (equal?/c
+                                            (cons E (cons (first S)
+                                                          (cons (second S)
+                                                                (cons (first S)
+                                                                      (rest (rest S)))))))
+                                           #f)])
+                              ;; swap
+                              (command%?-with-exec
+                               (args E S v)
+                               [result (if (and (is-or-starts-with? (curry equal? 'swap) v)
+                                                ((list-with-min-size/c 2) S))
+                                           (equal?/c
+                                            (cons E
+                                                  (cons (second S)
+                                                        (cons (first S)
+                                                              (rest (rest S))))))
+                                           #f)])
+                              ;; push
+                              (command%?-with-exec
+                               (args E S v)
+                               [result (if (or (and (list? v)
+                                                    (>= (length v) 1)
+                                                    (exact-integer? (first v)))
+                                               (and (list? v)
+                                                    (>= (length v) 2)
+                                                    (equal? (first v) 'push)
+                                                    (exact-integer? (second v))))
+                                           (equal?/c
+                                            (cons E
+                                                  (cons (if (exact-integer? (first v))
+                                                            (first v)
+                                                            (second v))
+                                                        S)))
+                                           #f)])
+                              ;; show
+                              ;; lltemporal: prints
+                              (command%?-with-exec
+                               (args E S v)
+                               [result (if (is-or-starts-with? (curry equal? 'show) v)
+                                           (equal?/c (cons E S))
+                                           #f)]))))]
+        [types (modal/c curr-mode env?)])]
  [exit? ([max (modal->i curr-mode ([sym any/c])
-             [result (sym)
-                     (memq sym '(exit quit q leave bye))])]
-   [types (any/c . modal-> . boolean?)])]
+                        [result (sym)
+                                (memq sym '(exit quit q leave bye))])]
+         [types (curr-mode any/c . modal-> . boolean?)])]
  [find-command ([max (modal->i curr-mode ([E env?]
-              [sym symbol?])
-             [result (E)
-                     (and (not (empty? E))
-                          (get-field id (first E)))])]
-   [types (env? symbol? . modal-> . symbol?)])]
+                                          [sym symbol?])
+                               [result (E)
+                                       (and (not (empty? E))
+                                            (get-field id (first E)))])]
+                [types (curr-mode env? symbol? . modal-> . symbol?)])]
  [help? ([max (modal->i curr-mode ([sym any/c])
-             [result (sym)
-                     (memq sym '(help ? ??? -help --help h))])]
-   [types (any/c . modal-> . boolean?)])]
+                        [result (sym)
+                                (memq sym '(help ? ??? -help --help h))])]
+         [types (curr-mode any/c . modal-> . boolean?)])]
  [show? ([max (modal->i curr-mode ([sym any/c])
-             [result (sym)
-                     (memq sym '(show print pp ls stack))])]
-   [types (any/c . modal-> . boolean?)])]
+                        [result (sym)
+                                (memq sym '(show print pp ls stack))])]
+         [types (curr-mode any/c . modal-> . boolean?)])]
  [show-help ([max (modal->i curr-mode ([E env?]
                                        [v any/c])
                             [result string?]
@@ -170,7 +171,7 @@
                                 (regexp-quote
                                  (format "Cannot help with '~a'" x))])
                              result))]
-             [types (env? any/c . modal-> . string?)])])
+             [types (curr-mode env? any/c . modal-> . string?)])])
 
 (define (assert v p)
   (unless (p v) (error 'assert))
@@ -183,9 +184,9 @@
   (class object%
     (super-new)
     (init-field
-      id
-      descr
-      exec)))
+     id
+     descr
+     exec)))
 
 (define/ctc-helper ((env-with/c cmd-ids) env)
   (cond [(env? env)
@@ -208,37 +209,38 @@
 ;; Command is recognized by its identifier,
 ;;  the identifier is then applied to the top 2 numbers on the stack.
 (define/ctc-helper binop-command%/c
-  (modal/c curr-mode (and/c command%/c
+  (and/c command%/c
          ;; original: depends on an extension of class/c
          #;(class/dc
-          (init-field [binop (number? number? . -> . number?)])
-          (inherit-field [id symbol?]
-                         [binop (number? number? . -> . number?)])
-          (field [id symbol?]
-                 [exec (binop id)
-                       (->i ([E env?] [S stack?] [v any/c])
-                            [result (E S v)
-                                    (match* {S v}
-                                      [{(list-rest v1 v2 S-rest)
-                                        (list (== id eq?))}
-                                       (equal?/c
-                                        (cons E (cons (binop v2 v1) S-rest)))]
-                                      [{_ _} #f])])]))
+            (init-field [binop (number? number? . -> . number?)])
+            (inherit-field [id symbol?]
+                           [binop (number? number? . -> . number?)])
+            (field [id symbol?]
+                   [exec (binop id)
+                         (->i ([E env?] [S stack?] [v any/c])
+                              [result (E S v)
+                                      (match* {S v}
+                                        [{(list-rest v1 v2 S-rest)
+                                          (list (== id eq?))}
+                                         (equal?/c
+                                          (cons E (cons (binop v2 v1) S-rest)))]
+                                        [{_ _} #f])])]))
          (class/c
-          (init-field [binop (number? number? . -> . number?)])
-          (inherit-field [id symbol?]
-                         [binop (number? number? . -> . number?)])
-          (field [id symbol?]
-                 [exec (->i ([E env?] [S stack?] [v any/c])
-                            [result (E S v)
-                                    (match* {S v}
-                                      [{(list-rest v1 v2 S-rest)
-                                        (list symbol?)}
-                                       (or/c #f ;; if the symbol above is not == id
-                                             (cons/c (equal?/c E)
-                                                     (cons/c number?
-                                                             (equal?/c S-rest))))]
-                                      [{_ _} #f])])])))))
+          (init-field [binop (curr-mode number? number? . modal-> . number?)])
+          (inherit-field [id (modal/c curr-mode symbol?)]
+                         [binop (curr-mode number? number? . modal-> . number?)])
+          (field [id (modal/c curr-mode symbol?)]
+                 [exec (modal->i curr-mode
+                                 ([E env?] [S stack?] [v any/c])
+                                 [result (E S v)
+                                         (match* {S v}
+                                           [{(list-rest v1 v2 S-rest)
+                                             (list symbol?)}
+                                            (or/c #f ;; if the symbol above is not == id
+                                                  (cons/c (equal?/c E)
+                                                          (cons/c number?
+                                                                  (equal?/c S-rest))))]
+                                           [{_ _} #f])])]))))
 
 (require (for-syntax syntax/parse))
 (define-syntax/ctc-helper (binop-command%/c-for stx)
@@ -262,28 +264,28 @@
     (init-field
      binop)
     (super-new
-      (id (assert (object-name binop) symbol?))
-      (exec (lambda (E S v)
-              (if (singleton-list? v)
-                  (if (eq? (car v) (get-field id this))
-                      (let*-values ([(v1 S1) (stack-pop S)]
-                                    [(v2 S2) (stack-pop S1)])
-                        (cons E (stack-push S2 (binop v2 v1))))
-                      #f)
-                  #f))))))
+     (id (assert (object-name binop) symbol?))
+     (exec (lambda (E S v)
+             (if (singleton-list? v)
+                 (if (eq? (car v) (get-field id this))
+                     (let*-values ([(v1 S1) (stack-pop S)]
+                                   [(v2 S2) (stack-pop S1)])
+                       (cons E (stack-push S2 (binop v2 v1))))
+                     #f)
+                 #f))))))
 
 ;; Turns a symbol into a stack command parser
 (define-syntax make-stack-command
   (syntax-parser
-   [(_ opcode:id d:str)
-    #:with stack-cmd (format-id #'opcode "stack-~a" (syntax-e #'opcode))
-    #`(new command%
-        (id '#,(syntax-e #'opcode))
-        (descr d)
-        (exec (lambda (E S v)
-          (and (singleton-list? v)
-               (eq? '#,(syntax-e #'opcode) (car v))
-               (cons E (stack-cmd S))))))]))
+    [(_ opcode:id d:str)
+     #:with stack-cmd (format-id #'opcode "stack-~a" (syntax-e #'opcode))
+     #`(new command%
+            (id '#,(syntax-e #'opcode))
+            (descr d)
+            (exec (lambda (E S v)
+                    (and (singleton-list? v)
+                         (eq? '#,(syntax-e #'opcode) (car v))
+                         (cons E (stack-cmd S))))))]))
 
 (define/ctc-helper (is-or-starts-with? predicate v)
   (or (and (symbol? v)
@@ -364,7 +366,7 @@
 (define (find-command E sym)
   (for/or ([c (in-list E)])
     (get-field id c) (error 'no)))
-    ;(if (eq? sym (get-field id c)) c #f)))
+;(if (eq? sym (get-field id c)) c #f)))
 
 (define (help? sym)
   (and (memq sym '(help ? ??? -help --help h)) #t))

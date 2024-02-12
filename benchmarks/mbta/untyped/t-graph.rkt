@@ -42,19 +42,21 @@
 
 (provide/configurable-contract
  [unweighted-graph/directed* ([max (modal/c curr-mode ((listof (list/c any/c any/c)) any/c))]
-                              [types ((listof (list/c any/c any/c)) . modal-> . any)])]
- [attach-edge-property* ([max ([graph?]
+                              [types (curr-mode (listof (list/c any/c any/c)) . modal-> . any)])]
+ [attach-edge-property* ([max (
+                               [graph?]
                                [#:init any/c
                                 #:for-each any/c]
                                . ->* .
                                any)]
-                         [types ([graph?]
+                         [types (
+                                 [graph?]
                                  [#:init any/c
                                   #:for-each any/c]
                                  . ->* .
                                  any)])]
- [in-neighbors* ([max (graph? any/c . modal-> . any)]
-                 [types (graph? any/c . modal-> . any)])]
+ [in-neighbors* ([max (curr-mode graph? any/c . modal-> . any)]
+                 [types (curr-mode graph? any/c . modal-> . any)])]
  [SOURCE-DIRECTORY ([max (modal/c curr-mode (λ (res)
                            (string=? "../base/~a.dat" res)))]
                     #;[max/sub1 (and/c string?
@@ -83,7 +85,7 @@
                                                   (if res
                                                       (< (length res) (string-length s))
                                                       (not (substring? "-- " s))))])]                      
-                       [types (modal-> string? (or/c boolean? (listof string?)))])]
+                       [types (modal-> curr-mode string? (or/c boolean? (listof string?)))])]
  [read-t-graph (;; not the strongest contract I can think of here
                 ;; maybe you could check if find-path returns all valid paths
                 [max (modal/c curr-mode (object/c
@@ -119,7 +121,7 @@
                                                               (and (line? (first pair))
                                                                    (= (remainder (length (second pair)) 2) 0)))
                                                             res))])]                 
-                         [types (modal-> string?
+                         [types (modal-> curr-mode string?
                                     (listof (list/c string?
                                                     (listof (list/c string? string?)))))])]
  [lines->hash ([max (modal->i curr-mode ([lines (listof string?)])
@@ -139,27 +141,27 @@
                                                        (hash-values h))
                                                (= (remainder (length (rest (first (hash-values h)))) 2) 0)))])]
 
-               [types (modal-> (listof string?)
+               [types (modal-> curr-mode (listof string?)
                           (hash/c string?
                                   (cons/c string?
                                           (listof (list/c string? string?)))))])]
  [mbta% ([max
-          (modal/c curr-mode (class/c
-           (render (->m (set/c string?) string?))
-           (station? (->m string? boolean?))
-           (station (->m string? (or/c station? (listof station?))))
-           (find-path (->m station? station?
-                           (listof (listof (list/c station? (set/c line?))))))
-           (field [G graph?]
-                  [stations (listof station?)]
-                  [connection-on (-> station? station? (set/c line?))]
-                  [bundles (and/c (listof (list/c color? (set/c line?)))
+          (class/c
+           (render (modal/c curr-mode (->m (set/c string?) string?)))
+           (station? (modal/c curr-mode (->m string? boolean?)))
+           (station (modal/c curr-mode (->m string? (or/c station? (listof station?)))))
+           (find-path (modal/c curr-mode (->m station? station?
+                           (listof (listof (list/c station? (set/c line?)))))))
+           (field [G (modal/c curr-mode graph?)]
+                  [stations (modal/c curr-mode (listof station?))]
+                  [connection-on (modal-> curr-mode station? station? (set/c line?))]
+                  [bundles (modal/c curr-mode (and/c (listof (list/c color? (set/c line?)))
                                   (λ (res)
                                     (andmap (λ (lst)
                                               (lines-in-color-file?
                                                (set->list(second lst))
                                                (file->lines (format SOURCE-DIRECTORY (first lst)))))
-                                            res)))])))]
+                                            res))))]))]
          #;[max/sub1
             (class/c
              (render (->m (set/c string?) string?))
@@ -172,16 +174,16 @@
                     [connection-on (-> station? station? (set/c line?))]
                     [bundles (listof (list/c color? (set/c line?)))]))]
          [types
-          (modal/c curr-mode (class/c
-                              (render (->m (set/c string?) string?))
-                              (station? (->m string? boolean?))
-                              (station (->m string? (or/c string? (listof string?))))
-                              (find-path (->m string? string?
-                                              (listof (listof (list/c string? (set/c string?))))))
-                              (field [G graph?]
-                                     [stations (listof station?)]
-                                     [connection-on (-> string? string? (set/c string?))]
-                                     [bundles (listof (list/c string? (set/c string?)))])))])])
+          (class/c
+           (render (modal/c curr-mode (->m (set/c string?) string?)))
+           (station? (modal/c curr-mode (->m string? boolean?)))
+           (station (modal/c curr-mode (->m string? (or/c string? (listof string?)))))
+           (find-path (modal/c curr-mode (->m string? string?
+                                              (listof (listof (list/c string? (set/c string?)))))))
+           (field [G (modal/c curr-mode graph?)]
+                  [stations (modal/c curr-mode (listof station?))]
+                  [connection-on (modal-> curr-mode string? string? (set/c string?))]
+                  [bundles (modal/c curr-mode (listof (list/c string? (set/c string?))))]))])])
 
 (define unweighted-graph/directed*
   unweighted-graph/directed)

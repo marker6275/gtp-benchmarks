@@ -36,8 +36,8 @@
 
 (provide/configurable-contract
  [assert ([max #;(parametric->/c [A] (A (A . -> . boolean?) . -> . A))
-        (any/c (any/c . -> . boolean?) . modal-> . any/c)]
-   [types (any/c (any/c . -> . boolean?) . modal-> . any/c)])]
+        (curr-mode any/c (any/c . -> . boolean?) . modal-> . any/c)]
+   [types (curr-mode any/c (any/c . -> . boolean?) . modal-> . any/c)])]
  [defn-command ([max (modal/c curr-mode (command%?-with-exec
                                          (args E S v)
                                          [result (match v
@@ -48,8 +48,8 @@
                                                    [_ #f])]))]
                 [types (modal/c curr-mode command%?)])]
  [forth-eval* (;; lltodo: not sure if this can (reasonably) be more precise?
-   [max ((listof string?) . modal-> . (values env? stack?))]
-   [types ((listof string?) . modal-> . (values env? stack?))])]
+   [max (curr-mode (listof string?) . modal-> . (values env? stack?))]
+   [types (curr-mode (listof string?) . modal-> . (values env? stack?))])]
  [forth-eval ([max (modal->i curr-mode ([E env?]
                                         [S stack?]
                                         [token* token*?])
@@ -61,17 +61,17 @@
                               [stack-result (S)
                                             (or/c (equal?/c S)
                                                   stack?)]))]
-              [types (env? stack? token*? . modal-> . (values (or-#f/c env?) stack?))])]
+              [types (curr-mode env? stack? token*? . modal-> . (values (or-#f/c env?) stack?))])]
  [forth-tokenize ([max (modal->i curr-mode ([str string?])
              [result (str) (equal?/c
                             (de-nest
                              (read
                               (open-input-string
                                (string-append "(" str ")")))))])]
-   [types (string? . modal-> . token*?)])]
+   [types (curr-mode string? . modal-> . token*?)])]
  [de-nest ([max (modal->i curr-mode ([v* (listof/any-depth/c token*?)])
              [result (not/c nested-singleton-list?)])]
-   [types ((or/c list? symbol?) . modal-> . (or/c list? symbol?))])])
+   [types (curr-mode (or/c list? symbol?) . modal-> . (or/c list? symbol?))])])
 
 
 (define (assert v p)

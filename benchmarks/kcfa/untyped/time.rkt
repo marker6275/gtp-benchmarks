@@ -22,7 +22,7 @@
                                 (and/c (listof any/c)
                                        (length<=/c n)
                                        (prefix-of/c l))])]
-         [types ((listof any/c) natural? . modal-> . (listof any/c))])]
+         [types (curr-mode (listof any/c) natural? . modal-> . (listof any/c))])]
  [time-zero ([max (modal/c curr-mode (listof Time?))]
              [types (modal/c curr-mode (listof Time?))])]
  #;[k ([max (parameter/c (and/c natural?
@@ -34,7 +34,7 @@
                           (and/c Time?
                                  (length=/c 1 #;(k))
                                  (prefix-of/c (cons (Stx-label call) time)))])]
-        [types (Stx-type/c Time? . modal-> . Time?)])]
+        [types (curr-mode Stx-type/c Time? . modal-> . Time?)])]
  [alloc ([max (modal->i curr-mode ([time Time?])
                    [result (time)
                            (->i ([var Var?])
@@ -42,7 +42,7 @@
                                         (and/c Binding-type/c
                                                (Binding/c (equal?/c var)
                                                           (equal?/c time)))])])]
-         [types (Time? . modal-> . (Var? . -> . Binding-type/c))])])
+         [types (curr-mode Time? . modal-> . (Var? . -> . Binding-type/c))])])
 
 
 ;; (provide

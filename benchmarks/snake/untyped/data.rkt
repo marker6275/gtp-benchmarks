@@ -14,7 +14,7 @@
                             (match* (p1 p2)
                               [((posn x y) (posn x y)) #t]
                               [(_ _) #f])])]
-          [types (posn? posn? . modal-> . boolean?)])])
+          [types (curr-mode posn? posn? . modal-> . boolean?)])])
 
 (provide [struct-out posn])
 

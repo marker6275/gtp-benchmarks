@@ -27,7 +27,7 @@
                                   [result (letter)
                                           (and/c morse-string?
                                                  (morse-decodes-to? letter))])]
-                        [types (modal-> char? string?)])]
+                        [types (modal-> curr-mode char? string?)])]
  [string->morse ([max (modal->i curr-mode ([str string?])
                            [result (str)
                                    (and/c morse-string? (morse-decodes-to? str))]
@@ -35,7 +35,7 @@
                            (if (non-empty-string? str)
                                (non-empty-string? result)
                                (string=? result "")))]
-                 [types (modal-> string? string?)])])
+                 [types (modal-> curr-mode string? string?)])])
 
 
 ;; (provide string->morse)

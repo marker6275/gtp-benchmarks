@@ -37,12 +37,12 @@
                        (values
                         [first-result (S) (equal?/c (first S))]
                         [second-result (S) (equal?/c (rest S))]))]
-             [types (stack? . modal-> . (values any/c stack?))])]
+             [types (curr-mode stack? . modal-> . (values any/c stack?))])]
  [stack-push ([max (modal->i curr-mode ([S stack?]
                          [v any/c])
                         [result (S v)
                                 (equal?/c (cons v S))])]
-              [types (stack? any/c . modal-> . stack?)])]
+              [types (curr-mode stack? any/c . modal-> . stack?)])]
  [stack-swap ([max (->i ([S (stack-with-min-size/c 2)])
                         [result (S)
                                 (equal?/c

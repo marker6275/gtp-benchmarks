@@ -25,7 +25,7 @@
                          [v cell%?])
                         [result void?]
                         #:post (g p v) (equal? v (grid-ref g p)))]
-              [types ((arrayof cell%?) array-coord? cell%? . modal-> . void?)])]
+              [types (curr-mode (arrayof cell%?) array-coord? cell%? . modal-> . void?)])]
  [build-array ([max (modal->i curr-mode ([p array-coord?]
                           [f (array-coord? . -> . cell%?)])
                          [result (p)
@@ -37,20 +37,20 @@
                            (define xy (vector x y))
                            (equal? (f xy)
                                    (grid-ref result xy))))]
-               [types (array-coord? (array-coord? . -> . cell%?) . modal-> . (arrayof cell%?))])]
- [parse-grid ([max ((listof string?) . modal-> . grid?)]
-              [types ((listof string?) . modal-> . grid?)])]
- [show-grid ([max (grid? . modal-> . string?)]
-             [types (grid? . modal-> . string?)])]
+               [types (curr-mode array-coord? (array-coord? . -> . cell%?) . modal-> . (arrayof cell%?))])]
+ [parse-grid ([max (curr-mode (listof string?) . modal-> . grid?)]
+              [types (curr-mode (listof string?) . modal-> . grid?)])]
+ [show-grid ([max (curr-mode grid? . modal-> . string?)]
+             [types (curr-mode grid? . modal-> . string?)])]
  [grid-height ([max (modal->i curr-mode ([g grid?])
                          [result (g) (and/c index?
                                             (curry equal? (vector-length g)))])]
-               [types (grid? . modal-> . index?)])]
+               [types (curr-mode grid? . modal-> . index?)])]
  [grid-width ([max (modal->i curr-mode ([g grid?])
                         [result (g) (and/c index?
                                            (curry equal? 
                                                   (vector-length (vector-ref g 0))))])]
-              [types (grid? . modal-> . index?)])]
+              [types (curr-mode grid? . modal-> . index?)])]
  [within-grid? ([max (modal->i curr-mode ([g grid?]
                            [pos array-coord?])
                           [result 
@@ -58,7 +58,7 @@
                            (curry equal? 
                                   (and (<= 0 (vector-ref pos 0) (sub1 (grid-height g)))
                                        (<= 0 (vector-ref pos 1) (sub1 (grid-width  g)))))])]
-                [types (grid? array-coord? . modal-> . boolean?)])]
+                [types (curr-mode grid? array-coord? . modal-> . boolean?)])]
  [grid-ref ([max (modal->i curr-mode ([g grid?]
                        [pos array-coord?])
                       [result 
@@ -69,7 +69,7 @@
                                       (when (within-grid? g pos)
                                         (vector-ref (vector-ref g (vector-ref pos 0))
                                                     (vector-ref pos 1))))))])]
-            [types (grid? array-coord? . modal-> . (or-#f/c cell%?))])]
+            [types (curr-mode grid? array-coord? . modal-> . (or-#f/c cell%?))])]
  [left ([max (modal/c curr-mode (and/c direction?
                     (modal->i curr-mode ([pos array-coord?])
                          ([n exact-nonnegative-integer?])

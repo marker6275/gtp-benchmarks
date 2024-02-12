@@ -25,7 +25,7 @@
                                           (subsequence-of/c pat
                                                             #:swap (hash #\· #\.
                                                                          #\– #\-)))])]
-                 [types (string? . modal-> . string?)])]
+                 [types (curr-mode string? . modal-> . string?)])]
  [char-table ([max (modal/c curr-mode (and/c (hash/c char? (and/c non-empty-string? morse-string?))
                           (hash-with-keys/c all-chars)))]
               [types (modal/c curr-mode (hash/c char? string?))])])

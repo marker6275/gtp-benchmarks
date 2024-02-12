@@ -15,7 +15,7 @@
  [cut-tail ([max (modal->i curr-mode ([segs ne-segs?])
                       [result (segs)
                               (snake-segs=?/c (drop-right segs 1))])]
-            [types (ne-segs? . modal-> . snake-segs?)])])
+            [types (curr-mode ne-segs? . modal-> . snake-segs?)])])
 
 (define/ctc-helper ne-segs? (and/c snake-segs? cons?))
 

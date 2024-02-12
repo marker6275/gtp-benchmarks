@@ -40,12 +40,12 @@
                                 (foldl store-join
                                        empty-store
                                        (set-map states State-store)))])]
-             [types ((set/c State-type? #:kind 'immutable) . modal-> . Store/c)])]
+             [types (curr-mode (set/c State-type? #:kind 'immutable) . modal-> . Store/c)])]
  [empty-mono-store ([max (modal/c curr-mode MonoStore/c)]
                     [types (modal/c curr-mode MonoStore/c)])]
  [monovariant-value ([max (modal->i curr-mode ([v Closure-type/c])
                                [result (v) (equal?/c (Closure-lam v))])]
-                     [types (Closure-type/c . modal-> . Lam-type/c)])]
+                     [types (curr-mode Closure-type/c . modal-> . Lam-type/c)])]
  [monovariant-store ([max (modal->i curr-mode ([store Store/c])
                                [result MonoStore/c]
                                #:post (store result)
@@ -53,11 +53,11 @@
                                  (define result-vs (hash-ref result (Binding-var b) set))
                                  (define mono-vs (list->set (set-map vs monovariant-value)))
                                  (subset? mono-vs result-vs)))]
-                     [types (Store/c . modal-> . MonoStore/c)])]
+                     [types (curr-mode Store/c . modal-> . MonoStore/c)])]
  [analyze ([max (modal->i curr-mode ([exp (and/c Exp-type/c closed-term?)])
                      ;; lltodo: can be stronger?
                      [result MonoStore/c])]
-           [types (Exp-type/c . modal-> . MonoStore/c)])]
+           [types (curr-mode Exp-type/c . modal-> . MonoStore/c)])]
  [format-mono-store ([max (MonoStore/c . -> . string?)]
                      [types (MonoStore/c . -> . string?)])])
 

@@ -20,7 +20,7 @@
                                (= (length message-queue)
                                   (add1 pre/queue-len))
                                (string=? m (first message-queue)))))]
-   [types (string? . modal-> . void?)])]
+   [types (curr-mode string? . modal-> . void?)])]
  [reset-message-queue! ([max (->* () ()
              void?
              #:post (empty? message-queue))]

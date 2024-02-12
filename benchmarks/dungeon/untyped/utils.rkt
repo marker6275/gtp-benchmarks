@@ -18,14 +18,14 @@
         [types (modal/c curr-mode any/c)])]
  [r* ([max (modal/c curr-mode any/c)]
       [types (modal/c curr-mode any/c)])]
- [reset! ([max (modal/c curr-mode (->* ()
+ [reset! ([max (modal/c curr-mode (modal->* curr-mode () ;; add modal here!
                     void?
                     #:post (equal? (unbox r*) orig)))]
           [types (modal-> curr-mode void?)])]
  [random ([max (modal->i curr-mode ([n exact-nonnegative-integer?])
                     [result (n) (and/c exact-nonnegative-integer?
                                        (</c n))])]
-          [types (any/c . modal-> . exact-nonnegative-integer?)])]
+          [types (curr-mode any/c . modal-> . exact-nonnegative-integer?)])]
  [article ([max (->* (boolean? boolean?)
                      [#:an? boolean?]
                      (apply or/c (list+titlecases "the" "an" "a")))]
@@ -36,7 +36,7 @@
                              [max (min) (and/c exact-nonnegative-integer?
                                                (>/c min))])
                             [result (min max) (random-result-between/c min max)])]
-                  [types (exact-nonnegative-integer? exact-nonnegative-integer?
+                  [types (curr-mode exact-nonnegative-integer? exact-nonnegative-integer?
                                                      . modal-> . exact-nonnegative-integer?)])]
  [d6 ([max (-> (random-result-between/c 1 7))]
       [types (-> exact-nonnegative-integer?)])]
@@ -44,10 +44,10 @@
        [types (-> exact-nonnegative-integer?)])]
  [random-from ([max (modal->i curr-mode ([l (listof any/c)])
                          [result (l) (memberof/c l)])]
-               [types ((listof any/c) . modal-> . any/c)])]
+               [types (curr-mode (listof any/c) . modal-> . any/c)])]
  [shuffle ([max (modal->i curr-mode ([l (listof any/c)])
                           [result (l) (permutationof/c l)])]
-           [types ((listof any/c) . modal-> . (listof any/c))])])
+           [types (curr-mode (listof any/c) . modal-> . (listof any/c))])])
 
 (provide
 ;;   article

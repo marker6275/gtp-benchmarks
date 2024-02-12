@@ -20,7 +20,7 @@
                                   [((posn x y) "left")  (posn (sub1 x) y)]
                                   [((posn x y) "down")  (posn x (sub1 y))]
                                   [((posn x y) "up")    (posn x (add1 y))]))])]
-             [types (posn-type? string? . modal-> . posn-type?)])]
+             [types (curr-mode posn-type? string? . modal-> . posn-type?)])]
  [snake-slither ([max (modal->i curr-mode ([snk snake-type?])
                            [result (snk)
                                    (and/c
@@ -35,7 +35,7 @@
                                                         (snake-segs=?/c
                                                          (drop-right segs 1))))]
                                       [_ #f]))])]
-                 [types (snake-type? . modal-> . snake-type?)])]
+                 [types (curr-mode snake-type? . modal-> . snake-type?)])]
  [snake-grow ([max (modal->i curr-mode ([snk snake-type?])
                         [result (snk)
                                 (and/c
@@ -50,7 +50,7 @@
                                     (snake/c d
                                              (cons/c (posn=?/c (next-head segs/h d))
                                                      (snake-segs=?/c segs)))]))])]
-              [types (snake-type? . modal-> . snake-type?)])])
+              [types (curr-mode snake-type? . modal-> . snake-type?)])])
 
 ;; (provide
 ;;  snake-slither

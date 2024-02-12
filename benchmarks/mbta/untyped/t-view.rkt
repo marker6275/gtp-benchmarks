@@ -40,7 +40,7 @@
                                      (λ (out-lst)
                                        (and (list? out-lst)
                                             (cons? (member out-lst inp-lst))))])]
-            [types (modal-> (listof (listof any/c))
+            [types (modal-> curr-mode (listof (listof any/c))
                        (listof any/c))])]
  [INTERNAL ([max (modal/c curr-mode "find path: it is impossible to get from ~a to ~a [internal error]")]
             [types (modal/c curr-mode string?)])]
@@ -128,10 +128,11 @@
 (define/ctc-helper stash2 (box #f))
 (define/ctc-helper stash3 (box #f))
 (define/ctc-helper manage-c/max-ctc
-  (modal/c curr-mode (class/c
+  (class/c
    (add-to-disabled
-    (modal->i curr-mode ([this any/c]
-                         [s string?])
+    (modal->i curr-mode
+              ([this any/c]
+               [s string?])
               #:pre (this)
               (set-box! stash1 (length (get-field disabled this)))
               [result (s)
@@ -174,7 +175,7 @@
                            (λ (res)
                              (correct-find-result? from to res))]))
    (field [mbta-subways (is-a?/c mbta%)]
-          [disabled list?]))))
+          [disabled list?])))
 
 (define/ctc-helper find-result-memo (make-hash))
 (define/ctc-helper (correct-find-result? from to res)
@@ -232,13 +233,12 @@
                         (correct-find-result? from to res))]))))
 
 (define/ctc-helper manage-c/types-ctc
-  (modal/c curr-mode
-           (class/c
-            (add-to-disabled (->m string? (or/c string? #f)))
-            (remove-from-disabled (->m string? (or/c string? #f)))
-            (find (->m string? string? string?))
-            (field [mbta-subways (is-a?/c mbta%)]
-                   [disabled list?]))))
+  (class/c
+   (add-to-disabled (modal/c curr-mode (->m string? (or/c string? #f))))
+   (remove-from-disabled (modal/c curr-mode (->m string? (or/c string? #f))))
+   (find (modal/c curr-mode (->m string? string? string?)))
+   (field [mbta-subways (modal/c curr-mode (is-a?/c mbta%))]
+          [disabled (modal/c curr-mode list?)])))
 
 
 (define manage%

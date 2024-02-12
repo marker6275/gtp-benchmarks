@@ -49,14 +49,14 @@
                                                     segs)
                                              food)]
                                      [(_ w) w])))])]
-              [types (world-type? string? . modal-> . world-type?)])]
+              [types (curr-mode world-type? string? . modal-> . world-type?)])]
  [game-over? ([max (modal->i curr-mode ([w world-type?])
                         [result (w)
                                 (match w
                                   [(world s _)
                                    (or (snake-wall-collide? s)
                                        (snake-self-collide? s))])])]
-              [types (world-type? . modal-> . boolean?)])])
+              [types (curr-mode world-type? . modal-> . boolean?)])])
 
 ;; handle-key : World String -> World
 (define (handle-key w ke)

@@ -36,12 +36,12 @@
                                  [result void?]
                                  #:post (c% char) (class-equal? (dict-ref chars->cell%s char void)
                                                                 c%))]
-                       [types (cell%/c char? . modal-> . void?)])]
+                       [types (curr-mode cell%/c char? . modal-> . void?)])]
  [char->cell% ([max (modal->i curr-mode ([char (and/c char? (curry dict-has-key? chars->cell%s))])
                          [result (char)
                                  (and/c cell%/c
                                         (curry class-equal? (dict-ref chars->cell%s char)))])]
-               [types (char? . modal-> . cell%?)])]
+               [types (curr-mode char? . modal-> . cell%?)])]
  [empty-cell% ([max (modal/c curr-mode (make-cell%/c-with self
                                        (or/c #\space
                                              (send (get-field occupant self)
@@ -101,25 +101,25 @@
 ;; =============================================================================
 
 (define-syntax-rule/ctc-helper (make-cell%/c-with self-id show-char
-                                       free?/occupant-comparer)
-  (modal/c curr-mode (class/c* (init-field/all [items list?]     ;; ll: never seems to
-                            [occupant any/c]) ;; actually be used
+                                                  free?/occupant-comparer)
+  (class/c* (init-field/all [items (modal/c curr-mode list?)]     ;; ll: never seems to
+                            [occupant (modal/c curr-mode any/c)]) ;; actually be used
 
             (all
-             [open (->m void?)]
-             [close (->m void?)]
-             [free? (->m boolean?)])
+             [open (modal/c curr-mode (->m void?))]
+             [close (modal/c curr-mode (->m void?))]
+             [free? (modal/c curr-mode (->m boolean?))])
             (inherit+super
-             [show (->i ([self-id any/c])
-                        [result (self-id) show-char])])
+             [show (modal->i curr-mode ([self-id any/c])
+                             [result (self-id) show-char])])
             (override
-             [show (->m char?)])
+              [show (modal/c curr-mode (->m char?))])
 
-            [free? (->i ([self-id any/c])
-                        [result (self-id)
-                                (curry free?/occupant-comparer
-                                       (get-field occupant
-                                                  self-id))])])))
+            [free? (modal->i curr-mode ([self-id any/c])
+                             [result (self-id)
+                                     (curry free?/occupant-comparer
+                                            (get-field occupant
+                                                       self-id))])]))
 
 (define/ctc-helper cell%/c (make-cell%/c-with self any/c (λ x #t)))
 (define/ctc-helper cell%? (instanceof/c cell%/c))

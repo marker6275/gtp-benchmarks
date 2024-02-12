@@ -19,7 +19,7 @@
                                              (key-of/c benv))])
                          [result (benv key)
                                  (equal?/c (hash-ref benv key))])]
-               [types (BEnv? Var? . modal-> . Addr?)])]
+               [types (curr-mode BEnv? Var? . modal-> . Addr?)])]
  [benv-extend ([max (modal->i curr-mode ([benv BEnv?]
                           [key Var?]
                           [val Addr?])
@@ -37,7 +37,7 @@
                                     [v (in-list vals)])
                             (and (hash-has-key? result k)
                                  (equal? (hash-ref result k) v))))]
-                [types (BEnv? (listof Var?) (listof Addr?) . modal-> . BEnv?)])])
+                [types (curr-mode BEnv? (listof Var?) (listof Addr?) . modal-> . BEnv?)])])
 
 (provide
   (struct-out Closure)
