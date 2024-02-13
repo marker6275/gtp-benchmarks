@@ -174,8 +174,8 @@
                    [result (from to)
                            (λ (res)
                              (correct-find-result? from to res))]))
-   (field [mbta-subways (is-a?/c mbta%)]
-          [disabled list?])))
+   (field [mbta-subways (modal/c curr-mode (is-a?/c mbta%))]
+          [disabled (modal/c curr-mode list?)])))
 
 (define/ctc-helper find-result-memo (make-hash))
 (define/ctc-helper (correct-find-result? from to res)
@@ -234,9 +234,9 @@
 
 (define/ctc-helper manage-c/types-ctc
   (class/c
-   (add-to-disabled (modal/c curr-mode (->m string? (or/c string? #f))))
-   (remove-from-disabled (modal/c curr-mode (->m string? (or/c string? #f))))
-   (find (modal/c curr-mode (->m string? string? string?)))
+   (add-to-disabled (modal-> curr-mode string? (or/c string? #f)))
+   (remove-from-disabled (modal-> curr-mode string? (or/c string? #f)))
+   (find (modal-> curr-mode string? string? string?))
    (field [mbta-subways (modal/c curr-mode (is-a?/c mbta%))]
           [disabled (modal/c curr-mode list?)])))
 

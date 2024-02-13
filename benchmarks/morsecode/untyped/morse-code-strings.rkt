@@ -23,18 +23,18 @@
 
 (provide/configurable-contract
  [char->dit-dah-string ([max (modal->i curr-mode ([letter char?])
-                                  #:pre (letter) (hash-has-key? char-table (char-downcase letter))
-                                  [result (letter)
-                                          (and/c morse-string?
-                                                 (morse-decodes-to? letter))])]
+                                       #:pre (letter) (hash-has-key? char-table (char-downcase letter))
+                                       [result (letter)
+                                               (and/c morse-string?
+                                                      (morse-decodes-to? letter))])]
                         [types (modal-> curr-mode char? string?)])]
  [string->morse ([max (modal->i curr-mode ([str string?])
-                           [result (str)
-                                   (and/c morse-string? (morse-decodes-to? str))]
-                           #:post (str result)
-                           (if (non-empty-string? str)
-                               (non-empty-string? result)
-                               (string=? result "")))]
+                                [result (str)
+                                        (and/c morse-string? (morse-decodes-to? str))]
+                                #:post (str result)
+                                (if (non-empty-string? str)
+                                    (non-empty-string? result)
+                                    (string=? result "")))]
                  [types (modal-> curr-mode string? string?)])])
 
 

@@ -16,92 +16,92 @@
 ;;   void-cell%
   cell%?
   class-equal?
-))
+  ))
 (require/configurable-contract "cell.rkt" void-cell% char->cell% )
 
 (provide/configurable-contract
  [array-set! ([max (modal->i curr-mode ([g (arrayof cell%?)]
-                         [p array-coord?]
-                         [v cell%?])
-                        [result void?]
-                        #:post (g p v) (equal? v (grid-ref g p)))]
+                                        [p array-coord?]
+                                        [v cell%?])
+                             [result void?]
+                             #:post (g p v) (equal? v (grid-ref g p)))]
               [types (curr-mode (arrayof cell%?) array-coord? cell%? . modal-> . void?)])]
  [build-array ([max (modal->i curr-mode ([p array-coord?]
-                          [f (array-coord? . -> . cell%?)])
-                         [result (p)
-                                 (and/c (arrayof cell%?)
-                                        (array-size=/c p))]
-                         #:post (p f result)
-                         (for*/and ([x (in-range (vector-ref p 0))]
-                                    [y (in-range (vector-ref p 1))])
-                           (define xy (vector x y))
-                           (equal? (f xy)
-                                   (grid-ref result xy))))]
+                                         [f (array-coord? . -> . cell%?)])
+                              [result (p)
+                                      (and/c (arrayof cell%?)
+                                             (array-size=/c p))]
+                              #:post (p f result)
+                              (for*/and ([x (in-range (vector-ref p 0))]
+                                         [y (in-range (vector-ref p 1))])
+                                (define xy (vector x y))
+                                (equal? (f xy)
+                                        (grid-ref result xy))))]
                [types (curr-mode array-coord? (array-coord? . -> . cell%?) . modal-> . (arrayof cell%?))])]
  [parse-grid ([max (curr-mode (listof string?) . modal-> . grid?)]
               [types (curr-mode (listof string?) . modal-> . grid?)])]
  [show-grid ([max (curr-mode grid? . modal-> . string?)]
              [types (curr-mode grid? . modal-> . string?)])]
  [grid-height ([max (modal->i curr-mode ([g grid?])
-                         [result (g) (and/c index?
-                                            (curry equal? (vector-length g)))])]
+                              [result (g) (and/c index?
+                                                 (curry equal? (vector-length g)))])]
                [types (curr-mode grid? . modal-> . index?)])]
  [grid-width ([max (modal->i curr-mode ([g grid?])
-                        [result (g) (and/c index?
-                                           (curry equal? 
-                                                  (vector-length (vector-ref g 0))))])]
+                             [result (g) (and/c index?
+                                                (curry equal? 
+                                                       (vector-length (vector-ref g 0))))])]
               [types (curr-mode grid? . modal-> . index?)])]
  [within-grid? ([max (modal->i curr-mode ([g grid?]
-                           [pos array-coord?])
-                          [result 
-                           (g pos)
-                           (curry equal? 
-                                  (and (<= 0 (vector-ref pos 0) (sub1 (grid-height g)))
-                                       (<= 0 (vector-ref pos 1) (sub1 (grid-width  g)))))])]
+                                          [pos array-coord?])
+                               [result 
+                                (g pos)
+                                (curry equal? 
+                                       (and (<= 0 (vector-ref pos 0) (sub1 (grid-height g)))
+                                            (<= 0 (vector-ref pos 1) (sub1 (grid-width  g)))))])]
                 [types (curr-mode grid? array-coord? . modal-> . boolean?)])]
  [grid-ref ([max (modal->i curr-mode ([g grid?]
-                       [pos array-coord?])
-                      [result 
-                       (g pos)
-                       (or-#f/c
-                        (and/c cell%?
-                               (curry equal?
-                                      (when (within-grid? g pos)
-                                        (vector-ref (vector-ref g (vector-ref pos 0))
-                                                    (vector-ref pos 1))))))])]
+                                      [pos array-coord?])
+                           [result 
+                            (g pos)
+                            (or-#f/c
+                             (and/c cell%?
+                                    (curry equal?
+                                           (when (within-grid? g pos)
+                                             (vector-ref (vector-ref g (vector-ref pos 0))
+                                                         (vector-ref pos 1))))))])]
             [types (curr-mode grid? array-coord? . modal-> . (or-#f/c cell%?))])]
- [left ([max (modal/c curr-mode (and/c direction?
+ [left ([max (and/c direction?
                     (modal->i curr-mode ([pos array-coord?])
-                         ([n exact-nonnegative-integer?])
-                         [result
-                          (pos n)
-                          (vector/c (vector-ref pos 0)
-                                    (max (- (vector-ref pos 1) (if (unsupplied-arg? n) 1 n)) 0))])))]
-        [types (modal/c curr-mode direction?)])]
- [right ([max (modal/c curr-mode (and/c direction?
-                     (modal->i curr-mode ([pos array-coord?])
-                          ([n exact-nonnegative-integer?])
-                          [result
-                           (pos n)
-                           (vector/c (vector-ref pos 0)
-                                     (max (+ (vector-ref pos 1) (if (unsupplied-arg? n) 1 n)) 0))])))]
-         [types (modal/c curr-mode direction?)])]
- [up ([max (modal/c curr-mode (and/c direction?
-                  (modal->i curr-mode ([pos array-coord?])
-                       ([n exact-nonnegative-integer?])
-                       [result (pos n) (vector/c (max (- (vector-ref pos 0)
-                                                         (if (unsupplied-arg? n) 1 n))
-                                                      0)
-                                                 (vector-ref pos 1))])))]
-      [types (modal/c curr-mode direction?)])]
- [down ([max (modal/c curr-mode (and/c direction?
+                              ([n exact-nonnegative-integer?])
+                              [result
+                               (pos n)
+                               (vector/c (vector-ref pos 0)
+                                         (max (- (vector-ref pos 1) (if (unsupplied-arg? n) 1 n)) 0))]))]
+        [types direction?])]
+[right ([max (and/c direction?
                     (modal->i curr-mode ([pos array-coord?])
-                         ([n exact-nonnegative-integer?])
-                         [result (pos n) (vector/c (max (+ (vector-ref pos 0)
-                                                           (if (unsupplied-arg? n) 1 n))
-                                                        0)
-                                                   (vector-ref pos 1))])))]
-        [types (modal/c curr-mode direction?)])])
+                              ([n exact-nonnegative-integer?])
+                              [result
+                               (pos n)
+                               (vector/c (vector-ref pos 0)
+                                         (max (+ (vector-ref pos 1) (if (unsupplied-arg? n) 1 n)) 0))]))]
+        [types direction?])]
+[up ([max (and/c direction?
+                 (modal->i curr-mode ([pos array-coord?])
+                           ([n exact-nonnegative-integer?])
+                           [result (pos n) (vector/c (max (- (vector-ref pos 0)
+                                                             (if (unsupplied-arg? n) 1 n))
+                                                          0)
+                                                     (vector-ref pos 1))]))]
+     [types direction?])]
+[down ([max (and/c direction?
+                   (modal->i curr-mode ([pos array-coord?])
+                             ([n exact-nonnegative-integer?])
+                             [result (pos n) (vector/c (max (+ (vector-ref pos 0)
+                                                               (if (unsupplied-arg? n) 1 n))
+                                                            0)
+                                                       (vector-ref pos 1))]))]
+       [types direction?])])
 
 (provide
 ;;   left
@@ -188,7 +188,7 @@
   (and (within-grid? g pos)
        (vector-ref (vector-ref g (vector-ref pos 0)) (vector-ref pos 1))))
 
-(define/ctc-helper direction? (->* (array-coord?) [index?]
+(define/ctc-helper direction? (modal->* curr-mode (array-coord?) [index?]
                         array-coord?))
 
 (define (left pos [n 1])

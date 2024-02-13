@@ -147,11 +147,11 @@
                                           (listof (list/c string? string?)))))])]
  [mbta% ([max
           (class/c
-           (render (modal/c curr-mode (->m (set/c string?) string?)))
-           (station? (modal/c curr-mode (->m string? boolean?)))
-           (station (modal/c curr-mode (->m string? (or/c station? (listof station?)))))
-           (find-path (modal/c curr-mode (->m station? station?
-                           (listof (listof (list/c station? (set/c line?)))))))
+           (render (modal-> curr-mode (set/c string?) string?))
+           (station? (modal-> curr-mode (string? boolean?)))
+           (station (modal-> curr-mode string? (or/c station? (listof station?))))
+           (find-path (modal-> curr-mode station? station?
+                           (listof (listof (list/c station? (set/c line?))))))
            (field [G (modal/c curr-mode graph?)]
                   [stations (modal/c curr-mode (listof station?))]
                   [connection-on (modal-> curr-mode station? station? (set/c line?))]
@@ -175,11 +175,11 @@
                     [bundles (listof (list/c color? (set/c line?)))]))]
          [types
           (class/c
-           (render (modal/c curr-mode (->m (set/c string?) string?)))
-           (station? (modal/c curr-mode (->m string? boolean?)))
-           (station (modal/c curr-mode (->m string? (or/c string? (listof string?)))))
-           (find-path (modal/c curr-mode (->m string? string?
-                                              (listof (listof (list/c string? (set/c string?)))))))
+           (render (modal-> curr-mode (set/c string?) string?))
+           (station? (modal-> curr-mode  string? boolean?))
+           (station (modal-> curr-mode  string? (or/c string? (listof string?))))
+           (find-path (modal-> curr-mode  string? string?
+                                              (listof (listof (list/c string? (set/c string?))))))
            (field [G (modal/c curr-mode graph?)]
                   [stations (modal/c curr-mode (listof station?))]
                   [connection-on (modal-> curr-mode string? string? (set/c string?))]

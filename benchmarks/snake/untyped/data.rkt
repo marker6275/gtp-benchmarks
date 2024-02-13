@@ -9,11 +9,11 @@
 
 (provide/configurable-contract
  [posn=? ([max (modal->i curr-mode ([p1 posn?]
-                     [p2 posn?])
-                    [result (p1 p2)
-                            (match* (p1 p2)
-                              [((posn x y) (posn x y)) #t]
-                              [(_ _) #f])])]
+                                    [p2 posn?])
+                         [result (p1 p2)
+                                 (match* (p1 p2)
+                                   [((posn x y) (posn x y)) #t]
+                                   [(_ _) #f])])]
           [types (curr-mode posn? posn? . modal-> . boolean?)])])
 
 (provide [struct-out posn])

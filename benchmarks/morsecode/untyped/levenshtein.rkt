@@ -68,14 +68,14 @@
                                   (andmap char=? (string->list s) (vector->list result))))]
                    [types (modal-> curr-mode string? (vectorof char?))])]
  [vector-levenshtein/predicate/get-scratch ([max (modal->i curr-mode ([a vector?]
-                                                       [b vector?]
-                                                       [pred (any/c any/c . -> . boolean?)]
-                                                       [get-scratch (->i ([n natural?])
-                                                                         [result vector?]
-                                                                         #:post (n result)
-                                                                         (= (vector-length result) n))])
-                                                      [result natural?]
-                                                      #:post (a b pred result)
+                                                                      [b vector?]
+                                                                      [pred (curr-mode any/c any/c . modal-> . boolean?)]
+                                                                      [get-scratch (modal->i curr-mode ([n natural?])
+                                                                                        [result vector?]
+                                                                                        #:post (n result)
+                                                                                        (= (vector-length result) n))])
+                                                           [result natural?]
+                                                           #:post (a b pred result)
                                                       (editable-to? a b result #:compare-with pred))]
                                             [types (curr-mode
                                                     vector?
@@ -296,11 +296,11 @@
                                                #:sequence-type [seq? vector?])
   (match level
     ['max (modal->i curr-mode ([a seq?]
-                [b seq?]
-                [pred (any/c any/c . -> . boolean?)])
-               [result natural?]
-               #:post (a b pred result)
-               (editable-to? a b result #:compare-with pred))]
+                               [b seq?]
+                               [pred (any/c any/c . -> . boolean?)])
+                    [result natural?]
+                    #:post (a b pred result)
+                    (editable-to? a b result #:compare-with pred))]
     ['types (curr-mode
              seq?
              seq?
@@ -313,10 +313,10 @@
                                           #:sequence-type [seq? vector?])
   (match level
     ['max (modal->i curr-mode ([a seq?]
-                [b seq?])
-               [result natural?]
-               #:post (a b result)
-               (editable-to? a b result #:compare-with pred))]
+                               [b seq?])
+                    [result natural?]
+                    #:post (a b result)
+                    (editable-to? a b result #:compare-with pred))]
     ['types (curr-mode
              seq?
              seq?

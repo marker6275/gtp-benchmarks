@@ -34,28 +34,28 @@
 
 (provide/configurable-contract
  [handle-key ([max (modal->i curr-mode ([w world-type?]
-                         [ke string?])
-                        [result (w ke)
-                                (world=?/c
-                                 (let ([keymap (hash "w" "up"
-                                                     "s" "down"
-                                                     "a" "left"
-                                                     "d" "right")])
-                                   (match* (ke w)
-                                     [((? (curry hash-has-key? keymap))
-                                       (world (snake _ segs)
-                                              food))
-                                      (world (snake (hash-ref keymap ke)
-                                                    segs)
-                                             food)]
-                                     [(_ w) w])))])]
+                                        [ke string?])
+                             [result (w ke)
+                                     (world=?/c
+                                      (let ([keymap (hash "w" "up"
+                                                          "s" "down"
+                                                          "a" "left"
+                                                          "d" "right")])
+                                        (match* (ke w)
+                                          [((? (curry hash-has-key? keymap))
+                                            (world (snake _ segs)
+                                                   food))
+                                           (world (snake (hash-ref keymap ke)
+                                                         segs)
+                                                  food)]
+                                          [(_ w) w])))])]
               [types (curr-mode world-type? string? . modal-> . world-type?)])]
  [game-over? ([max (modal->i curr-mode ([w world-type?])
-                        [result (w)
-                                (match w
-                                  [(world s _)
-                                   (or (snake-wall-collide? s)
-                                       (snake-self-collide? s))])])]
+                             [result (w)
+                                     (match w
+                                       [(world s _)
+                                        (or (snake-wall-collide? s)
+                                            (snake-self-collide? s))])])]
               [types (curr-mode world-type? . modal-> . boolean?)])])
 
 ;; handle-key : World String -> World

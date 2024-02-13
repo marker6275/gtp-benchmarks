@@ -15,57 +15,57 @@
 (provide/configurable-contract
  [r ([max pseudo-random-generator?]
      [types pseudo-random-generator?])]
- ;; ->* contract? no modal?
- [reset! ([max (modal->* curr-mode ()
-                    void?
-                    #:post
-                    (equal?
-                     (pseudo-random-generator->vector r)
-                     (let ([r* (make-pseudo-random-generator)])
-                       (parameterize ([current-pseudo-random-generator r*])
-                         (random-seed 1324)
-                         (pseudo-random-generator->vector r*)))))]
+ [reset! ([max (modal->* curr-mode
+                         () ()
+                         #;(#:post
+                         (equal?
+                          (pseudo-random-generator->vector r)
+                          (let ([r* (make-pseudo-random-generator)])
+                            (parameterize ([current-pseudo-random-generator r*])
+                              (random-seed 1324)
+                              (pseudo-random-generator->vector r*)))))
+                         void?)]
           [types (modal-> curr-mode void?)])]
  [world->world ([max (modal->i curr-mode ([w world-type?])
-                          [result
-                           (w)
-                           (match w
-                             [(world (snake dir (cons h t)) food) #:when (posn=? h food)
-                                                                  (world/c (snake/c dir
-                                                                                    (compose (=/c (+ (length t) 2))
-                                                                                             length))
-                                                                           any/c)]
-                             [(world (snake dir segs) food)
-                              (world/c (snake/c dir
-                                                (compose (=/c (length segs))
-                                                         length))
-                                       (food=?/c food))])])]
+                               [result
+                                (w)
+                                (match w
+                                  [(world (snake dir (cons h t)) food) #:when (posn=? h food)
+                                                                       (world/c (snake/c dir
+                                                                                         (compose (=/c (+ (length t) 2))
+                                                                                                  length))
+                                                                                any/c)]
+                                  [(world (snake dir segs) food)
+                                   (world/c (snake/c dir
+                                                     (compose (=/c (length segs))
+                                                              length))
+                                            (food=?/c food))])])]
                 [types (curr-mode world-type? . modal-> . world-type?)])]
  [eating? ([max (modal->i curr-mode ([w world-type?])
-                     [result (w)
-                             (match w
-                               [(world (snake _ (cons p1 _)) p2) #:when (posn=? p1 p2)
-                                                                 #t]
-                               [_ #f])])]
+                          [result (w)
+                                  (match w
+                                    [(world (snake _ (cons p1 _)) p2) #:when (posn=? p1 p2)
+                                                                      #t]
+                                    [_ #f])])]
            [types (curr-mode world-type? . modal-> . boolean?)])]
  [snake-change-direction ([max (modal->i curr-mode ([snk snake-type?]
-                                     [dir snake-dir?])
-                                    [result (snk dir)
-                                            (snake/c dir (snake-segs=?/c (snake-segs snk)))])]
+                                                    [dir snake-dir?])
+                                         [result (snk dir)
+                                                 (snake/c dir (snake-segs=?/c (snake-segs snk)))])]
                           [types (curr-mode snake-type? string? . modal-> . snake-type?)])]
  [world-change-dir ([max (modal->i curr-mode ([w world-type?]
-                               [dir snake-dir?])
-                              [result (w dir)
-                                      (match w
-                                        [(world (snake _ segs) food)
-                                         (world/c (snake/c dir (snake-segs=?/c segs))
-                                                  (food=?/c food))])])]
+                                              [dir snake-dir?])
+                                   [result (w dir)
+                                           (match w
+                                             [(world (snake _ segs) food)
+                                              (world/c (snake/c dir (snake-segs=?/c segs))
+                                                       (food=?/c food))])])]
                     [types (curr-mode world-type? string? . modal-> . world-type?)])]
  [snake-eat ([max (modal->i curr-mode ([w world-type?])
-                       [result (w)
-                               (world/c (snake=?/c (snake-grow (world-snake w)))
-                                        (posn/c (integer-in 0 (sub1 BOARD-WIDTH))
-                                                (integer-in 0 (sub1 BOARD-HEIGHT))))])]
+                            [result (w)
+                                    (world/c (snake=?/c (snake-grow (world-snake w)))
+                                             (posn/c (integer-in 0 (sub1 BOARD-WIDTH))
+                                                     (integer-in 0 (sub1 BOARD-HEIGHT))))])]
              [types (curr-mode world-type? . modal-> . world-type?)])])
 
 
