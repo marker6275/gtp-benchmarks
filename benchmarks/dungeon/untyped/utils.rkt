@@ -18,9 +18,10 @@
         [types (modal/c curr-mode any/c)])]
  [r* ([max (modal/c curr-mode any/c)]
       [types (modal/c curr-mode any/c)])]
- [reset! ([max (modal->* curr-mode () ()
-                    void?
-                    #;(#:post (equal? (unbox r*) orig)))]
+ [reset! ([max (modal->i curr-mode ()
+                         [result ()
+                                 void?]
+                         #:post () (equal? (unbox r*) orig))]
           [types (modal-> curr-mode void?)])]
  [random ([max (modal->i curr-mode ([n exact-nonnegative-integer?])
                     [result (n) (and/c exact-nonnegative-integer?

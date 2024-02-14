@@ -15,16 +15,15 @@
 (provide/configurable-contract
  [r ([max pseudo-random-generator?]
      [types pseudo-random-generator?])]
- [reset! ([max (modal->* curr-mode
-                         () ()
-                         #;(#:post
-                         (equal?
-                          (pseudo-random-generator->vector r)
-                          (let ([r* (make-pseudo-random-generator)])
-                            (parameterize ([current-pseudo-random-generator r*])
-                              (random-seed 1324)
-                              (pseudo-random-generator->vector r*)))))
-                         void?)]
+ [reset! ([max (modal->i curr-mode () ;;used to be modal->*, no #:post support
+                         [result ()
+                          void?]
+                         #:post () (equal?
+                                 (pseudo-random-generator->vector r)
+                                 (let ([r* (make-pseudo-random-generator)])
+                                   (parameterize ([current-pseudo-random-generator r*])
+                                     (random-seed 1324)
+                                     (pseudo-random-generator->vector r*)))))]
           [types (modal-> curr-mode void?)])]
  [world->world ([max (modal->i curr-mode ([w world-type?])
                                [result
