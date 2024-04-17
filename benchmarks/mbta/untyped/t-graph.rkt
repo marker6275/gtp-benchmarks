@@ -89,22 +89,16 @@
  [read-t-graph (;; not the strongest contract I can think of here
                 ;; maybe you could check if find-path returns all valid paths
                 [max (modal/c curr-mode (object/c
-                          (render (->m (set/c string?) string?))
-                          (station? (->m string? boolean?))
-                          (station (->m string? (or/c station? (listof station?))))
-                          (find-path (->m station? station?
+                          (render (modal-> curr-mode any/c (set/c string?) string?))
+                          (station? (modal-> curr-mode any/c string? boolean?))
+                          (station (modal-> curr-mode any/c string? (or/c station? (listof station?))))
+                          (find-path (modal-> curr-mode any/c station? station?
                                           (listof (listof (list/c station? (set/c line?))))))))]
-                #;[max/sub1 (-> (object/c
-                                 (render (->m (set/c string?) string?))
-                                 (station? (->m string? boolean?))
-                                 (station (->m string? (or/c station? (listof station?))))
-                                 (find-path (->m station? station?
-                                                 (listof (listof (list/c station? (set/c line?))))))))]
                 [types (modal/c curr-mode (object/c
-                            (render (->m (set/c string?) string?))
-                            (station? (->m string? boolean?))
-                            (station (->m string? (or/c string? (listof string?))))
-                            (find-path (->m string? string?
+                            (render (modal-> curr-mode any/c (set/c string?) string?))
+                            (station? (modal-> curr-mode any/c string? boolean?))
+                            (station (modal-> curr-mode any/c string? (or/c string? (listof string?))))
+                            (find-path (modal-> curr-mode any/c string? string?
                                             (listof (listof (list/c string? (set/c string?))))))))])]
  [read-t-line-from-file ([max (modal->i curr-mode ([lf (λ (lf) (color? lf))])
                                    [result (lf)
@@ -162,17 +156,6 @@
                                                (set->list(second lst))
                                                (file->lines (format SOURCE-DIRECTORY (first lst)))))
                                             res))))]))]
-         #;[max/sub1
-            (class/c
-             (render (->m (set/c string?) string?))
-             (station? (->m string? boolean?))
-             (station (->m string? (or/c station? (listof station?))))
-             (find-path (->m station? station?
-                             (listof (listof (list/c station? (set/c line?))))))
-             (field [G graph?]
-                    [stations (listof station?)]
-                    [connection-on (-> station? station? (set/c line?))]
-                    [bundles (listof (list/c color? (set/c line?)))]))]
          [types
           (class/c
            (render (modal-> curr-mode (set/c string?) string?))
